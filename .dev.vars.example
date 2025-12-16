@@ -1,0 +1,8 @@
+# Copy this file to .dev.vars and fill in with your actual credentials
+# .dev.vars is git-ignored and should never be committed
+
+# Google Cloud service account JSON (entire file as a single line)
+GOOGLE_SERVICE_ACCOUNT_JSON={"type":"service_account","project_id":"your-project-id","private_key_id":"...","private_key":"-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n","client_email":"translation-proxy-worker@your-project-id.iam.gserviceaccount.com",...}
+
+# Google Cloud project ID
+GOOGLE_PROJECT_ID=your-project-id

@@ -1,0 +1,24 @@
+{
+	"name": "translation-proxy",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-12-02",
+	"compatibility_flags": ["nodejs_compat"],
+	"kv_namespaces": [
+		{
+			"binding": "KV",
+			"id": "330f9ee6f18d49cba190d1ae237ea5c3"
+		}
+	],
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1
+	},
+	"env": {
+		"production": {
+			"routes": [
+				{ "pattern": "sp.find-your-item.com", "custom_domain": true },
+				{ "pattern": "fr.find-your-item.com", "custom_domain": true }
+			]
+		}
+	}
+}

@@ -1,0 +1,38 @@
+# Development
+.dev.vars
+.env.local
+*.local
+.claude
+
+# Dependencies
+node_modules/
+yarn.lock
+
+# Build
+dist/
+build/
+*.tsbuildinfo
+
+# Wrangler
+.wrangler/
+wrangler.toml.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test & Temporary Files
+db.md
+test-*.js
+*.bak

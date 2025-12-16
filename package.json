@@ -1,0 +1,22 @@
+{
+	"name": "translation-proxy",
+	"version": "1.0.0",
+	"description": "Cloudflare Workers translation proxy",
+	"main": "src/index.ts",
+	"scripts": {
+		"dev": "npx wrangler build && npx wrangler dev",
+		"dev:clear": "rm -rf ./.wrangler && npm run dev",
+		"deploy": "npx wrangler deploy",
+		"build": "npx wrangler build",
+		"kv": "npx wrangler dev src/dev/kv.js"
+	},
+	"dependencies": {
+		"linkedom": "^0.18.12"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20250103.0",
+		"@types/node": "^20.0.0",
+		"typescript": "^5.3.0",
+		"wrangler": "^4.53.0"
+	}
+}
