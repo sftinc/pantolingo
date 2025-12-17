@@ -120,6 +120,8 @@ export async function handleRequest(req: Request, res: Response, cache: MemoryCa
 			if (!fetchHeaders['user-agent']) {
 				fetchHeaders['user-agent'] = 'Mozilla/5.0 (Translation Proxy) AppleWebKit/537.36'
 			}
+			fetchHeaders['weglot-language'] = targetLang
+			fetchHeaders['pantolingo-language'] = targetLang
 
 			const originResponse = await fetch(fetchUrl, {
 				method: req.method,
@@ -195,6 +197,8 @@ export async function handleRequest(req: Request, res: Response, cache: MemoryCa
 			if (!fetchHeaders['user-agent']) {
 				fetchHeaders['user-agent'] = 'Mozilla/5.0 (Translation Proxy) AppleWebKit/537.36'
 			}
+			fetchHeaders['weglot-language'] = targetLang
+			fetchHeaders['pantolingo-language'] = targetLang
 
 			// For POST/PUT/PATCH/DELETE, we need to buffer the body to handle redirects
 			let fetchBody: ArrayBuffer | undefined
