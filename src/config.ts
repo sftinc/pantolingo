@@ -7,11 +7,11 @@ import type { HostSettings } from './types'
 
 // Host to settings mapping (hardcoded for MVP)
 export const HOST_SETTINGS: Record<string, HostSettings> = {
-	'es.esnip.com': {
+	'es.esnipe.com': {
 		origin: 'https://www.esnipe.com',
 		sourceLang: 'en',
 		targetLang: 'es',
-		skipWords: ['eSnipe'],
+		skipWords: ['eSnipe', 'eBay'],
 		skipPatterns: ['pii', 'numeric'],
 		translatePath: true,
 		skipPath: [],
