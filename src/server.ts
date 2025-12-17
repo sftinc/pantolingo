@@ -35,6 +35,7 @@ setInterval(() => {
 }, 60 * 60 * 1000)
 
 app.listen(PORT, () => {
-	console.log(`Translation proxy running on port ${PORT} (http://localhost:${PORT})`)
+	console.log(`Translation proxy running on port ${PORT}`)
+	if (PORT === 8787) console.log(`http://localhost:${PORT}`)
 	console.log(`Cache initialized (in-memory)`)
 })
