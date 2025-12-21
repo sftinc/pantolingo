@@ -118,8 +118,8 @@ const GOOGLE_PROJECT_ID = process.env.GOOGLE_PROJECT_ID || ''
  * Main request handler for Express
  */
 export async function handleRequest(req: Request, res: Response): Promise<void> {
-	const protocol = req.protocol || 'http'
-	const host = req.get('host') || ''
+	const protocol = req.get('x-forwarded-protocol') || req.protocol || 'http'
+	const host = req.get('x-forwarded-host') || req.get('host') || ''
 	const url = new URL(req.originalUrl, `${protocol}://${host}`)
 
 	console.log(`URL: ${url.href}`)
