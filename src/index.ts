@@ -123,12 +123,6 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 	const host = req.get('x-forwarded-host') || req.get('host') || ''
 	const url = new URL(req.originalUrl, `${protocol}://${host}`)
 
-	// Whitelist host: translate.pantolingo.com
-	if (host === 'translate.pantolingo.com' || host === 'pantolingo-translate.onrender.com') {
-		res.status(200).json({ status: 'ok' })
-		return
-	}
-
 	console.log(`URL: ${url.href}`)
 
 	try {
@@ -137,7 +131,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 
 		if (!hostConfig) {
 			console.log(`Unknown host: ${host}`)
-			res.status(404).set('Content-Type', 'text/plain').send('Not Found')
+			res.set('Content-Type', 'text/plain').send(`Host not configured: ${host}`)
 			return
 		}
 

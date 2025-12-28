@@ -15,7 +15,7 @@ app.use(express.raw({ type: '*/*', limit: '10mb' }))
 
 // Health check endpoint
 app.get('/pantolingo/__healthcheck', (_req, res) => {
-	res.status(200).json({ status: 'ok' })
+	res.json({ status: 'ok' })
 })
 
 // Main request handler
