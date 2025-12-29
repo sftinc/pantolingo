@@ -65,9 +65,12 @@ The server processes each request through this pipeline (see [index.ts](src/inde
 
 -   `pool.ts`: Connection pool with SSL support for Render
 -   `host.ts`: Host configuration queries (replaces `HOST_SETTINGS` lookup)
--   `translations.ts`: Batch get/upsert translations with hash-based lookups
--   `pathnames.ts`: Bidirectional URL mapping storage
--   `pathname-translations.ts`: Junction table linking translations to pathnames
+-   `segments.ts`: Batch get/upsert translations with hash-based lookups
+-   `paths.ts`: Bidirectional URL mapping storage
+-   `junctions.ts`: Junction table linking translations to pathnames
+
+**[src/utils/](src/utils/)** - Utility functions
+
 -   `hash.ts`: Text hashing for efficient lookups
 
 **[src/fetch/](src/fetch/)** - DOM manipulation pipeline
@@ -91,19 +94,23 @@ The server processes each request through this pipeline (see [index.ts](src/inde
 
 Schema file: [dev/postgres/pg-schema.sql](dev/postgres/pg-schema.sql)
 
-**Tables**:
+**Tables** (origin-scoped model):
 
 -   `origin`: Origin websites (domain, source language)
 -   `host`: Translated domains (hostname, target language, config options)
--   `translation`: Cached translations (original_text, translated_text, text_hash)
--   `pathname`: Bidirectional URL mappings (path ↔ translated_path)
--   `pathname_translation`: Junction linking translations to pages
+-   `origin_segment`: Source text segments scoped to origin (text, text_hash)
+-   `translated_segment`: Translations scoped to origin + language
+-   `origin_path`: Source URL paths scoped to origin
+-   `translated_path`: Translated URL paths scoped to origin + language
+-   `origin_path_segment`: Junction linking paths to segments (for cache invalidation)
 
 **Key relationships**:
 
 -   `host` → `origin`: Many translated hosts per origin
--   `translation` → `host`: Translations scoped per host
--   `pathname` → `host`: URL mappings scoped per host
+-   `origin_segment` → `origin`: Text segments shared across all languages for an origin
+-   `translated_segment` → `origin_segment`: One translation per language per segment
+-   `origin_path` → `origin`: URL paths shared across all languages
+-   `translated_path` → `origin_path`: One translated path per language
 
 ### Translation Optimization
 
