@@ -159,7 +159,7 @@ Optional:
 
 - `PORT`: Server port (defaults to 8787)
 
-See [.env.example](.env.example) for all variables.
+Copy `.env` to get started (never commit secrets).
 
 ## Deployment (Render.com)
 
@@ -190,7 +190,5 @@ Each app deploys as a separate Render service. Both apps share the same PostgreS
 
 ## Future Considerations (not yet implemented)
 
-- Authentication system for `apps/www`
-- User/account tables in database
-- Multi-tenancy: `user_id` foreign key on `origin` and `host` tables
+- Authentication system for `apps/www` (schema has `user` table, app needs integration)
 - Billing integration

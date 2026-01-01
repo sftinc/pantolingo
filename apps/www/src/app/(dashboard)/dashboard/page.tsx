@@ -7,9 +7,11 @@ export default function DashboardPage() {
   void testConnection
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-4xl font-bold mb-4">Dashboard</h1>
-      <p className="text-lg text-gray-600">Coming soon</p>
+    <main className="flex min-h-screen flex-col items-center justify-center p-6">
+      <div className="text-center max-w-lg bg-[var(--card-bg)] p-10 rounded-lg shadow-[0_2px_8px_var(--shadow-color)]">
+        <h1 className="text-3xl font-semibold mb-4 text-[var(--text-heading)]">Dashboard</h1>
+        <p className="text-base leading-relaxed text-[var(--text-muted)]">Coming soon</p>
+      </div>
     </main>
   )
 }
