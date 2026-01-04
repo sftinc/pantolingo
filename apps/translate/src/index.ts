@@ -23,6 +23,7 @@ import { isStaticAsset } from './utils.js'
 import { renderMessagePage } from './utils/message-page.js'
 import {
 	getHostConfig,
+	getOriginPathId,
 	lookupPathname,
 	batchLookupPathnames,
 	batchGetTranslations,
@@ -70,7 +71,16 @@ async function executeDeferredWrites(writes: DeferredWrites): Promise<void> {
 		const pathnameIdMap = await batchUpsertPathnames(originId, lang, pathnames)
 
 		// 3. Link new segments to current path
-		const pathIds = pathnameIdMap.get(currentPath)
+		let pathIds = pathnameIdMap.get(currentPath)
+
+		// Fallback: lookup origin_path_id if not returned from upsert (path already existed)
+		if (!pathIds?.originPathId) {
+			const originPathId = await getOriginPathId(originId, currentPath)
+			if (originPathId) {
+				pathIds = { originPathId, translatedPathId: 0 }
+			}
+		}
+
 		if (pathIds?.originPathId && newSegmentHashes.length > 0) {
 			const originSegmentIds = await batchGetOriginSegmentIds(originId, newSegmentHashes)
 			if (originSegmentIds.size > 0) {

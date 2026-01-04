@@ -10,6 +10,27 @@
 import { pool } from './pool.js'
 
 /**
+ * Get origin_path_id for a specific path
+ * Used as fallback when batchUpsertPathnames doesn't return IDs (path already existed)
+ *
+ * @param originId - Origin ID
+ * @param path - Normalized path
+ * @returns origin_path_id or null if not found
+ */
+export async function getOriginPathId(originId: number, path: string): Promise<number | null> {
+	try {
+		const result = await pool.query<{ id: number }>(
+			`SELECT id FROM origin_path WHERE origin_id = $1 AND path = $2`,
+			[originId, path]
+		)
+		return result.rows[0]?.id ?? null
+	} catch (error) {
+		console.error('DB getOriginPathId failed:', error)
+		return null
+	}
+}
+
+/**
  * Pathname mapping result
  */
 export interface PathnameResult {

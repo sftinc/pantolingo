@@ -14,6 +14,7 @@ export {
 } from './segments.js'
 export { linkPathnameTranslations, linkPathSegments } from './junctions.js'
 export {
+	getOriginPathId,
 	lookupPathname,
 	batchLookupPathnames,
 	batchUpsertPathnames,
