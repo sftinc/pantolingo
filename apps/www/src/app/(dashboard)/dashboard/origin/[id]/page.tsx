@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation'
 import { getOriginById, getHostsForOrigin } from '@pantolingo/db'
 import { DashboardNav } from '@/components/dashboard/DashboardNav'
 import { HostTable } from '@/components/dashboard/HostTable'
-import { getLanguageName } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,22 +28,13 @@ export default async function OriginDetailPage({ params }: OriginDetailPageProps
 	return (
 		<div>
 			<DashboardNav
-				breadcrumbs={[{ label: 'Dashboard', href: '/dashboard' }, { label: origin.domain }]}
+				breadcrumbs={[
+					{ label: 'Dashboard', href: '/dashboard' },
+					{ label: `${origin.domain} (${origin.originLang})` },
+				]}
 			/>
 
-			<div className="mb-8">
-				<h2 className="text-2xl font-semibold text-[var(--text-heading)]">{origin.domain}</h2>
-				<p className="mt-1 text-[var(--text-muted)]">
-					Source language: {getLanguageName(origin.originLang)}
-				</p>
-			</div>
-
-			<div className="mb-4">
-				<h3 className="text-lg font-medium text-[var(--text-heading)]">Translation Hosts</h3>
-				<p className="text-sm text-[var(--text-muted)]">
-					Click a host to view and manage translations
-				</p>
-			</div>
+			<h3 className="mb-4 text-lg font-medium text-[var(--text-heading)]">Translation Hosts</h3>
 
 			<HostTable hosts={hosts} />
 		</div>

@@ -46,7 +46,10 @@ export default async function HostDetailPage({ params, searchParams }: HostDetai
 			<DashboardNav
 				breadcrumbs={[
 					{ label: 'Dashboard', href: '/dashboard' },
-					{ label: host.originDomain, href: `/dashboard/origin/${host.originId}` },
+					{
+						label: `${host.originDomain} (${host.originLang})`,
+						href: `/dashboard/origin/${host.originId}`,
+					},
 					{ label: host.hostname },
 				]}
 			/>
