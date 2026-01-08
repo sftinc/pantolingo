@@ -3,7 +3,7 @@
  * Converts inline tags to placeholders for single-segment translation
  */
 
-import { HTML_TAG_MAP, INLINE_TAGS, VOID_TAGS } from '../config.js'
+import { HTML_TAG_MAP, INLINE_TAGS, SKIP_TAGS, VOID_TAGS } from '../config.js'
 import type { HtmlTagReplacement } from '../types.js'
 
 /**
@@ -21,11 +21,11 @@ export function isGroupableElement(element: Element): boolean {
 		// Text nodes are always OK
 		if (child.nodeType === 3) continue
 
-		// Element nodes must be inline tags
+		// Element nodes must be inline tags and not skip tags
 		if (child.nodeType === 1) {
 			const tagName = (child as Element).tagName.toLowerCase()
-			if (!INLINE_TAGS.has(tagName)) {
-				return false // Contains block element - not groupable
+			if (!INLINE_TAGS.has(tagName) || SKIP_TAGS.has(tagName)) {
+				return false // Contains block or skip element - not groupable
 			}
 			// Recursively check nested elements
 			if (!isGroupableElement(child as Element)) {
@@ -54,17 +54,18 @@ export function normalizeWhitespace(text: string): string {
  * Convert innerHTML to placeholdered text
  * Replaces HTML tags with indexed placeholders
  * @param innerHTML - The original innerHTML string
+ * @param preserveWhitespace - If true, skip whitespace normalization (for pre tags)
  * @returns Object with placeholdered text and replacement metadata
  */
-export function htmlToPlaceholders(innerHTML: string): {
+export function htmlToPlaceholders(innerHTML: string, preserveWhitespace = false): {
 	text: string
 	replacements: HtmlTagReplacement[]
 } {
 	const replacements: HtmlTagReplacement[] = []
 	const tagCounters: Record<string, number> = {}
 
-	// Normalize whitespace first
-	let result = normalizeWhitespace(innerHTML)
+	// Normalize whitespace (skip for pre tags to preserve line breaks)
+	let result = preserveWhitespace ? innerHTML : normalizeWhitespace(innerHTML)
 
 	// Regex to match HTML tags (opening, closing, and self-closing)
 	// Captures: full match, slash for closing, tag name, attributes

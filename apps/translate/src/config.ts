@@ -122,6 +122,7 @@ export const BLOCK_TAGS = new Set([
 	'label',
 	'legend',
 	'summary',
+	'pre',
 ])
 
 // Attributes to translate

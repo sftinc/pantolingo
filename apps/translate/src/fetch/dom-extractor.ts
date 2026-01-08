@@ -31,7 +31,8 @@ function extractGroupedBlocks(node: Node, segments: Content[], groupedElements: 
 
 			// Only process if there's actual text content
 			if (trimmed.length > 0 && containsText(trimmed)) {
-				const { text, replacements } = htmlToPlaceholders(innerHTML)
+				const preserveWs = tagName === 'pre'
+				const { text, replacements } = htmlToPlaceholders(innerHTML, preserveWs)
 
 				// Only use grouped extraction if the result has content
 				if (text.trim().length > 0) {
