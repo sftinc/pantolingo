@@ -31,7 +31,8 @@ src/
 │   ├── (auth)/                 # Auth pages
 │   │   ├── login/              # /login - email input
 │   │   │   ├── check-email/    # /login/check-email - "check your email"
-│   │   │   └── error/          # /login/error - auth errors
+│   │   │   ├── error/          # /login/error - auth errors
+│   │   │   └── magic/          # /login/magic - redirects to NextAuth callback
 │   │   ├── signup/             # /signup
 │   │   └── onboarding/         # /onboarding - name setup
 │   ├── (dashboard)/            # Customer dashboard
@@ -46,14 +47,15 @@ src/
 ├── actions/                    # Server actions
 ├── components/
 │   ├── ui/                     # Reusable UI (Modal, Table, Badge, Lexical editor)
-│   └── dashboard/              # Dashboard-specific (EditModal, LangTable, OriginCard)
+│   └── dashboard/              # Dashboard-specific (SegmentEditModal, PathEditModal, tables)
 ├── lib/                        # Utilities (auth, db queries)
+├── proxy.ts                    # Auth middleware (route protection)
 └── types/                      # TypeScript type extensions
 ```
 
 ## Key Components
 
--   `EditModal` - Modal with Lexical-based editor for editing translations
+-   `SegmentEditModal`, `PathEditModal` - Modals with Lexical editor for editing translations
 -   `LangTable`, `SegmentTable`, `PathTable` - Data tables with pagination
 -   `PlaceholderEditor` - Lexical editor with placeholder validation (preserves `[HB1]...[/HB1]` formatting)
 
