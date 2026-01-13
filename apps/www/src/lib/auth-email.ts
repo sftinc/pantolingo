@@ -12,9 +12,9 @@ export function SmtpProvider(): EmailConfig {
 		name: 'Email',
 		maxAge: 60 * 60, // Magic link expires in 1 hour
 		async sendVerificationRequest({ identifier, url }) {
-			const emailFrom = process.env.EMAIL_FROM
+			const emailFrom = process.env.SMTP_FROM
 			if (!emailFrom) {
-				throw new Error('EMAIL_FROM environment variable is required for magic link authentication')
+				throw new Error('SMTP_FROM environment variable is required for magic link authentication')
 			}
 
 			const result = await sendEmail({
