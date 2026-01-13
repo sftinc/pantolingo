@@ -181,12 +181,12 @@ export function PathEditModal({
 					Reset
 				</Button>
 				{translatedPath && !isReviewed && (
-					<Button variant="success" onClick={handleMarkReviewed} disabled={isPending}>
-						{isPending ? 'Saving...' : 'Mark Reviewed'}
+					<Button variant="success" onClick={handleMarkReviewed} loading={isPending}>
+						Mark Reviewed
 					</Button>
 				)}
-				<Button variant="primary" onClick={handleSave} disabled={isPending || !canSave}>
-					{isPending ? 'Saving...' : 'Save Translation'}
+				<Button variant="primary" onClick={handleSave} disabled={!canSave} loading={isPending}>
+					Save Translation
 				</Button>
 			</ModalFooter>
 		</Modal>

@@ -150,46 +150,29 @@ export function PantolingoAdapter(): Adapter {
 		},
 
 		async useVerificationToken({ identifier, token }) {
-			const checkResult = await pool.query<{ identifier: string; token: string; expires: Date }>(
-				`SELECT identifier, token, expires FROM auth_token WHERE identifier = $1`,
-				[identifier]
-			)
-
-			if (checkResult.rows.length === 0) {
-				console.error('[auth] Token not found for', identifier)
-				return null
-			}
-
-			const existingToken = checkResult.rows[0]
-			if (existingToken.token !== token) {
-				console.error('[auth] Token mismatch for', identifier)
-				return null
-			}
-
-			if (new Date(existingToken.expires) < new Date()) {
-				console.error('[auth] Token expired for', identifier)
-				await pool.query(`DELETE FROM auth_token WHERE identifier = $1`, [identifier])
-				return null
-			}
-
+			// Single query: delete token (if valid and not expired) and update profile in one round-trip
 			const result = await pool.query<{ identifier: string; token: string; expires: Date }>(
-				`DELETE FROM auth_token WHERE identifier = $1 AND token = $2
-				 RETURNING identifier, token, expires`,
+				`WITH deleted_token AS (
+					DELETE FROM auth_token
+					WHERE identifier = $1 AND token = $2 AND expires > NOW()
+					RETURNING identifier, token, expires
+				), update_profile AS (
+					UPDATE profile
+					SET verified_at = NOW()
+					WHERE email = $1
+					  AND verified_at IS NULL
+					  AND EXISTS (SELECT 1 FROM deleted_token)
+				)
+				SELECT identifier, token, expires FROM deleted_token`,
 				[identifier, token]
 			)
 
 			if (!result.rows[0]) {
-				console.error('[auth] Token race condition for', identifier)
+				console.error('[auth] Token invalid, expired, or not found for', identifier)
 				return null
 			}
 
 			console.log('[auth] Token verified for', identifier)
-
-			await pool.query(
-				`UPDATE profile SET verified_at = NOW() WHERE email = $1 AND verified_at IS NULL`,
-				[identifier]
-			)
-
 			return result.rows[0]
 		},
 

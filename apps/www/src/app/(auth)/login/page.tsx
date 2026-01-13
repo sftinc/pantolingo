@@ -1,4 +1,6 @@
 import { signIn } from '@/lib/auth'
+import { FormInput } from '@/components/ui/FormInput'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 function getSafeCallbackUrl(url: string | undefined): string {
 	if (!url) return '/dashboard'
@@ -45,24 +47,17 @@ export default async function LoginPage({
 				)}
 
 				<form action={handleSignIn}>
-					<label htmlFor="email" className="block text-sm font-medium text-[var(--text-body)] mb-2">
-						Email address
-					</label>
-					<input
+					<FormInput
 						id="email"
 						name="email"
 						type="email"
 						required
 						autoFocus
 						placeholder="you@example.com"
-						className="w-full px-4 py-3 rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text-body)] mb-4 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+						label="Email address"
+						className="mb-4"
 					/>
-					<button
-						type="submit"
-						className="w-full py-3 bg-[var(--primary)] text-white rounded-md font-medium hover:opacity-90 transition cursor-pointer"
-					>
-						Send magic link
-					</button>
+					<SubmitButton>Send magic link</SubmitButton>
 				</form>
 			</div>
 		</main>

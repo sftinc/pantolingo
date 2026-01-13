@@ -21,12 +21,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
 					<h1 className="text-xl font-semibold text-[var(--text-heading)]">Pantolingo</h1>
 					<div className="flex items-center gap-4">
 						<span className="text-sm text-[var(--text-muted)]">
-							{session.user.name || session.user.email}
+							{(() => {
+								const parts = session.user.name!.trim().split(/\s+/)
+								if (parts.length === 1) return parts[0]
+								return `${parts[0][0]}. ${parts[parts.length - 1]}`
+							})()}
 						</span>
 						<form action={handleSignOut}>
 							<button
 								type="submit"
-								className="text-sm text-[var(--text-muted)] hover:text-[var(--text-body)] transition cursor-pointer"
+								className="text-sm px-3 py-1.5 rounded-md border border-[var(--border)] text-[var(--text-heading)] hover:bg-[var(--border)] transition cursor-pointer"
 							>
 								Sign out
 							</button>

@@ -45,8 +45,3 @@ export default auth((req) => {
 	return NextResponse.next()
 }) as MiddlewareFn
 
-export const config = {
-	matcher: ['/dashboard/:path*', '/login', '/signup', '/onboarding'],
-}
-
-export const runtime = 'nodejs'

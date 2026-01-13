@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
+import { Spinner } from './Spinner'
 
 interface ModalProps {
 	isOpen: boolean
@@ -109,11 +110,12 @@ interface ButtonProps {
 	variant?: 'primary' | 'secondary' | 'success'
 	onClick?: () => void
 	disabled?: boolean
+	loading?: boolean
 	type?: 'button' | 'submit'
 	className?: string
 }
 
-export function Button({ children, variant = 'secondary', onClick, disabled, type = 'button', className }: ButtonProps) {
+export function Button({ children, variant = 'secondary', onClick, disabled, loading, type = 'button', className }: ButtonProps) {
 	const variantStyles = {
 		primary: 'bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]',
 		secondary: 'bg-[var(--border)] text-[var(--text-heading)] hover:bg-[var(--border-hover)]',
@@ -124,14 +126,14 @@ export function Button({ children, variant = 'secondary', onClick, disabled, typ
 		<button
 			type={type}
 			onClick={onClick}
-			disabled={disabled}
+			disabled={disabled || loading}
 			className={cn(
 				'px-4 py-2 text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
 				variantStyles[variant],
 				className
 			)}
 		>
-			{children}
+			{loading ? <Spinner size="sm" /> : children}
 		</button>
 	)
 }
