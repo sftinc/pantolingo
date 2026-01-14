@@ -10,11 +10,11 @@ import type { PathWithTranslation } from '@pantolingo/db'
 interface PathTableProps {
 	paths: PathWithTranslation[]
 	targetLang: string
-	originId: number
+	websiteId: number
 	onUpdate?: () => void
 }
 
-export function PathTable({ paths, targetLang, originId, onUpdate }: PathTableProps) {
+export function PathTable({ paths, targetLang, websiteId, onUpdate }: PathTableProps) {
 	const [editingPath, setEditingPath] = useState<PathWithTranslation | null>(null)
 
 	if (paths.length === 0) {
@@ -34,7 +34,7 @@ export function PathTable({ paths, targetLang, originId, onUpdate }: PathTablePr
 				<TableBody>
 					{paths.map((path) => (
 						<TableRow
-							key={path.originPathId}
+							key={path.websitePathId}
 							clickable
 							onClick={() => setEditingPath(path)}
 						>
@@ -78,8 +78,8 @@ export function PathTable({ paths, targetLang, originId, onUpdate }: PathTablePr
 				<PathEditModal
 					isOpen={!!editingPath}
 					onClose={() => setEditingPath(null)}
-					originId={originId}
-					originPathId={editingPath.originPathId}
+					websiteId={websiteId}
+					websitePathId={editingPath.websitePathId}
 					originalPath={editingPath.path}
 					translatedPath={editingPath.translatedPath}
 					isReviewed={!!editingPath.reviewedAt}

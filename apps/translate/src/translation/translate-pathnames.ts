@@ -56,7 +56,7 @@ function lookupCachedPathname(
 		return null
 	}
 
-	const translatedNormalized = pathnameMapping.origin[normalized]
+	const translatedNormalized = pathnameMapping.source[normalized]
 	if (!translatedNormalized) {
 		return null
 	}

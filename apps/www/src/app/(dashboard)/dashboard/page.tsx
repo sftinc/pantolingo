@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { getOriginsWithStats } from '@pantolingo/db'
-import { OriginCard } from '@/components/dashboard/OriginCard'
+import { getWebsitesWithStats } from '@pantolingo/db'
+import { WebsiteCard } from '@/components/dashboard/WebsiteCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,20 +12,20 @@ export default async function DashboardPage() {
 		redirect('/login')
 	}
 
-	const origins = await getOriginsWithStats(session.user.profileId)
+	const websites = await getWebsitesWithStats(session.user.profileId)
 
 	return (
 		<div>
-			<h2 className="mb-4 text-2xl font-semibold text-[var(--text-heading)]">Your Origins</h2>
+			<h2 className="mb-4 text-2xl font-semibold text-[var(--text-heading)]">Your Websites</h2>
 
-			{origins.length === 0 ? (
+			{websites.length === 0 ? (
 				<div className="text-center py-12 bg-[var(--card-bg)] rounded-lg">
-					<p className="text-[var(--text-muted)]">No origins configured yet</p>
+					<p className="text-[var(--text-muted)]">No websites configured yet</p>
 				</div>
 			) : (
 				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-					{origins.map((origin) => (
-						<OriginCard key={origin.id} origin={origin} />
+					{websites.map((website) => (
+						<WebsiteCard key={website.id} website={website} />
 					))}
 				</div>
 			)}

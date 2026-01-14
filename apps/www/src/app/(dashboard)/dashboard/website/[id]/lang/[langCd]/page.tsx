@@ -1,10 +1,10 @@
 import { notFound, redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import {
-	canAccessOrigin,
-	getOriginById,
-	isValidLangForOrigin,
-	getPathsForOrigin,
+	canAccessWebsite,
+	getWebsiteById,
+	isValidLangForWebsite,
+	getPathsForWebsite,
 	getSegmentsForLang,
 	getPathsForLang,
 } from '@pantolingo/db'
@@ -33,7 +33,7 @@ export default async function LangDetailPage({ params, searchParams }: LangDetai
 
 	const { id, langCd } = await params
 	const { view = 'segments', filter = 'unreviewed', page = '1', path } = await searchParams
-	const originId = parseInt(id, 10)
+	const websiteId = parseInt(id, 10)
 	const pageNum = parseInt(page, 10) || 1
 	const limit = 50
 
@@ -41,48 +41,48 @@ export default async function LangDetailPage({ params, searchParams }: LangDetai
 	const pathId: number | 'none' | undefined =
 		path === undefined ? undefined : path === 'none' ? 'none' : parseInt(path, 10) || undefined
 
-	// Invalid originId - show 404
-	if (isNaN(originId)) {
+	// Invalid websiteId - show 404
+	if (isNaN(websiteId)) {
 		notFound()
 	}
 
 	// Check authorization
-	if (!(await canAccessOrigin(session.user.profileId, originId))) {
+	if (!(await canAccessWebsite(session.user.profileId, websiteId))) {
 		notFound()
 	}
 
-	const origin = await getOriginById(originId)
+	const website = await getWebsiteById(websiteId)
 
-	// Origin not found - show 404
-	if (!origin) {
+	// Website not found - show 404
+	if (!website) {
 		notFound()
 	}
 
-	// Invalid language for this origin - redirect to origin page
-	const validLang = await isValidLangForOrigin(originId, langCd)
+	// Invalid language for this website - redirect to website page
+	const validLang = await isValidLangForWebsite(websiteId, langCd)
 	if (!validLang) {
-		redirect(`/dashboard/origin/${originId}`)
+		redirect(`/dashboard/website/${websiteId}`)
 	}
 
 	const validView = view === 'paths' ? 'paths' : 'segments'
 	const validFilter = filter === 'all' ? 'all' : 'unreviewed'
 
 	// Fetch paths for the dropdown (only when viewing segments)
-	const pathOptions = validView === 'segments' ? await getPathsForOrigin(originId) : []
+	const pathOptions = validView === 'segments' ? await getPathsForWebsite(websiteId) : []
 
 	const segmentData =
 		validView === 'segments'
-			? await getSegmentsForLang(originId, langCd, validFilter, pageNum, limit, pathId)
+			? await getSegmentsForLang(websiteId, langCd, validFilter, pageNum, limit, pathId)
 			: null
 	const pathData =
 		validView === 'paths'
-			? await getPathsForLang(originId, langCd, validFilter, pageNum, limit)
+			? await getPathsForLang(websiteId, langCd, validFilter, pageNum, limit)
 			: null
 	const data = segmentData ?? pathData!
 
 	// Build path param string for URLs
 	const pathParam = pathId !== undefined ? `&path=${pathId}` : ''
-	const baseUrl = `/dashboard/origin/${originId}/lang/${langCd}?view=${validView}&filter=${validFilter}${pathParam}`
+	const baseUrl = `/dashboard/website/${websiteId}/lang/${langCd}?view=${validView}&filter=${validFilter}${pathParam}`
 
 	return (
 		<div>
@@ -90,8 +90,8 @@ export default async function LangDetailPage({ params, searchParams }: LangDetai
 				breadcrumbs={[
 					{ label: 'Dashboard', href: '/dashboard' },
 					{
-						label: `${origin.domain} ${getFlag(origin.originLang)}`,
-						href: `/dashboard/origin/${originId}`,
+						label: `${website.domain} ${getFlag(website.sourceLang)}`,
+						href: `/dashboard/website/${websiteId}`,
 					},
 					{ label: `${getLanguageLabel(langCd)} (${formatNumber(data.total)})` },
 				]}
@@ -105,7 +105,7 @@ export default async function LangDetailPage({ params, searchParams }: LangDetai
 						{ value: 'paths', label: 'Paths' },
 					]}
 					value={validView}
-					baseUrl={`/dashboard/origin/${originId}/lang/${langCd}?filter=${validFilter}`}
+					baseUrl={`/dashboard/website/${websiteId}/lang/${langCd}?filter=${validFilter}`}
 					paramName="view"
 				/>
 				<Toggle
@@ -114,14 +114,14 @@ export default async function LangDetailPage({ params, searchParams }: LangDetai
 						{ value: 'all', label: 'All' },
 					]}
 					value={validFilter}
-					baseUrl={`/dashboard/origin/${originId}/lang/${langCd}?view=${validView}${pathParam}`}
+					baseUrl={`/dashboard/website/${websiteId}/lang/${langCd}?view=${validView}${pathParam}`}
 					paramName="filter"
 				/>
 				{validView === 'segments' && (
 					<PathSelect
 						paths={pathOptions}
 						selectedPathId={pathId ?? null}
-						baseUrl={`/dashboard/origin/${originId}/lang/${langCd}?view=${validView}&filter=${validFilter}`}
+						baseUrl={`/dashboard/website/${websiteId}/lang/${langCd}?view=${validView}&filter=${validFilter}`}
 						className="ml-auto"
 					/>
 				)}
@@ -135,8 +135,8 @@ export default async function LangDetailPage({ params, searchParams }: LangDetai
 			)}
 
 			{/* Data table */}
-			{segmentData && <SegmentTable segments={segmentData.items} targetLang={langCd} originId={originId} />}
-			{pathData && <PathTable paths={pathData.items} targetLang={langCd} originId={originId} />}
+			{segmentData && <SegmentTable segments={segmentData.items} targetLang={langCd} websiteId={websiteId} />}
+			{pathData && <PathTable paths={pathData.items} targetLang={langCd} websiteId={websiteId} />}
 
 			{/* Pagination */}
 			<div className="mt-6">

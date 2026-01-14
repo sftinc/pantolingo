@@ -3,8 +3,8 @@
  * Batch operations to minimize SQL round trips
  *
  * Uses normalized schema:
- * - origin_segment: source text stored once per origin
- * - translated_segment: translations scoped to origin + lang
+ * - website_segment: source text stored once per website
+ * - translated_segment: translations scoped to website + lang
  */
 
 import { pool } from './pool.js'
@@ -22,15 +22,15 @@ export interface TranslationItem {
  * Batch lookup translations by text
  * Uses text_hash for efficient indexed lookups
  *
- * @param originId - Origin ID from getHostConfig()
+ * @param websiteId - Website ID from getHostConfig()
  * @param lang - Target language code
  * @param texts - Array of normalized text strings to look up
  * @returns Map of original text -> translated text (only cache hits)
  *
- * SQL: 1 query joining origin_segment -> translated_segment
+ * SQL: 1 query joining website_segment -> translated_segment
  */
 export async function batchGetTranslations(
-	originId: number,
+	websiteId: number,
 	lang: string,
 	texts: string[]
 ): Promise<Map<string, string>> {
@@ -46,13 +46,13 @@ export async function batchGetTranslations(
 			text: string
 			translated_text: string
 		}>(
-			`SELECT os.text, ts.translated_text
-			FROM origin_segment os
-			JOIN translated_segment ts ON ts.origin_segment_id = os.id
-			WHERE os.origin_id = $1
+			`SELECT ws.text, ts.translated_text
+			FROM website_segment ws
+			JOIN translated_segment ts ON ts.website_segment_id = ws.id
+			WHERE ws.website_id = $1
 			  AND ts.lang = $2
-			  AND os.text_hash = ANY($3::text[])`,
-			[originId, lang, hashes]
+			  AND ws.text_hash = ANY($3::text[])`,
+			[websiteId, lang, hashes]
 		)
 
 		// Build map for O(1) lookups
@@ -70,17 +70,17 @@ export async function batchGetTranslations(
 
 /**
  * Batch insert/update translations
- * Two-step upsert: origin_segment first, then translated_segment
+ * Two-step upsert: website_segment first, then translated_segment
  *
- * @param originId - Origin ID
+ * @param websiteId - Website ID
  * @param lang - Target language code
  * @param translations - Array of translation items
  * @returns Map of text_hash -> translated_segment.id
  *
- * SQL: 2 queries - one for origin_segment, one for translated_segment
+ * SQL: 2 queries - one for website_segment, one for translated_segment
  */
 export async function batchUpsertTranslations(
-	originId: number,
+	websiteId: number,
 	lang: string,
 	translations: TranslationItem[]
 ): Promise<Map<string, number>> {
@@ -107,23 +107,23 @@ export async function batchUpsertTranslations(
 			hashes.push(hashText(t.original))
 		}
 
-		// Step 1: Upsert origin_segment (source text)
+		// Step 1: Upsert website_segment (source text)
 		await pool.query(
-			`INSERT INTO origin_segment (origin_id, text, text_hash)
+			`INSERT INTO website_segment (website_id, text, text_hash)
 			SELECT $1, unnest($2::text[]), unnest($3::text[])
-			ON CONFLICT (origin_id, text_hash) DO NOTHING`,
-			[originId, originals, hashes]
+			ON CONFLICT (website_id, text_hash) DO NOTHING`,
+			[websiteId, originals, hashes]
 		)
 
 		// Step 2: Upsert translated_segment (translations)
 		const result = await pool.query<{ id: number; text_hash: string }>(
-			`INSERT INTO translated_segment (origin_segment_id, lang, translated_text)
-			SELECT os.id, $2, t.translated
+			`INSERT INTO translated_segment (website_segment_id, lang, translated_text)
+			SELECT ws.id, $2, t.translated
 			FROM unnest($3::text[], $4::text[]) AS t(hash, translated)
-			JOIN origin_segment os ON os.origin_id = $1 AND os.text_hash = t.hash
-			ON CONFLICT (origin_segment_id, lang) DO NOTHING
-			RETURNING id, (SELECT text_hash FROM origin_segment WHERE id = origin_segment_id) AS text_hash`,
-			[originId, lang, hashes, translated]
+			JOIN website_segment ws ON ws.website_id = $1 AND ws.text_hash = t.hash
+			ON CONFLICT (website_segment_id, lang) DO NOTHING
+			RETURNING id, (SELECT text_hash FROM website_segment WHERE id = website_segment_id) AS text_hash`,
+			[websiteId, lang, hashes, translated]
 		)
 
 		// Return map: text_hash -> id
@@ -142,15 +142,15 @@ export async function batchUpsertTranslations(
  * Batch lookup translation IDs by text hash
  * Used to link cached translations to pathnames
  *
- * @param originId - Origin ID
+ * @param websiteId - Website ID
  * @param lang - Target language code
  * @param textHashes - Array of text hashes to look up
  * @returns Map of text_hash -> translated_segment.id
  *
- * SQL: 1 query joining origin_segment -> translated_segment
+ * SQL: 1 query joining website_segment -> translated_segment
  */
 export async function batchGetTranslationIds(
-	originId: number,
+	websiteId: number,
 	lang: string,
 	textHashes: string[]
 ): Promise<Map<string, number>> {
@@ -160,13 +160,13 @@ export async function batchGetTranslationIds(
 
 	try {
 		const result = await pool.query<{ text_hash: string; id: number }>(
-			`SELECT os.text_hash, ts.id
-			FROM origin_segment os
-			JOIN translated_segment ts ON ts.origin_segment_id = os.id
-			WHERE os.origin_id = $1
+			`SELECT ws.text_hash, ts.id
+			FROM website_segment ws
+			JOIN translated_segment ts ON ts.website_segment_id = ws.id
+			WHERE ws.website_id = $1
 			  AND ts.lang = $2
-			  AND os.text_hash = ANY($3::text[])`,
-			[originId, lang, textHashes]
+			  AND ws.text_hash = ANY($3::text[])`,
+			[websiteId, lang, textHashes]
 		)
 
 		const idMap = new Map<string, number>()
@@ -181,17 +181,17 @@ export async function batchGetTranslationIds(
 }
 
 /**
- * Batch lookup origin segment IDs by text hash
- * Used to link origin segments to origin paths (language-independent)
+ * Batch lookup website segment IDs by text hash
+ * Used to link website segments to website paths (language-independent)
  *
- * @param originId - Origin ID
+ * @param websiteId - Website ID
  * @param textHashes - Array of text hashes to look up
- * @returns Map of text_hash -> origin_segment.id
+ * @returns Map of text_hash -> website_segment.id
  *
- * SQL: 1 query on origin_segment
+ * SQL: 1 query on website_segment
  */
-export async function batchGetOriginSegmentIds(
-	originId: number,
+export async function batchGetWebsiteSegmentIds(
+	websiteId: number,
 	textHashes: string[]
 ): Promise<Map<string, number>> {
 	if (textHashes.length === 0) {
@@ -201,10 +201,10 @@ export async function batchGetOriginSegmentIds(
 	try {
 		const result = await pool.query<{ text_hash: string; id: number }>(
 			`SELECT text_hash, id
-			FROM origin_segment
-			WHERE origin_id = $1
+			FROM website_segment
+			WHERE website_id = $1
 			  AND text_hash = ANY($2::text[])`,
-			[originId, textHashes]
+			[websiteId, textHashes]
 		)
 
 		const idMap = new Map<string, number>()
@@ -213,7 +213,7 @@ export async function batchGetOriginSegmentIds(
 		}
 		return idMap
 	} catch (error) {
-		console.error('DB origin segment ID lookup failed:', error)
+		console.error('DB website segment ID lookup failed:', error)
 		return new Map() // Fail open
 	}
 }

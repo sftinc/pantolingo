@@ -9,14 +9,14 @@ import type { LangWithStats } from '@pantolingo/db'
 
 interface LangTableProps {
 	langs: LangWithStats[]
-	originId: number
+	websiteId: number
 }
 
-export function LangTable({ langs, originId }: LangTableProps) {
+export function LangTable({ langs, websiteId }: LangTableProps) {
 	const router = useRouter()
 
 	if (langs.length === 0) {
-		return <EmptyState message="No languages configured for this origin" />
+		return <EmptyState message="No languages configured for this website" />
 	}
 
 	return (
@@ -34,7 +34,7 @@ export function LangTable({ langs, originId }: LangTableProps) {
 					<TableRow
 						key={lang.targetLang}
 						clickable
-						onClick={() => router.push(`/dashboard/origin/${originId}/lang/${lang.targetLang}`)}
+						onClick={() => router.push(`/dashboard/website/${websiteId}/lang/${lang.targetLang}`)}
 					>
 						<TableCell className="font-medium">{getLanguageLabel(lang.targetLang)}</TableCell>
 						<TableCell className="text-right tabular-nums">

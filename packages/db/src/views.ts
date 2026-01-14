@@ -1,21 +1,21 @@
 import { pool } from './pool.js'
 
 /**
- * Record a page view for an origin path + language combination.
+ * Record a page view for a website path + language combination.
  * Increments hit_count if already exists for today, otherwise inserts.
  * Non-blocking - errors are logged but don't throw.
  */
 export async function recordPageView(
-	originPathId: number,
+	websitePathId: number,
 	lang: string
 ): Promise<void> {
 	try {
 		await pool.query(
-			`INSERT INTO origin_path_view (origin_path_id, lang, view_date, hit_count)
+			`INSERT INTO website_path_view (website_path_id, lang, view_date, hit_count)
 			 VALUES ($1, $2, CURRENT_DATE, 1)
-			 ON CONFLICT (origin_path_id, lang, view_date)
-			 DO UPDATE SET hit_count = origin_path_view.hit_count + 1`,
-			[originPathId, lang]
+			 ON CONFLICT (website_path_id, lang, view_date)
+			 DO UPDATE SET hit_count = website_path_view.hit_count + 1`,
+			[websitePathId, lang]
 		)
 	} catch (error) {
 		console.error('Failed to record page view:', error)
@@ -27,12 +27,12 @@ export async function recordPageView(
  * Only updates if the current date is different (to minimize writes).
  * Non-blocking - errors are logged but don't throw.
  *
- * @param originId - Origin ID
+ * @param websiteId - Website ID
  * @param lang - Target language code
  * @param textHashes - Array of text hashes for segments that were used
  */
 export async function updateSegmentLastUsed(
-	originId: number,
+	websiteId: number,
 	lang: string,
 	textHashes: string[]
 ): Promise<void> {
@@ -42,13 +42,13 @@ export async function updateSegmentLastUsed(
 		await pool.query(
 			`UPDATE translated_segment ts
 			 SET last_used_on = CURRENT_DATE
-			 FROM origin_segment os
-			 WHERE ts.origin_segment_id = os.id
-			   AND os.origin_id = $1
+			 FROM website_segment ws
+			 WHERE ts.website_segment_id = ws.id
+			   AND ws.website_id = $1
 			   AND ts.lang = $2
-			   AND os.text_hash = ANY($3::text[])
+			   AND ws.text_hash = ANY($3::text[])
 			   AND (ts.last_used_on IS NULL OR ts.last_used_on < CURRENT_DATE)`,
-			[originId, lang, textHashes]
+			[websiteId, lang, textHashes]
 		)
 	} catch (error) {
 		console.error('Failed to update segment last_used_on:', error)
@@ -60,12 +60,12 @@ export async function updateSegmentLastUsed(
  * Only updates if the current date is different (to minimize writes).
  * Non-blocking - errors are logged but don't throw.
  *
- * @param originId - Origin ID
+ * @param websiteId - Website ID
  * @param lang - Target language code
  * @param paths - Array of original paths that were used
  */
 export async function updatePathLastUsed(
-	originId: number,
+	websiteId: number,
 	lang: string,
 	paths: string[]
 ): Promise<void> {
@@ -75,13 +75,13 @@ export async function updatePathLastUsed(
 		await pool.query(
 			`UPDATE translated_path tp
 			 SET last_used_on = CURRENT_DATE
-			 FROM origin_path op
-			 WHERE tp.origin_path_id = op.id
-			   AND op.origin_id = $1
+			 FROM website_path wp
+			 WHERE tp.website_path_id = wp.id
+			   AND wp.website_id = $1
 			   AND tp.lang = $2
-			   AND op.path = ANY($3::text[])
+			   AND wp.path = ANY($3::text[])
 			   AND (tp.last_used_on IS NULL OR tp.last_used_on < CURRENT_DATE)`,
-			[originId, lang, paths]
+			[websiteId, lang, paths]
 		)
 	} catch (error) {
 		console.error('Failed to update path last_used_on:', error)

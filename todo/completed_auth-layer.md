@@ -32,8 +32,8 @@ Create a separate authorization layer that checks if a profile can access an ori
 
 **Goal:** Create the authorization check function in the shared DB layer
 
-- [ ] Add `canAccessOrigin` function to `packages/db/src/dashboard.ts`
-- [ ] Export from `packages/db/src/index.ts`
+- [x] Add `canAccessOrigin` function to `packages/db/src/dashboard.ts`
+- [x] Export from `packages/db/src/index.ts`
 
 ### Details
 
@@ -59,11 +59,11 @@ export async function canAccessOrigin(profileId: number, originId: number): Prom
 
 **Goal:** Remove profile auth from queries, add origin validation, change to UPDATE-only
 
-- [ ] Update `updateSegmentTranslation` - remove CTE auth, change INSERT→UPDATE, add originId param
-- [ ] Update `updatePathTranslation` - remove CTE auth, change INSERT→UPDATE, add originId param
-- [ ] Update `markSegmentReviewed` - remove profile auth, add originId param
-- [ ] Update `markPathReviewed` - remove profile auth, add originId param
-- [ ] Update `getOriginById` - remove account_profile JOIN, remove profileId param
+- [x] Update `updateSegmentTranslation` - remove CTE auth, change INSERT→UPDATE, add originId param
+- [x] Update `updatePathTranslation` - remove CTE auth, change INSERT→UPDATE, add originId param
+- [x] Update `markSegmentReviewed` - remove profile auth, add originId param
+- [x] Update `markPathReviewed` - remove profile auth, add originId param
+- [x] Update `getOriginById` - remove account_profile JOIN, remove profileId param
 
 ### Details
 
@@ -123,11 +123,11 @@ WHERE tp.origin_path_id = $2
 
 **Goal:** Check access before calling queries, receive originId from client
 
-- [ ] Import `canAccessOrigin` from `@pantolingo/db`
-- [ ] Update `saveSegmentTranslation` signature and add auth check
-- [ ] Update `savePathTranslation` signature and add auth check
-- [ ] Update `reviewSegment` signature and add auth check
-- [ ] Update `reviewPath` signature and add auth check
+- [x] Import `canAccessOrigin` from `@pantolingo/db`
+- [x] Update `saveSegmentTranslation` signature and add auth check
+- [x] Update `savePathTranslation` signature and add auth check
+- [x] Update `reviewSegment` signature and add auth check
+- [x] Update `reviewPath` signature and add auth check
 
 ### Details
 
@@ -163,11 +163,11 @@ export async function saveSegmentTranslation(
 
 **Goal:** Fix prop naming, thread originId correctly
 
-- [ ] Create `apps/www/src/components/dashboard/SegmentEditModal.tsx`
-- [ ] Create `apps/www/src/components/dashboard/PathEditModal.tsx`
-- [ ] Delete `apps/www/src/components/dashboard/EditModal.tsx`
-- [ ] Update `SegmentTable.tsx` to use SegmentEditModal and receive originId prop
-- [ ] Update `PathTable.tsx` to use PathEditModal and receive originId prop
+- [x] Create `apps/www/src/components/dashboard/SegmentEditModal.tsx`
+- [x] Create `apps/www/src/components/dashboard/PathEditModal.tsx`
+- [x] Delete `apps/www/src/components/dashboard/EditModal.tsx`
+- [x] Update `SegmentTable.tsx` to use SegmentEditModal and receive originId prop
+- [x] Update `PathTable.tsx` to use PathEditModal and receive originId prop
 
 ### Details
 
@@ -220,8 +220,8 @@ Page (has originId from URL)
 
 **Goal:** Use auth check for read operations, pass originId to components
 
-- [ ] Update `apps/www/src/app/(dashboard)/dashboard/origin/[id]/page.tsx`
-- [ ] Update `apps/www/src/app/(dashboard)/dashboard/origin/[id]/lang/[langCd]/page.tsx`
+- [x] Update `apps/www/src/app/(dashboard)/dashboard/origin/[id]/page.tsx`
+- [x] Update `apps/www/src/app/(dashboard)/dashboard/origin/[id]/lang/[langCd]/page.tsx`
 
 ### Details
 

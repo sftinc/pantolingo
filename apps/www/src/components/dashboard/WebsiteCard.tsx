@@ -1,38 +1,38 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card'
 import { formatNumber } from '@/lib/utils'
 import { getLanguageName } from '@pantolingo/lang'
-import type { OriginWithStats } from '@pantolingo/db'
+import type { WebsiteWithStats } from '@pantolingo/db'
 
-interface OriginCardProps {
-	origin: OriginWithStats
+interface WebsiteCardProps {
+	website: WebsiteWithStats
 }
 
-export function OriginCard({ origin }: OriginCardProps) {
+export function WebsiteCard({ website }: WebsiteCardProps) {
 	return (
-		<Card href={`/dashboard/origin/${origin.id}`}>
+		<Card href={`/dashboard/website/${website.id}`}>
 			<CardHeader>
-				<CardTitle>{origin.domain}</CardTitle>
-				<CardDescription>Source: {getLanguageName(origin.originLang)}</CardDescription>
+				<CardTitle>{website.domain}</CardTitle>
+				<CardDescription>Source: {getLanguageName(website.sourceLang)}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<div className="grid grid-cols-3 gap-4 text-center">
 					<div>
 						<div className="text-2xl font-semibold text-[var(--text-heading)]">
-							{formatNumber(origin.langCount)}
+							{formatNumber(website.langCount)}
 						</div>
 						<div className="text-xs text-[var(--text-muted)]">
-							{origin.langCount === 1 ? 'Language' : 'Languages'}
+							{website.langCount === 1 ? 'Language' : 'Languages'}
 						</div>
 					</div>
 					<div>
 						<div className="text-2xl font-semibold text-[var(--text-heading)]">
-							{formatNumber(origin.segmentCount)}
+							{formatNumber(website.segmentCount)}
 						</div>
 						<div className="text-xs text-[var(--text-muted)]">Segments</div>
 					</div>
 					<div>
 						<div className="text-2xl font-semibold text-[var(--text-heading)]">
-							{formatNumber(origin.pathCount)}
+							{formatNumber(website.pathCount)}
 						</div>
 						<div className="text-xs text-[var(--text-muted)]">Paths</div>
 					</div>

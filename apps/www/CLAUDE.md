@@ -9,9 +9,9 @@ Next.js 16 app with Tailwind CSS v4 and React 19.
 -   `/login/magic` - Magic link verification (redirects to `/api/auth/callback/smtp`)
 -   `/login/check-email` - "Check your email" confirmation page
 -   `/onboarding` - Name setup for new users
--   `/dashboard` - Origins overview with segment/path counts
--   `/dashboard/origin/[id]` - Language list for an origin
--   `/dashboard/origin/[id]/lang/[langCd]` - Translation editor for segments and paths
+-   `/dashboard` - Websites overview with segment/path counts
+-   `/dashboard/website/[id]` - Language list for a website
+-   `/dashboard/website/[id]/lang/[langCd]` - Translation editor for segments and paths
 
 ## Clean URLs
 
@@ -37,10 +37,10 @@ src/
 │   │   └── onboarding/         # /onboarding - name setup
 │   ├── (dashboard)/            # Customer dashboard
 │   │   └── dashboard/
-│   │       ├── page.tsx                        # /dashboard - origins overview
-│   │       └── origin/[id]/
-│   │           ├── page.tsx                    # /dashboard/origin/:id - language list
-│   │           └── lang/[langCd]/page.tsx      # /dashboard/origin/:id/lang/:langCd - translations
+│   │       ├── page.tsx                        # /dashboard - websites overview
+│   │       └── website/[id]/
+│   │           ├── page.tsx                    # /dashboard/website/:id - language list
+│   │           └── lang/[langCd]/page.tsx      # /dashboard/website/:id/lang/:langCd - translations
 │   ├── api/
 │   │   └── auth/[...nextauth]/ # NextAuth API routes
 │   └── healthz/                # Health check endpoint

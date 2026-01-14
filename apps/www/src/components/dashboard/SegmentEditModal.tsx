@@ -17,8 +17,8 @@ import { saveSegmentTranslation, reviewSegment } from '@/actions/translations'
 interface SegmentEditModalProps {
 	isOpen: boolean
 	onClose: () => void
-	originId: number
-	originSegmentId: number
+	websiteId: number
+	websiteSegmentId: number
 	originalText: string
 	translatedText: string | null
 	isReviewed: boolean
@@ -29,8 +29,8 @@ interface SegmentEditModalProps {
 export function SegmentEditModal({
 	isOpen,
 	onClose,
-	originId,
-	originSegmentId,
+	websiteId,
+	websiteSegmentId,
 	originalText,
 	translatedText,
 	isReviewed,
@@ -73,7 +73,7 @@ export function SegmentEditModal({
 		}
 
 		startTransition(async () => {
-			const result = await saveSegmentTranslation(originId, originSegmentId, targetLang, value)
+			const result = await saveSegmentTranslation(websiteId, websiteSegmentId, targetLang, value)
 
 			if (result.success) {
 				router.refresh()
@@ -88,7 +88,7 @@ export function SegmentEditModal({
 	const handleMarkReviewed = async () => {
 		setError(null)
 		startTransition(async () => {
-			const result = await reviewSegment(originId, originSegmentId, targetLang)
+			const result = await reviewSegment(websiteId, websiteSegmentId, targetLang)
 
 			if (result.success) {
 				router.refresh()

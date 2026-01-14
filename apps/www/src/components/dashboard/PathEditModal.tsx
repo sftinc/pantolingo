@@ -17,8 +17,8 @@ import { savePathTranslation, reviewPath } from '@/actions/translations'
 interface PathEditModalProps {
 	isOpen: boolean
 	onClose: () => void
-	originId: number
-	originPathId: number
+	websiteId: number
+	websitePathId: number
 	originalPath: string
 	translatedPath: string | null
 	isReviewed: boolean
@@ -29,8 +29,8 @@ interface PathEditModalProps {
 export function PathEditModal({
 	isOpen,
 	onClose,
-	originId,
-	originPathId,
+	websiteId,
+	websitePathId,
 	originalPath,
 	translatedPath,
 	isReviewed,
@@ -73,7 +73,7 @@ export function PathEditModal({
 		}
 
 		startTransition(async () => {
-			const result = await savePathTranslation(originId, originPathId, targetLang, value)
+			const result = await savePathTranslation(websiteId, websitePathId, targetLang, value)
 
 			if (result.success) {
 				router.refresh()
@@ -88,7 +88,7 @@ export function PathEditModal({
 	const handleMarkReviewed = async () => {
 		setError(null)
 		startTransition(async () => {
-			const result = await reviewPath(originId, originPathId, targetLang)
+			const result = await reviewPath(websiteId, websitePathId, targetLang)
 
 			if (result.success) {
 				router.refresh()

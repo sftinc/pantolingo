@@ -2,7 +2,7 @@
 
 import { auth } from '@/lib/auth'
 import {
-	canAccessOrigin,
+	canAccessWebsite,
 	updateSegmentTranslation,
 	updatePathTranslation,
 	markSegmentReviewed,
@@ -18,74 +18,74 @@ async function requireProfileId(): Promise<number> {
 }
 
 export async function saveSegmentTranslation(
-	originId: number,
-	originSegmentId: number,
+	websiteId: number,
+	websiteSegmentId: number,
 	lang: string,
 	text: string
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		const profileId = await requireProfileId()
 
-		if (!(await canAccessOrigin(profileId, originId))) {
+		if (!(await canAccessWebsite(profileId, websiteId))) {
 			return { success: true } // Silent success - don't leak existence
 		}
 
-		return updateSegmentTranslation(originId, originSegmentId, lang, text)
+		return updateSegmentTranslation(websiteId, websiteSegmentId, lang, text)
 	} catch {
 		return { success: false, error: 'An error occurred' }
 	}
 }
 
 export async function savePathTranslation(
-	originId: number,
-	originPathId: number,
+	websiteId: number,
+	websitePathId: number,
 	lang: string,
 	text: string
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		const profileId = await requireProfileId()
 
-		if (!(await canAccessOrigin(profileId, originId))) {
+		if (!(await canAccessWebsite(profileId, websiteId))) {
 			return { success: true } // Silent success - don't leak existence
 		}
 
-		return updatePathTranslation(originId, originPathId, lang, text)
+		return updatePathTranslation(websiteId, websitePathId, lang, text)
 	} catch {
 		return { success: false, error: 'An error occurred' }
 	}
 }
 
 export async function reviewSegment(
-	originId: number,
-	originSegmentId: number,
+	websiteId: number,
+	websiteSegmentId: number,
 	lang: string
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		const profileId = await requireProfileId()
 
-		if (!(await canAccessOrigin(profileId, originId))) {
+		if (!(await canAccessWebsite(profileId, websiteId))) {
 			return { success: true } // Silent success - don't leak existence
 		}
 
-		return markSegmentReviewed(originId, originSegmentId, lang)
+		return markSegmentReviewed(websiteId, websiteSegmentId, lang)
 	} catch {
 		return { success: false, error: 'An error occurred' }
 	}
 }
 
 export async function reviewPath(
-	originId: number,
-	originPathId: number,
+	websiteId: number,
+	websitePathId: number,
 	lang: string
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		const profileId = await requireProfileId()
 
-		if (!(await canAccessOrigin(profileId, originId))) {
+		if (!(await canAccessWebsite(profileId, websiteId))) {
 			return { success: true } // Silent success - don't leak existence
 		}
 
-		return markPathReviewed(originId, originPathId, lang)
+		return markPathReviewed(websiteId, websitePathId, lang)
 	} catch {
 		return { success: false, error: 'An error occurred' }
 	}

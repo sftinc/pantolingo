@@ -11,10 +11,9 @@ import { pool } from './pool.js'
  */
 export interface HostConfig {
 	hostId: number
-	originId: number // origin.id - used for translation lookups
-	origin: string // Constructed: 'https://' + domain
-	originDomain: string // origin.domain
-	sourceLang: string // origin.origin_lang
+	websiteId: number // website.id - used for translation lookups
+	websiteDomain: string // website.domain
+	sourceLang: string // website.source_lang
 	targetLang: string // host.target_lang
 	skipWords: string[]
 	skipPath: (string | RegExp)[]
@@ -52,7 +51,7 @@ function parseSkipPath(dbArray: string[] | null): (string | RegExp)[] {
  * @param hostname - Request hostname (e.g., 'es.esnipe.com')
  * @returns HostConfig or null if not found/disabled
  *
- * SQL: 1 query (host JOIN origin)
+ * SQL: 1 query (host JOIN website)
  */
 export async function getHostConfig(hostname: string): Promise<HostConfig | null> {
 	// Check in-memory cache first
@@ -65,27 +64,27 @@ export async function getHostConfig(hostname: string): Promise<HostConfig | null
 	try {
 		const result = await pool.query<{
 			host_id: number
-			origin_id: number
+			website_id: number
 			target_lang: string
 			skip_words: string[] | null
 			skip_path: string[] | null
 			translate_path: boolean | null
 			proxied_cache: number
-			origin_domain: string
-			origin_lang: string
+			website_domain: string
+			source_lang: string
 		}>(
 			`SELECT
 				h.id AS host_id,
-				h.origin_id,
+				h.website_id,
 				h.target_lang,
-				o.skip_words,
-				o.skip_path,
-				o.translate_path,
+				w.skip_words,
+				w.skip_path,
+				w.translate_path,
 				h.proxied_cache,
-				o.domain AS origin_domain,
-				o.origin_lang
+				w.domain AS website_domain,
+				w.source_lang
 			FROM host h
-			JOIN origin o ON o.id = h.origin_id
+			JOIN website w ON w.id = h.website_id
 			WHERE h.hostname = $1 AND h.enabled = TRUE`,
 			[hostname]
 		)
@@ -99,10 +98,9 @@ export async function getHostConfig(hostname: string): Promise<HostConfig | null
 		const row = result.rows[0]
 		const config: HostConfig = {
 			hostId: row.host_id,
-			originId: row.origin_id,
-			origin: `https://${row.origin_domain}`,
-			originDomain: row.origin_domain,
-			sourceLang: row.origin_lang,
+			websiteId: row.website_id,
+			websiteDomain: row.website_domain,
+			sourceLang: row.source_lang,
 			targetLang: row.target_lang,
 			skipWords: row.skip_words || [],
 			skipPath: parseSkipPath(row.skip_path),

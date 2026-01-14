@@ -10,28 +10,28 @@ Shared PostgreSQL queries and utilities used by both apps.
 -   `paths.ts`: Bidirectional URL mapping storage
 -   `junctions.ts`: Junction table linking translations to pathnames
 -   `views.ts`: Page view recording and last_used_on timestamp updates
--   `dashboard.ts`: Dashboard CRUD operations (origins, languages, segments, paths with stats and pagination)
+-   `dashboard.ts`: Dashboard CRUD operations (websites, languages, segments, paths with stats and pagination)
 -   `utils/hash.ts`: SHA-256 hashing for text lookups
 
 ## Usage
 
 ```typescript
 import { getHostConfig, batchGetTranslations } from '@pantolingo/db'
-import { getOriginsWithStats, updateSegmentTranslation } from '@pantolingo/db'
+import { getWebsitesWithStats, updateSegmentTranslation } from '@pantolingo/db'
 ```
 
 ## Database Schema
 
-**Tables** (origin-scoped model):
+**Tables** (website-scoped model):
 
--   `origin`: Origin websites (domain, source language)
+-   `website`: Source websites (domain, source language)
 -   `host`: Translated domains (hostname, target language, config options)
--   `origin_segment`: Source text segments scoped to origin (text, text_hash)
--   `translated_segment`: Translations scoped to origin + language
--   `origin_path`: Source URL paths scoped to origin
--   `translated_path`: Translated URL paths scoped to origin + language
--   `origin_path_segment`: Junction linking paths to segments (for cache invalidation)
--   `origin_path_view`: Page view analytics per path/language/date
+-   `website_segment`: Source text segments scoped to website (text, text_hash)
+-   `translated_segment`: Translations scoped to website + language
+-   `website_path`: Source URL paths scoped to website
+-   `translated_path`: Translated URL paths scoped to website + language
+-   `website_path_segment`: Junction linking paths to segments (for cache invalidation)
+-   `website_path_view`: Page view analytics per path/language/date
 -   `account`: Accounts (for multi-tenant billing)
 -   `account_profile`: Account membership with roles
 -   `profile`: User profiles (email, name)

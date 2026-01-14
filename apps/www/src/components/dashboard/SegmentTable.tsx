@@ -10,11 +10,11 @@ import type { SegmentWithTranslation } from '@pantolingo/db'
 interface SegmentTableProps {
 	segments: SegmentWithTranslation[]
 	targetLang: string
-	originId: number
+	websiteId: number
 	onUpdate?: () => void
 }
 
-export function SegmentTable({ segments, targetLang, originId, onUpdate }: SegmentTableProps) {
+export function SegmentTable({ segments, targetLang, websiteId, onUpdate }: SegmentTableProps) {
 	const [editingSegment, setEditingSegment] = useState<SegmentWithTranslation | null>(null)
 
 	if (segments.length === 0) {
@@ -34,7 +34,7 @@ export function SegmentTable({ segments, targetLang, originId, onUpdate }: Segme
 				<TableBody>
 					{segments.map((segment) => (
 						<TableRow
-							key={segment.originSegmentId}
+							key={segment.websiteSegmentId}
 							clickable
 							onClick={() => setEditingSegment(segment)}
 						>
@@ -78,8 +78,8 @@ export function SegmentTable({ segments, targetLang, originId, onUpdate }: Segme
 				<SegmentEditModal
 					isOpen={!!editingSegment}
 					onClose={() => setEditingSegment(null)}
-					originId={originId}
-					originSegmentId={editingSegment.originSegmentId}
+					websiteId={websiteId}
+					websiteSegmentId={editingSegment.websiteSegmentId}
 					originalText={editingSegment.text}
 					translatedText={editingSegment.translatedText}
 					isReviewed={!!editingSegment.reviewedAt}

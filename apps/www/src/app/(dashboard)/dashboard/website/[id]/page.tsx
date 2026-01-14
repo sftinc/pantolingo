@@ -1,17 +1,17 @@
 import { notFound, redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
-import { canAccessOrigin, getOriginById, getLangsForOrigin } from '@pantolingo/db'
+import { canAccessWebsite, getWebsiteById, getLangsForWebsite } from '@pantolingo/db'
 import { getFlag } from '@pantolingo/lang'
 import { DashboardNav } from '@/components/dashboard/DashboardNav'
 import { LangTable } from '@/components/dashboard/LangTable'
 
 export const dynamic = 'force-dynamic'
 
-interface OriginDetailPageProps {
+interface WebsiteDetailPageProps {
 	params: Promise<{ id: string }>
 }
 
-export default async function OriginDetailPage({ params }: OriginDetailPageProps) {
+export default async function WebsiteDetailPage({ params }: WebsiteDetailPageProps) {
 	const session = await auth()
 
 	if (!session) {
@@ -19,37 +19,37 @@ export default async function OriginDetailPage({ params }: OriginDetailPageProps
 	}
 
 	const { id } = await params
-	const originId = parseInt(id, 10)
+	const websiteId = parseInt(id, 10)
 
-	if (isNaN(originId)) {
+	if (isNaN(websiteId)) {
 		notFound()
 	}
 
 	// Check authorization
-	if (!(await canAccessOrigin(session.user.profileId, originId))) {
+	if (!(await canAccessWebsite(session.user.profileId, websiteId))) {
 		notFound()
 	}
 
-	const origin = await getOriginById(originId)
+	const website = await getWebsiteById(websiteId)
 
-	if (!origin) {
+	if (!website) {
 		notFound()
 	}
 
-	const langs = await getLangsForOrigin(originId)
+	const langs = await getLangsForWebsite(websiteId)
 
 	return (
 		<div>
 			<DashboardNav
 				breadcrumbs={[
 					{ label: 'Dashboard', href: '/dashboard' },
-					{ label: `${origin.domain} ${getFlag(origin.originLang)}` },
+					{ label: `${website.domain} ${getFlag(website.sourceLang)}` },
 				]}
 			/>
 
 			<h2 className="mb-4 text-2xl font-semibold text-[var(--text-heading)]">Languages</h2>
 
-			<LangTable langs={langs} originId={originId} />
+			<LangTable langs={langs} websiteId={websiteId} />
 		</div>
 	)
 }

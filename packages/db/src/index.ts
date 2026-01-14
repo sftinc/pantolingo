@@ -9,12 +9,12 @@ export {
 	batchGetTranslations,
 	batchUpsertTranslations,
 	batchGetTranslationIds,
-	batchGetOriginSegmentIds,
+	batchGetWebsiteSegmentIds,
 	type TranslationItem,
 } from './segments.js'
 export { linkPathnameTranslations, linkPathSegments } from './junctions.js'
 export {
-	getOriginPathId,
+	getWebsitePathId,
 	lookupPathname,
 	batchLookupPathnames,
 	batchUpsertPathnames,
@@ -24,23 +24,23 @@ export {
 } from './paths.js'
 export { recordPageView, updateSegmentLastUsed, updatePathLastUsed } from './views.js'
 export {
-	canAccessOrigin,
-	getOriginsWithStats,
-	getOriginById,
-	getLangsForOrigin,
-	isValidLangForOrigin,
-	getPathsForOrigin,
+	canAccessWebsite,
+	getWebsitesWithStats,
+	getWebsiteById,
+	getLangsForWebsite,
+	isValidLangForWebsite,
+	getPathsForWebsite,
 	getSegmentsForLang,
 	getPathsForLang,
 	updateSegmentTranslation,
 	updatePathTranslation,
 	markSegmentReviewed,
 	markPathReviewed,
-	type OriginWithStats,
+	type WebsiteWithStats,
 	type LangWithStats,
 	type SegmentWithTranslation,
 	type PathWithTranslation,
 	type PaginatedResult,
-	type Origin,
+	type Website,
 	type PathOption,
 } from './dashboard.js'

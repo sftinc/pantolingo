@@ -23,13 +23,13 @@ import { isStaticAsset } from './utils.js'
 import { renderMessagePage } from './utils/message-page.js'
 import {
 	getHostConfig,
-	getOriginPathId,
+	getWebsitePathId,
 	lookupPathname,
 	batchLookupPathnames,
 	batchGetTranslations,
 	batchUpsertTranslations,
 	batchUpsertPathnames,
-	batchGetOriginSegmentIds,
+	batchGetWebsiteSegmentIds,
 	linkPathSegments,
 	hashText,
 	recordPageView,
@@ -43,7 +43,7 @@ import {
  * Deferred database writes - executed after response is sent
  */
 interface DeferredWrites {
-	originId: number
+	websiteId: number
 	lang: string
 	translations: TranslationItem[]
 	pathnames: PathnameMapping[]
@@ -51,8 +51,8 @@ interface DeferredWrites {
 	newSegmentHashes: string[]
 	cachedSegmentHashes: string[]
 	cachedPaths: string[]
-	originPathId?: number // ID from stage 1 lookup (for existing paths)
-	statusCode: number // Origin response status code
+	websitePathId?: number // ID from stage 1 lookup (for existing paths)
+	statusCode: number // Website response status code
 }
 
 /**
@@ -60,7 +60,7 @@ interface DeferredWrites {
  * All operations are non-blocking and errors are logged but don't affect the response
  */
 async function executeDeferredWrites(writes: DeferredWrites): Promise<void> {
-	const { originId, lang, translations, pathnames, currentPath, newSegmentHashes, cachedSegmentHashes, cachedPaths, originPathId, statusCode } =
+	const { websiteId, lang, translations, pathnames, currentPath, newSegmentHashes, cachedSegmentHashes, cachedPaths, websitePathId, statusCode } =
 		writes
 
 	const isErrorResponse = statusCode >= 400
@@ -68,56 +68,56 @@ async function executeDeferredWrites(writes: DeferredWrites): Promise<void> {
 	try {
 		// 1. Upsert translations (cache for future requests - even for error pages)
 		if (translations.length > 0) {
-			await batchUpsertTranslations(originId, lang, translations)
+			await batchUpsertTranslations(websiteId, lang, translations)
 		}
 
 		// Skip path operations for error responses (4xx, 5xx)
 		if (isErrorResponse) {
 			// Still update last_used_on for cached segments (they were used to translate error page)
 			if (cachedSegmentHashes.length > 0) {
-				updateSegmentLastUsed(originId, lang, cachedSegmentHashes)
+				updateSegmentLastUsed(websiteId, lang, cachedSegmentHashes)
 			}
 			return
 		}
 
 		// 2. Upsert pathnames (always includes current path) and get IDs
-		const pathnameIdMap = await batchUpsertPathnames(originId, lang, pathnames)
+		const pathnameIdMap = await batchUpsertPathnames(websiteId, lang, pathnames)
 
 		// 3. Link new segments to current path
 		let pathIds = pathnameIdMap.get(currentPath)
 
 		// Use lookup ID for existing paths (upsert returns nothing for ON CONFLICT DO NOTHING)
-		if (!pathIds?.originPathId && originPathId) {
-			pathIds = { originPathId, translatedPathId: 0 }
+		if (!pathIds?.websitePathId && websitePathId) {
+			pathIds = { websitePathId, translatedPathId: 0 }
 		}
 
 		// Fallback for unexpected edge cases
-		if (!pathIds?.originPathId) {
-			console.warn('getOriginPathId fallback triggered - investigate:', currentPath)
-			const fallbackId = await getOriginPathId(originId, currentPath)
+		if (!pathIds?.websitePathId) {
+			console.warn('getWebsitePathId fallback triggered - investigate:', currentPath)
+			const fallbackId = await getWebsitePathId(websiteId, currentPath)
 			if (fallbackId) {
-				pathIds = { originPathId: fallbackId, translatedPathId: 0 }
+				pathIds = { websitePathId: fallbackId, translatedPathId: 0 }
 			}
 		}
 
-		if (pathIds?.originPathId && newSegmentHashes.length > 0) {
-			const originSegmentIds = await batchGetOriginSegmentIds(originId, newSegmentHashes)
-			if (originSegmentIds.size > 0) {
-				await linkPathSegments(pathIds.originPathId, Array.from(originSegmentIds.values()))
+		if (pathIds?.websitePathId && newSegmentHashes.length > 0) {
+			const websiteSegmentIds = await batchGetWebsiteSegmentIds(websiteId, newSegmentHashes)
+			if (websiteSegmentIds.size > 0) {
+				await linkPathSegments(pathIds.websitePathId, Array.from(websiteSegmentIds.values()))
 			}
 		}
 
 		// 4. Record page view
-		if (pathIds?.originPathId) {
-			recordPageView(pathIds.originPathId, lang)
+		if (pathIds?.websitePathId) {
+			recordPageView(pathIds.websitePathId, lang)
 		}
 
 		// 5. Update last_used_on for cached items (fire-and-forget)
 		if (cachedSegmentHashes.length > 0) {
-			updateSegmentLastUsed(originId, lang, cachedSegmentHashes)
+			updateSegmentLastUsed(websiteId, lang, cachedSegmentHashes)
 		}
 		if (cachedPaths.length > 0) {
-			updatePathLastUsed(originId, lang, cachedPaths)
+			updatePathLastUsed(websiteId, lang, cachedPaths)
 		}
 	} catch (error) {
 		console.error('Deferred DB writes failed:', error)
@@ -233,9 +233,9 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 
 		const targetLang = hostConfig.targetLang
 
-		// Extract per-domain origin configuration
-		const originBase = hostConfig.origin
-		const originHostname = hostConfig.originDomain
+		// Extract per-domain website configuration
+		const originBase = `https://${hostConfig.websiteDomain}`
+		const originHostname = hostConfig.websiteDomain
 		const sourceLang = hostConfig.sourceLang
 
 		// Resolve pathname (reverse lookup for translated URLs)
@@ -306,7 +306,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 		// STAGE 1: Early pathname lookup for reverse URL resolution
 		// Normalize incoming pathname before lookup (DB stores normalized paths)
 		const { normalized: normalizedIncoming, replacements: incomingReplacements } = normalizePathname(incomingPathname)
-		const pathnameResult = await lookupPathname(hostConfig.originId, hostConfig.targetLang, normalizedIncoming)
+		const pathnameResult = await lookupPathname(hostConfig.websiteId, hostConfig.targetLang, normalizedIncoming)
 		if (pathnameResult) {
 			// If we found a match and the incoming path matches the translated path,
 			// use the original path for fetching (denormalize to restore numeric values)
@@ -428,7 +428,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 			// Initialize deferred writes - will be executed after response is sent
 			const { normalized: normalizedCurrentPath } = normalizePathname(originalPathname)
 			const deferredWrites: DeferredWrites = {
-				originId: hostConfig.originId,
+				websiteId: hostConfig.websiteId,
 				lang: hostConfig.targetLang,
 				translations: [],
 				pathnames: [{ original: normalizedCurrentPath, translated: normalizedCurrentPath }], // Always include current path
@@ -436,7 +436,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 				newSegmentHashes: [],
 				cachedSegmentHashes: [],
 				cachedPaths: [],
-				originPathId: pathnameResult?.originPathId,
+				websitePathId: pathnameResult?.websitePathId,
 				statusCode: originResponse.status,
 			}
 
@@ -475,7 +475,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 				// 7. Batch lookup translations from database
 				const segmentTexts = normalizedSegments.map((s) => s.value)
 				const cachedTranslations = await batchGetTranslations(
-					hostConfig.originId,
+					hostConfig.websiteId,
 					hostConfig.targetLang,
 					segmentTexts
 				)
@@ -563,7 +563,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 						}
 						const normalizedPaths = Array.from(normalizedToOriginal.keys())
 						const existingPathnames = await batchLookupPathnames(
-							hostConfig.originId,
+							hostConfig.websiteId,
 							hostConfig.targetLang,
 							normalizedPaths
 						)
@@ -578,7 +578,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 						const pathnameMapping =
 							existingPathnames.size > 0
 								? {
-										origin: Object.fromEntries(existingPathnames),
+										source: Object.fromEntries(existingPathnames),
 										translated: Object.fromEntries(
 											Array.from(existingPathnames.entries()).map(([k, v]) => [v, k])
 										),

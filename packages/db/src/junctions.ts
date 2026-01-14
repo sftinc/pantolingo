@@ -3,35 +3,35 @@
  * Links paths to segments for tracking which translations appear on which pages
  *
  * Tables:
- * - origin_path_segment: links origin_path to origin_segment (language-independent)
+ * - website_path_segment: links website_path to website_segment (language-independent)
  * - pathname_translation: links translated_path to translated_segment
  */
 
 import { pool } from './pool.js'
 
 /**
- * Link an origin path to multiple origin segments
+ * Link a website path to multiple website segments
  * Uses ON CONFLICT DO NOTHING for idempotency
  *
- * @param originPathId - Origin path ID from batchUpsertPathnames
- * @param originSegmentIds - Array of origin segment IDs to link
+ * @param websitePathId - Website path ID from batchUpsertPathnames
+ * @param websiteSegmentIds - Array of website segment IDs to link
  *
  * SQL: 1 query with UNNEST
  */
 export async function linkPathSegments(
-	originPathId: number,
-	originSegmentIds: number[]
+	websitePathId: number,
+	websiteSegmentIds: number[]
 ): Promise<void> {
-	if (originSegmentIds.length === 0) {
+	if (websiteSegmentIds.length === 0) {
 		return
 	}
 
 	try {
 		await pool.query(
-			`INSERT INTO origin_path_segment (origin_path_id, origin_segment_id)
+			`INSERT INTO website_path_segment (website_path_id, website_segment_id)
 			SELECT $1, unnest($2::int[])
-			ON CONFLICT (origin_path_id, origin_segment_id) DO NOTHING`,
-			[originPathId, originSegmentIds]
+			ON CONFLICT (website_path_id, website_segment_id) DO NOTHING`,
+			[websitePathId, websiteSegmentIds]
 		)
 	} catch (error) {
 		console.error('Failed to link path segments:', error)

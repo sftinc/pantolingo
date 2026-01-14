@@ -120,10 +120,10 @@ export interface TranslationStats {
 }
 
 /**
- * Segment cache stored per origin+language (domain-wide scope)
+ * Segment cache stored per website+language (domain-wide scope)
  * Single cache accumulates ALL segment translations across entire site
  *
- * Key format: segments::{lang}::{originDomain}
+ * Key format: segments::{lang}::{websiteDomain}
  * Example key: segments::es::www.esnipe.com
  *
  * Value format: Hash map for O(1) lookups
@@ -135,16 +135,16 @@ export interface TranslationStats {
 export type SegmentCache = Record<string, string>
 
 /**
- * Pathname mapping cache stored per origin+language
+ * Pathname mapping cache stored per website+language
  * Enables bidirectional lookup: English ↔ Translated pathnames
  *
- * Key format: pathnames::{lang}::{originDomain}
+ * Key format: pathnames::{lang}::{websiteDomain}
  * Example key: pathnames::es::www.esnipe.com
  *
  * Value format: Dual-object structure with forward and reverse mappings
  * Example value:
  * {
- *   "origin": {
+ *   "source": {
  *     "/pricing": "/preise",
  *     "/about": "/uber"
  *   },
@@ -158,8 +158,8 @@ export type SegmentCache = Record<string, string>
  * This enables cache hits across different numeric values
  */
 export type PathnameMapping = {
-	origin: Record<string, string> // original pathname → translated pathname
-	translated: Record<string, string> // translated pathname → original pathname
+	source: Record<string, string> // source pathname → translated pathname
+	translated: Record<string, string> // translated pathname → source pathname
 }
 
 /**
