@@ -10,9 +10,10 @@ interface ModalProps {
 	title: string
 	children: React.ReactNode
 	className?: string
+	badge?: React.ReactNode
 }
 
-export function Modal({ isOpen, onClose, title, children, className }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, className, badge }: ModalProps) {
 	const dialogRef = useRef<HTMLDialogElement>(null)
 
 	useEffect(() => {
@@ -65,26 +66,29 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
 			<div className="flex flex-col max-h-[85vh]">
 				<div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
 					<h2 className="text-lg font-semibold text-[var(--text-heading)]">{title}</h2>
-					<button
-						onClick={onClose}
-						className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--border)] transition-colors focus:outline-none"
-						aria-label="Close"
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="20"
-							height="20"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-							strokeLinecap="round"
-							strokeLinejoin="round"
+					<div className="flex items-center gap-3">
+						{badge}
+						<button
+							onClick={onClose}
+							className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--border)] transition-colors focus:outline-none"
+							aria-label="Close"
 						>
-							<line x1="18" y1="6" x2="6" y2="18" />
-							<line x1="6" y1="6" x2="18" y2="18" />
-						</svg>
-					</button>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="20"
+								height="20"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
+								<line x1="18" y1="6" x2="6" y2="18" />
+								<line x1="6" y1="6" x2="18" y2="18" />
+							</svg>
+						</button>
+					</div>
 				</div>
 				<div className="flex-1 overflow-auto p-6">{children}</div>
 			</div>

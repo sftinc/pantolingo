@@ -404,24 +404,32 @@ export async function getPathsForLang(
  * @param websiteSegmentId - Website segment ID
  * @param lang - Target language code
  * @param translatedText - Translation text
+ * @param reviewed - Optional: true=mark reviewed, false=unmark, null/undefined=no change
  * @returns Success status - mutation only succeeds if segment belongs to claimed website
  */
 export async function updateSegmentTranslation(
 	websiteId: number,
 	websiteSegmentId: number,
 	lang: string,
-	translatedText: string
+	translatedText: string,
+	reviewed?: boolean | null
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		await pool.query(
 			`UPDATE translated_segment ts
-			 SET translated_text = $4, updated_at = NOW()
+			 SET translated_text = $4,
+			     updated_at = NOW(),
+			     reviewed_at = CASE
+			       WHEN $5::boolean IS NULL THEN reviewed_at
+			       WHEN $5 = true THEN NOW()
+			       ELSE NULL
+			     END
 			 FROM website_segment ws
 			 WHERE ts.website_segment_id = $2
 			   AND ts.lang = $3
 			   AND ws.id = ts.website_segment_id
 			   AND ws.website_id = $1`,
-			[websiteId, websiteSegmentId, lang, translatedText]
+			[websiteId, websiteSegmentId, lang, translatedText, reviewed]
 		)
 		return { success: true }
 	} catch (error) {
@@ -437,24 +445,32 @@ export async function updateSegmentTranslation(
  * @param websitePathId - Website path ID
  * @param lang - Target language code
  * @param translatedPath - Translated path
+ * @param reviewed - Optional: true=mark reviewed, false=unmark, null/undefined=no change
  * @returns Success status - mutation only succeeds if path belongs to claimed website
  */
 export async function updatePathTranslation(
 	websiteId: number,
 	websitePathId: number,
 	lang: string,
-	translatedPath: string
+	translatedPath: string,
+	reviewed?: boolean | null
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		await pool.query(
 			`UPDATE translated_path tp
-			 SET translated_path = $4, updated_at = NOW()
+			 SET translated_path = $4,
+			     updated_at = NOW(),
+			     reviewed_at = CASE
+			       WHEN $5::boolean IS NULL THEN reviewed_at
+			       WHEN $5 = true THEN NOW()
+			       ELSE NULL
+			     END
 			 FROM website_path wp
 			 WHERE tp.website_path_id = $2
 			   AND tp.lang = $3
 			   AND wp.id = tp.website_path_id
 			   AND wp.website_id = $1`,
-			[websiteId, websitePathId, lang, translatedPath]
+			[websiteId, websitePathId, lang, translatedPath, reviewed]
 		)
 		return { success: true }
 	} catch (error) {

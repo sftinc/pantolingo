@@ -9,10 +9,11 @@ import {
 	PlaceholderEditor,
 	type PlaceholderEditorRef,
 } from '@/components/ui/PlaceholderEditor'
-import { MissingPlaceholderToolbar } from '@/components/ui/MissingPlaceholderToolbar'
+import { PlaceholderIssuesBar } from '@/components/ui/PlaceholderIssuesBar'
+import { SplitButton } from '@/components/ui/SplitButton'
 import { validatePlaceholders, type ValidationResult } from '@/components/ui/placeholder-utils'
 import { getLanguageName } from '@pantolingo/lang'
-import { saveSegmentTranslation, reviewSegment } from '@/actions/translations'
+import { saveSegmentTranslation } from '@/actions/translations'
 
 interface SegmentEditModalProps {
 	isOpen: boolean
@@ -63,7 +64,10 @@ export function SegmentEditModal({
 		}
 	}, [value, originalText])
 
-	const handleSave = async () => {
+	// reviewed = true  → mark reviewed
+	// reviewed = false → mark NOT reviewed
+	// reviewed = null  → don't change review status
+	const handleSave = async (reviewed: boolean | null) => {
 		setError(null)
 
 		// Final validation before save
@@ -73,7 +77,13 @@ export function SegmentEditModal({
 		}
 
 		startTransition(async () => {
-			const result = await saveSegmentTranslation(websiteId, websiteSegmentId, targetLang, value)
+			const result = await saveSegmentTranslation(
+				websiteId,
+				websiteSegmentId,
+				targetLang,
+				value,
+				reviewed
+			)
 
 			if (result.success) {
 				router.refresh()
@@ -85,24 +95,15 @@ export function SegmentEditModal({
 		})
 	}
 
-	const handleMarkReviewed = async () => {
-		setError(null)
-		startTransition(async () => {
-			const result = await reviewSegment(websiteId, websiteSegmentId, targetLang)
-
-			if (result.success) {
-				router.refresh()
-				onUpdate?.()
-				onClose()
-			} else {
-				setError(result.error || 'Failed to mark as reviewed')
-			}
-		})
-	}
-
 	const handleInsertPlaceholder = (token: string) => {
 		editorRef.current?.insertPlaceholder(token)
 		editorRef.current?.focus()
+	}
+
+	const handleRemovePlaceholder = (token: string) => {
+		// Global replace to remove ALL instances
+		const newValue = value.replaceAll(token, '')
+		setValue(newValue)
 	}
 
 	const handleReset = () => {
@@ -113,7 +114,16 @@ export function SegmentEditModal({
 	const canSave = value.trim() && (!validationResult || validationResult.valid)
 
 	return (
-		<Modal isOpen={isOpen} onClose={onClose} title="Edit Segment Translation">
+		<Modal
+			isOpen={isOpen}
+			onClose={onClose}
+			title="Edit Segment Translation"
+			badge={
+				<Badge variant={isReviewed ? 'success' : 'warning'}>
+					{isReviewed ? 'Reviewed' : 'Pending Review'}
+				</Badge>
+			}
+		>
 			<div className="grid grid-cols-2 gap-6">
 				{/* Original text */}
 				<div>
@@ -133,18 +143,7 @@ export function SegmentEditModal({
 						<span className="text-sm font-medium text-[var(--text-muted)]">
 							{getLanguageName(targetLang)} Translation
 						</span>
-						{translatedText && (
-							<Badge variant={isReviewed ? 'success' : 'warning'}>
-								{isReviewed ? 'Reviewed' : 'Pending Review'}
-							</Badge>
-						)}
 					</div>
-
-					{/* Missing placeholder toolbar */}
-					<MissingPlaceholderToolbar
-						missing={validationResult?.missing || []}
-						onInsert={handleInsertPlaceholder}
-					/>
 
 					{/* Placeholder editor */}
 					<PlaceholderEditor
@@ -154,20 +153,18 @@ export function SegmentEditModal({
 						placeholder={`Enter ${getLanguageName(targetLang)} translation...`}
 						disabled={isPending}
 					/>
+
+					{/* Placeholder issues bar - below editor */}
+					<PlaceholderIssuesBar
+						missing={validationResult?.missing || []}
+						extra={validationResult?.extra || []}
+						nestingErrors={validationResult?.nestingErrors || []}
+						unclosedErrors={validationResult?.unclosedErrors || []}
+						onInsertMissing={handleInsertPlaceholder}
+						onRemoveExtra={handleRemovePlaceholder}
+					/>
 				</div>
 			</div>
-
-			{/* Validation warnings */}
-			{validationResult && validationResult.errors.length > 0 && (
-				<div className="mt-4 p-3 rounded-lg bg-[var(--warning)]/10 text-[var(--warning)] text-sm">
-					<strong>Validation issues:</strong>
-					<ul className="list-disc list-inside mt-1">
-						{validationResult.errors.map((err, i) => (
-							<li key={i}>{err}</li>
-						))}
-					</ul>
-				</div>
-			)}
 
 			{/* Server error */}
 			{error && (
@@ -176,18 +173,32 @@ export function SegmentEditModal({
 				</div>
 			)}
 
-			<ModalFooter>
+			<ModalFooter className="justify-between">
 				<Button variant="secondary" onClick={handleReset} disabled={isPending}>
 					Reset
 				</Button>
-				{translatedText && !isReviewed && (
-					<Button variant="success" onClick={handleMarkReviewed} loading={isPending}>
-						Mark Reviewed
-					</Button>
+
+				{isReviewed ? (
+					<SplitButton
+						variant="primary"
+						primaryLabel="Save"
+						primaryOnClick={() => handleSave(null)}
+						secondaryLabel="Unreview + Save"
+						secondaryOnClick={() => handleSave(false)}
+						loading={isPending}
+						disabled={!canSave}
+					/>
+				) : (
+					<SplitButton
+						variant="success"
+						primaryLabel="Reviewed + Save"
+						primaryOnClick={() => handleSave(true)}
+						secondaryLabel="Save"
+						secondaryOnClick={() => handleSave(null)}
+						loading={isPending}
+						disabled={!canSave}
+					/>
 				)}
-				<Button variant="primary" onClick={handleSave} disabled={!canSave} loading={isPending}>
-					Save Translation
-				</Button>
 			</ModalFooter>
 		</Modal>
 	)

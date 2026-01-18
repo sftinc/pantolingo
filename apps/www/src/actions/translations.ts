@@ -21,7 +21,8 @@ export async function saveSegmentTranslation(
 	websiteId: number,
 	websiteSegmentId: number,
 	lang: string,
-	text: string
+	text: string,
+	reviewed?: boolean | null
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		const accountId = await requireAccountId()
@@ -30,7 +31,7 @@ export async function saveSegmentTranslation(
 			return { success: true } // Silent success - don't leak existence
 		}
 
-		return updateSegmentTranslation(websiteId, websiteSegmentId, lang, text)
+		return updateSegmentTranslation(websiteId, websiteSegmentId, lang, text, reviewed)
 	} catch {
 		return { success: false, error: 'An error occurred' }
 	}
@@ -40,7 +41,8 @@ export async function savePathTranslation(
 	websiteId: number,
 	websitePathId: number,
 	lang: string,
-	text: string
+	text: string,
+	reviewed?: boolean | null
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		const accountId = await requireAccountId()
@@ -49,7 +51,7 @@ export async function savePathTranslation(
 			return { success: true } // Silent success - don't leak existence
 		}
 
-		return updatePathTranslation(websiteId, websitePathId, lang, text)
+		return updatePathTranslation(websiteId, websitePathId, lang, text, reviewed)
 	} catch {
 		return { success: false, error: 'An error occurred' }
 	}

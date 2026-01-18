@@ -24,7 +24,9 @@ export interface ValidationResult {
 	valid: boolean
 	missing: string[] // Placeholders in original but not translated
 	extra: string[] // Placeholders in translated but not original
-	errors: string[] // Human-readable error messages
+	nestingErrors: string[] // Nesting error descriptions
+	unclosedErrors: string[] // Unclosed tag descriptions
+	errors: string[] // Human-readable error messages (combined, for backwards compat)
 }
 
 // ============================================================================
@@ -188,8 +190,17 @@ export function validatePlaceholders(original: string, translated: string): Vali
 	// 2. Paired tag matching (every open has a close)
 	const unmatchedOpen = findUnmatchedOpenTags(translated)
 	const unmatchedClose = findUnmatchedCloseTags(translated)
-	if (unmatchedOpen.length) errors.push(`Unclosed tags: ${unmatchedOpen.join(', ')}`)
-	if (unmatchedClose.length) errors.push(`Extra closing tags: ${unmatchedClose.join(', ')}`)
+
+	// Build unclosed errors array
+	const unclosedErrors: string[] = []
+	if (unmatchedOpen.length) {
+		unclosedErrors.push(`Unclosed tags: ${unmatchedOpen.join(', ')}`)
+		errors.push(`Unclosed tags: ${unmatchedOpen.join(', ')}`)
+	}
+	if (unmatchedClose.length) {
+		unclosedErrors.push(`Extra closing tags: ${unmatchedClose.join(', ')}`)
+		errors.push(`Extra closing tags: ${unmatchedClose.join(', ')}`)
+	}
 
 	// 3. Proper nesting (LIFO order, no interleaving)
 	const nestingErrors = validateNesting(translated)
@@ -199,6 +210,8 @@ export function validatePlaceholders(original: string, translated: string): Vali
 		valid: errors.length === 0,
 		missing,
 		extra,
+		nestingErrors,
+		unclosedErrors,
 		errors,
 	}
 }
