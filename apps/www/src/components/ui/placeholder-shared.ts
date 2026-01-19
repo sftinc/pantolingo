@@ -89,7 +89,7 @@ export function PlaceholderBadge({ kind, className = '' }: PlaceholderBadgeProps
 	const color = STANDALONE_COLORS[kind]
 
 	return React.createElement('span', {
-		className: `inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium mx-0.5 whitespace-nowrap ${className}`,
+		className: `inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium whitespace-nowrap ${className}`,
 		style: {
 			backgroundColor: `color-mix(in srgb, ${color} 20%, transparent)`,
 			color: color,

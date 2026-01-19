@@ -243,7 +243,7 @@ function renderASTToHTML(nodes: ASTNode[]): string {
 			case 'standalone': {
 				const color = STANDALONE_COLORS[node.kind]
 				const label = STANDALONE_LABELS[node.kind]
-				html += `<span data-standalone="${node.kind}" data-index="${node.index}" contenteditable="false" class="inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium mx-0.5 whitespace-nowrap" style="background-color: color-mix(in srgb, ${color} 20%, transparent); color: ${color};">${label}</span>`
+				html += `<span data-standalone="${node.kind}" data-index="${node.index}" contenteditable="false" class="inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium whitespace-nowrap" style="background-color: color-mix(in srgb, ${color} 20%, transparent); color: ${color};">${label}</span>`
 				break
 			}
 
