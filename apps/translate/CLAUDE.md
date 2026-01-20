@@ -23,20 +23,42 @@ The translation proxy processes each request through this pipeline:
 -   `fetch/`: DOM manipulation (parsing, extraction, application, rewriting)
 -   `translation/`: Translation engine (OpenRouter API, deduplication, patterns)
 
-## HTML Placeholder System
+## Placeholder System
 
-Inline HTML elements are converted to placeholders during translation to preserve formatting:
+Placeholders preserve content that shouldn't be translated or needs special handling.
 
-| Type | Tags                                    | Example              |
-| ---- | --------------------------------------- | -------------------- |
-| `HB` | `<b>`, `<strong>`                       | `[HB1]bold[/HB1]`    |
-| `HE` | `<em>`, `<i>`                           | `[HE1]italic[/HE1]`  |
-| `HA` | `<a>`                                   | `[HA1]link[/HA1]`    |
-| `HS` | `<span>`                                | `[HS1]styled[/HS1]`  |
-| `HG` | `<u>`, `<sub>`, `<sup>`, `<mark>`, etc. | `[HG1]text[/HG1]`    |
-| `HV` | `<br>`, `<hr>`, `<img>`, `<wbr>` (void) | `[HV1]` (no closing) |
+### HTML Paired Placeholders (open/close tags)
 
-Defined in `config.ts` (`HTML_TAG_MAP`, `VOID_TAGS`). Logic in `fetch/dom-placeholders.ts`.
+| Code | Tags | Example |
+| ---- | ---- | ------- |
+| `HB` | `<b>`, `<strong>` | `[HB1]bold[/HB1]` |
+| `HE` | `<em>`, `<i>` | `[HE1]italic[/HE1]` |
+| `HA` | `<a>` | `[HA1]link[/HA1]` |
+| `HS` | `<span>` | `[HS1]styled[/HS1]` |
+| `HG` | `<u>`, `<sub>`, `<sup>`, `<mark>`, `<small>`, `<s>`, `<del>`, `<ins>`, `<abbr>`, `<q>`, `<cite>`, `<code>`, `<kbd>`, `<time>` | `[HG1]text[/HG1]` |
+
+### HTML Void Placeholders (self-closing, no close tag)
+
+| Code | Tags | Example |
+| ---- | ---- | ------- |
+| `HV` | `<br>`, `<hr>`, `<img>`, `<wbr>` | `[HV1]` |
+
+**Note**: Empty paired tags (e.g., `<i class="fa-icon"></i>`) are also converted to `HV` placeholders.
+
+### Non-HTML Placeholders (standalone, no close tag)
+
+| Code | Purpose | Example |
+| ---- | ------- | ------- |
+| `N` | Numbers (integers, decimals, formatted) | `[N1]` for "1,234.56" |
+| `P` | PII - Email addresses (redacted for privacy) | `[P1]` for "user@example.com" |
+| `S` | Skip words - Brand names, proper nouns | `[S1]` for "eBay" |
+
+### Key Files
+
+- `config.ts`: `HTML_TAG_MAP`, `VOID_TAGS`, `INLINE_TAGS`
+- `fetch/dom-placeholders.ts`: HTML → placeholder conversion
+- `translation/skip-patterns.ts`: N (numeric) and P (PII) patterns
+- `translation/skip-words.ts`: S (skip word) handling
 
 ## Translation Engine
 

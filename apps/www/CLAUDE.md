@@ -55,9 +55,44 @@ src/
 
 ## Key Components
 
--   `SegmentEditModal`, `PathEditModal` - Modals with Lexical editor for editing translations
+-   `SegmentEditModal`, `PathEditModal` - Modals for editing translations
 -   `LangTable`, `SegmentTable`, `PathTable` - Data tables with pagination
--   `PlaceholderEditor` - Lexical editor with placeholder validation (preserves `[HB1]...[/HB1]` formatting)
+-   `PlaceholderEditor` - ContentEditable editor with placeholder validation
+
+## Placeholder System
+
+The `PlaceholderEditor` component renders and validates placeholders in translations. Placeholders must match between original and translated text.
+
+### HTML Paired Placeholders (open/close tags)
+
+| Code | Label | HTML Tags |
+| ---- | ----- | --------- |
+| `HB` | bold | `<b>`, `<strong>` |
+| `HE` | emphasis | `<em>`, `<i>` |
+| `HA` | anchor | `<a>` |
+| `HS` | span | `<span>` |
+| `HG` | element | `<u>`, `<sub>`, `<sup>`, `<mark>`, `<small>`, `<s>`, `<del>`, `<ins>`, `<abbr>`, `<q>`, `<cite>`, `<code>`, `<kbd>`, `<time>` |
+
+### HTML Void Placeholders (self-closing, no close tag)
+
+| Code | Label | HTML Tags |
+| ---- | ----- | --------- |
+| `HV` | element | `<br>`, `<hr>`, `<img>`, `<wbr>`, empty paired tags |
+
+### Non-HTML Placeholders (standalone, no close tag)
+
+| Code | Label | Purpose |
+| ---- | ----- | ------- |
+| `N` | number | Numbers (e.g., "1,234.56") |
+| `P` | email | Email addresses (PII) |
+| `S` | skip | Brand names, proper nouns |
+
+### Key Files
+
+- `components/ui/PlaceholderEditor.tsx` - Main editor component
+- `components/ui/PlaceholderIssuesBar.tsx` - Missing/extra placeholder warnings
+- `components/ui/placeholder-shared.ts` - Labels, colors, tokenizer, AST parser
+- `components/ui/placeholder-utils.ts` - Validation logic
 
 ## Environment Variables
 

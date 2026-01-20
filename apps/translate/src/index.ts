@@ -101,8 +101,9 @@ async function executeDeferredWrites(writes: DeferredWrites): Promise<void> {
 			}
 		}
 
-		if (pathIds?.websitePathId && newSegmentHashes.length > 0) {
-			const websiteSegmentIds = await batchGetWebsiteSegmentIds(websiteId, newSegmentHashes)
+		const allSegmentHashes = [...newSegmentHashes, ...cachedSegmentHashes]
+		if (pathIds?.websitePathId && allSegmentHashes.length > 0) {
+			const websiteSegmentIds = await batchGetWebsiteSegmentIds(websiteId, allSegmentHashes)
 			if (websiteSegmentIds.size > 0) {
 				await linkPathSegments(pathIds.websitePathId, Array.from(websiteSegmentIds.values()))
 			}
