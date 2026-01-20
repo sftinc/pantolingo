@@ -219,24 +219,9 @@ function serializeDOMToValue(node: Node): string {
 // AST -> DOM Rendering
 // ============================================================================
 
-function renderASTToHTML(nodes: ASTNode[]): string {
-	let html = ''
-
-	// Check if first node is a placeholder - need cursor anchor before it
-	const firstNode = nodes[0]
-	const needsStartAnchor =
-		firstNode &&
-		(firstNode.type === 'standalone' || firstNode.type === 'paired')
-
-	// Check if last node is a placeholder - need cursor anchor after it
-	const lastNode = nodes[nodes.length - 1]
-	const needsEndAnchor =
-		lastNode &&
-		(lastNode.type === 'standalone' || lastNode.type === 'paired')
-
-	if (needsStartAnchor) {
-		html += '<span data-cursor-anchor>\u200B</span>'
-	}
+function renderASTToHTML(nodes: ASTNode[], isRoot = true): string {
+	// Always add cursor anchors at start and end for consistent cursor positioning (root level only)
+	let html = isRoot ? '<span data-cursor-anchor>\u200B</span>' : ''
 
 	for (const node of nodes) {
 		switch (node.type) {
@@ -254,17 +239,16 @@ function renderASTToHTML(nodes: ASTNode[]): string {
 
 			case 'paired': {
 				const color = PAIRED_COLORS[node.kind]
-				const childHTML = renderASTToHTML(node.children)
+				const childHTML = renderASTToHTML(node.children, false)
 				html += `<span data-paired="${node.kind}" data-index="${node.index}" class="relative group/placeholder inline rounded-sm px-0.5" style="background-color: color-mix(in srgb, ${color} 15%, transparent);">${childHTML}</span>`
 				break
 			}
 		}
 	}
 
-	if (needsEndAnchor) {
+	if (isRoot) {
 		html += '<span data-cursor-anchor>\u200B</span>'
 	}
-
 	return html
 }
 
