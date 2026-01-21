@@ -68,12 +68,13 @@ Placeholders preserve content that shouldn't be translated or needs special hand
 
 ## Environment Variables
 
-| Variable             | Default | Description                                    |
-| -------------------- | ------- | ---------------------------------------------- |
-| `POSTGRES_DB_URL`    | -       | PostgreSQL connection string (required)        |
-| `OPENROUTER_API_KEY` | -       | API key for OpenRouter (required)              |
-| `PORT`               | `8787`  | Port the translation proxy listens on          |
-| `GOOGLE_PROJECT_ID`  | -       | Reserved for future Google Translate API       |
+| Variable              | Default | Description                                    |
+| --------------------- | ------- | ---------------------------------------------- |
+| `POSTGRES_DB_URL`     | -       | PostgreSQL connection string (required)        |
+| `OPENROUTER_API_KEY`  | -       | API key for OpenRouter (required)              |
+| `PORT`                | `8787`  | Port the translation proxy listens on          |
+| `MAINTENANCE_MESSAGE` | -       | When set, returns 503 page with this message   |
+| `GOOGLE_PROJECT_ID`   | -       | Reserved for future Google Translate API       |
 
 ## Deployment (Render.com)
 

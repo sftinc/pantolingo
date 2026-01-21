@@ -13,6 +13,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') })
 import express from 'express'
 import { handleRequest } from './index.js'
 import { testConnection, closePool } from '@pantolingo/db'
+import { renderMessagePage } from './utils/message-page.js'
 
 const app = express()
 const PORT = process.env.PORT || 8787
@@ -23,6 +24,22 @@ app.use(express.raw({ type: '*/*', limit: '10mb' }))
 // Health check endpoint
 app.get('/healthz', (_req, res) => {
 	res.json({ status: 'ok' })
+})
+
+// Maintenance mode middleware
+app.use((req, res, next) => {
+	const maintenanceMessage = process.env.MAINTENANCE_MESSAGE
+	if (maintenanceMessage) {
+		res.status(503).set('Content-Type', 'text/html').send(
+			renderMessagePage({
+				title: 'Maintenance in Progress',
+				message: maintenanceMessage,
+				subtitle: 'Thank you for your patience.',
+			})
+		)
+		return
+	}
+	next()
 })
 
 // Main request handler
