@@ -1,4 +1,4 @@
-# Todo: Fix cursor positioning in empty paired placeholders
+# Completed: Fix cursor positioning in empty paired placeholders
 
 ## Summary
 
@@ -55,3 +55,28 @@ After inserting `[HB1][/HB1]` and re-rendering:
 - The paired element is empty, so `renderASTToHTML` produces `<span data-paired="HB" data-index="1"></span>`
 - An empty span gives the cursor nowhere to land inside it
 - When the user types, text goes outside the span instead of inside
+
+## Solution (commit f214ef0)
+
+Instead of inserting empty paired tags and fighting browser cursor positioning, insert default placeholder text between the tags.
+
+**Before:**
+```typescript
+document.execCommand('insertText', false, openTag + closeTag)
+// + 13 lines of cursor positioning logic with requestAnimationFrame
+```
+
+**After:**
+```typescript
+document.execCommand('insertText', false, openTag + 'Text' + closeTag)
+```
+
+### Why This Works
+
+1. The span now has content ("Text"), so cursor positioning works naturally
+2. Users see "Text" which they can select and replace with their content
+3. Removed complex cursor positioning code that was fighting the browser bug
+
+### Additional Changes
+
+- Hid closing tags from the missing placeholders list in `PlaceholderIssuesBar.tsx` since clicking the open tag now inserts both tags with content automatically
