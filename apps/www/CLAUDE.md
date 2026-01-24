@@ -119,3 +119,29 @@ The `PlaceholderEditor` component renders and validates placeholders in translat
 3. **Start command**: `pnpm start:www`
 4. **Build Filters**:
     - Include paths: `apps/www/**`, `packages/db/**`, `packages/lang/**`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`
+
+## URL Message System
+
+Use `?msg=` URL parameter for messages that result from redirects or navigation.
+
+**When to use:**
+- Server-side redirects (signOut, magic link errors)
+- Navigation-based messages (session expired, access denied)
+
+**When NOT to use:**
+- Form action errors (use inline display with action state)
+- Client-side validation errors
+
+**Adding new messages:**
+1. Add key to `lib/messages.ts` (lowercase alphanumeric only)
+2. Set `page` property to restrict where message can appear
+3. Redirect with `?msg=yourkey`
+
+**Example:**
+```typescript
+// In server action or route handler
+redirect('/login?msg=logout')
+
+// In page with MessageDisplay
+<MessageDisplay hidden={hasSubmitted} />
+```

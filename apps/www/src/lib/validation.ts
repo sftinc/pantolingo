@@ -28,3 +28,16 @@ export function sanitizeInput(value: string): string | null {
 	const trimmed = value.trim()
 	return trimmed.length > 0 ? trimmed : null
 }
+
+/**
+ * Validate and sanitize callback URL to prevent open redirects
+ * Only allows relative URLs starting with / (but not //)
+ * Returns fallback if URL is invalid or missing
+ */
+export function getSafeCallbackUrl(url: string | null, fallback = '/dashboard'): string {
+	if (!url) return fallback
+	if (url.startsWith('/') && !url.startsWith('//')) {
+		return url
+	}
+	return fallback
+}

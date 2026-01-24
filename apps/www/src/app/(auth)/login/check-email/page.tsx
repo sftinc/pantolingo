@@ -1,11 +1,10 @@
 'use client'
 
-import { Suspense, useState, useEffect, useActionState } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams, redirect } from 'next/navigation'
 import Link from 'next/link'
-import { SubmitButton } from '@/components/ui/SubmitButton'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
-import { sendMagicLink, getEmailFromJwt, type AuthActionState } from '@/actions/auth'
+import { getEmailFromJwt } from '@/actions/auth'
 
 export default function CheckEmailPage() {
 	return (
@@ -34,8 +33,6 @@ function CheckEmailContent() {
 	const emailJwt = searchParams.get('t')
 	const [email, setEmail] = useState<string | null>(null)
 	const [isVerifying, setIsVerifying] = useState(true)
-
-	const [state, formAction] = useActionState<AuthActionState, FormData>(sendMagicLink, null)
 
 	// Verify JWT and extract email via server action
 	useEffect(() => {
@@ -69,12 +66,6 @@ function CheckEmailContent() {
 		return <CheckEmailSkeleton />
 	}
 
-	const handleResend = (formData: FormData) => {
-		// Pass the JWT to skip Turnstile verification on resend
-		formData.set('emailJwt', emailJwt)
-		formAction(formData)
-	}
-
 	return (
 		<main className="flex min-h-screen flex-col">
 			<div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8 flex justify-end">
@@ -95,12 +86,6 @@ function CheckEmailContent() {
 						code expire in 10 minutes.
 					</p>
 
-					{state?.error && (
-						<div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
-							{state.error}
-						</div>
-					)}
-
 					<div className="mt-6 space-y-3">
 						<Link
 							href={`/login/enter-code?t=${encodeURIComponent(emailJwt)}`}
@@ -109,10 +94,12 @@ function CheckEmailContent() {
 							Enter code manually
 						</Link>
 
-						<form action={handleResend}>
-							<input type="hidden" name="email" value={email} />
-							<SubmitButton variant="secondary">Resend email</SubmitButton>
-						</form>
+						<Link
+							href="/login"
+							className="block w-full py-3 text-[var(--text-muted)] hover:text-[var(--text-body)] transition text-center text-sm"
+						>
+							Back to Login
+						</Link>
 					</div>
 				</div>
 			</div>

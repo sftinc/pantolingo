@@ -4,6 +4,7 @@ import { useState, useActionState, useTransition, useRef, useEffect } from 'reac
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { FormInput } from '@/components/ui/FormInput'
+import { MessageDisplay } from '@/components/ui/MessageDisplay'
 import { Spinner } from '@/components/ui/Spinner'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
@@ -14,17 +15,9 @@ import {
 	signInWithPassword,
 	type AuthActionState,
 } from '@/actions/auth'
-import { isValidEmail } from '@/lib/validation'
+import { isValidEmail, getSafeCallbackUrl } from '@/lib/validation'
 
 type LoginStep = 'email' | 'password'
-
-function getSafeCallbackUrl(url: string | null): string {
-	if (!url) return '/dashboard'
-	if (url.startsWith('/') && !url.startsWith('//')) {
-		return url
-	}
-	return '/dashboard'
-}
 
 interface LoginFormProps {
 	turnstileSiteKey: string
@@ -34,8 +27,6 @@ export function LoginForm({ turnstileSiteKey }: LoginFormProps) {
 	console.log('LoginForm turnstileSiteKey:', turnstileSiteKey ? 'present' : 'missing')
 	const searchParams = useSearchParams()
 	const callbackUrl = getSafeCallbackUrl(searchParams.get('callbackUrl'))
-	const errorParam = searchParams.get('error')
-	const messageParam = searchParams.get('message')
 
 	const [step, setStep] = useState<LoginStep>('email')
 	const [email, setEmail] = useState('')
@@ -120,13 +111,9 @@ export function LoginForm({ turnstileSiteKey }: LoginFormProps) {
 		}
 	}, [turnstileToken])
 
-	// Map error codes to messages
+	// Map action error codes to user-friendly messages
 	const getErrorMessage = (error: string) => {
 		switch (error) {
-			case 'Verification':
-				return 'The magic link has expired or is invalid.'
-			case 'Configuration':
-				return 'Server configuration error. Please try again later.'
 			case 'CredentialsSignin':
 				return 'Invalid credentials'
 			default:
@@ -134,20 +121,8 @@ export function LoginForm({ turnstileSiteKey }: LoginFormProps) {
 		}
 	}
 
-	// Map message codes to success messages
-	const getSuccessMessage = (message: string) => {
-		switch (message) {
-			case 'signedOut':
-				return 'You have been signed out successfully.'
-			default:
-				return null
-		}
-	}
-
-	const error = errorParam || emailError || passwordError || passwordState?.error || magicLinkState?.error
-
-	// Only show success message if user hasn't submitted the form yet
-	const successMessage = !hasSubmitted && messageParam ? getSuccessMessage(messageParam) : null
+	// Combine inline errors from form validation and action states
+	const inlineError = emailError || passwordError || passwordState?.error || magicLinkState?.error
 
 	return (
 		<main className="flex min-h-screen flex-col">
@@ -163,15 +138,11 @@ export function LoginForm({ turnstileSiteKey }: LoginFormProps) {
 						{step === 'email' ? 'Enter your email to continue' : 'Enter your password'}
 					</p>
 
-					{successMessage && (
-						<div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md text-sm">
-							{successMessage}
-						</div>
-					)}
+					<MessageDisplay hidden={hasSubmitted} />
 
-					{error && (
+					{inlineError && (
 						<div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
-							{getErrorMessage(error)}
+							{getErrorMessage(inlineError)}
 						</div>
 					)}
 

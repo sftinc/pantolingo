@@ -1,6 +1,16 @@
 import { NextResponse } from 'next/server'
 import { pool } from '@pantolingo/db/pool'
 import type { NextRequest } from 'next/server'
+import { getSafeCallbackUrl } from '@/lib/validation'
+
+/**
+ * Build redirect URL with msg key and preserved callbackUrl
+ */
+function buildLoginRedirect(baseUrl: string, msgKey: string, callbackUrl: string): URL {
+	const params = new URLSearchParams({ msg: msgKey })
+	if (callbackUrl) params.set('callbackUrl', callbackUrl)
+	return new URL(`/login?${params.toString()}`, baseUrl)
+}
 
 /**
  * Redirect clean magic link URL to NextAuth callback
@@ -11,11 +21,11 @@ import type { NextRequest } from 'next/server'
  */
 export async function GET(request: NextRequest) {
 	const token = request.nextUrl.searchParams.get('token')
-	const callbackUrl = request.nextUrl.searchParams.get('callbackUrl') || '/dashboard'
+	const callbackUrl = getSafeCallbackUrl(request.nextUrl.searchParams.get('callbackUrl'))
 	const baseUrl = request.nextUrl.origin
 
 	if (!token) {
-		return NextResponse.redirect(new URL('/login?error=MissingToken', baseUrl))
+		return NextResponse.redirect(buildLoginRedirect(baseUrl, 'missingtoken', callbackUrl))
 	}
 
 	// Look up email from token
@@ -26,7 +36,7 @@ export async function GET(request: NextRequest) {
 
 	const email = result.rows[0]?.identifier
 	if (!email) {
-		return NextResponse.redirect(new URL('/login?error=Verification', baseUrl))
+		return NextResponse.redirect(buildLoginRedirect(baseUrl, 'invalidtoken', callbackUrl))
 	}
 
 	// Redirect to NextAuth callback with all required params
