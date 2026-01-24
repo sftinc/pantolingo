@@ -21,10 +21,8 @@ export const messages: Record<string, Message> = {
 	},
 	sessionexpired: {
 		type: 'error',
-		title: 'Session Expired',
-		text: 'Your session has expired.',
-		link: '/login',
-		linkText: 'Log in again',
+		text: 'Session expired. Please sign in again.',
+		page: '/login',
 	},
 	invalidtoken: {
 		type: 'error',

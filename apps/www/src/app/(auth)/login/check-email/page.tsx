@@ -1,71 +1,24 @@
-'use client'
-
-import { Suspense, useState, useEffect } from 'react'
-import { useSearchParams, redirect } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
-import { getEmailFromJwt } from '@/actions/auth'
+import { getEmailJwtFromCookie, verifyEmailJwt } from '@/lib/auth-jwt'
 
-export default function CheckEmailPage() {
-	return (
-		<Suspense fallback={<CheckEmailSkeleton />}>
-			<CheckEmailContent />
-		</Suspense>
-	)
-}
-
-function CheckEmailSkeleton() {
-	return (
-		<main className="flex min-h-screen flex-col items-center justify-center p-6">
-			<div className="text-center max-w-md bg-[var(--card-bg)] p-10 rounded-lg shadow-[0_2px_8px_var(--shadow-color)]">
-				<div className="animate-pulse">
-					<div className="h-12 w-12 bg-[var(--border)] rounded-full mx-auto mb-4" />
-					<div className="h-6 bg-[var(--border)] rounded mb-4 mx-auto w-3/4" />
-					<div className="h-4 bg-[var(--border)] rounded mb-2 mx-auto w-full" />
-				</div>
-			</div>
-		</main>
-	)
-}
-
-function CheckEmailContent() {
-	const searchParams = useSearchParams()
-	const emailJwt = searchParams.get('t')
-	const [email, setEmail] = useState<string | null>(null)
-	const [isVerifying, setIsVerifying] = useState(true)
-
-	// Verify JWT and extract email via server action
-	useEffect(() => {
-		async function verifyJwt() {
-			if (!emailJwt) {
-				redirect('/login')
-				return
-			}
-
-			try {
-				// Use server action to verify JWT (AUTH_SECRET not available client-side)
-				const extractedEmail = await getEmailFromJwt(emailJwt)
-
-				if (!extractedEmail) {
-					redirect('/login')
-					return
-				}
-
-				setEmail(extractedEmail)
-			} catch {
-				redirect('/login')
-			} finally {
-				setIsVerifying(false)
-			}
-		}
-
-		verifyJwt()
-	}, [emailJwt])
-
-	if (isVerifying || !email || !emailJwt) {
-		return <CheckEmailSkeleton />
+export default async function CheckEmailPage() {
+	// Read JWT from HTTP-only cookie and verify
+	const emailJwt = await getEmailJwtFromCookie()
+	if (!emailJwt) {
+		redirect('/login?msg=sessionexpired')
 	}
 
+	const email = await verifyEmailJwt(emailJwt)
+	if (!email) {
+		redirect('/login?msg=sessionexpired')
+	}
+
+	return <CheckEmailContent email={email} />
+}
+
+function CheckEmailContent({ email }: { email: string }) {
 	return (
 		<main className="flex min-h-screen flex-col">
 			<div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8 flex justify-end">
@@ -88,7 +41,7 @@ function CheckEmailContent() {
 
 					<div className="mt-6 space-y-3">
 						<Link
-							href={`/login/enter-code?t=${encodeURIComponent(emailJwt)}`}
+							href="/login/enter-code"
 							className="block w-full py-3 bg-[var(--accent)] text-white rounded-md font-medium hover:opacity-90 transition text-center"
 						>
 							Enter code manually

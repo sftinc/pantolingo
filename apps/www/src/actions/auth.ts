@@ -5,7 +5,13 @@ import { signIn } from '@/lib/auth'
 import { AuthError } from 'next-auth'
 import { pool } from '@pantolingo/db/pool'
 import { verifyTurnstileToken } from '@/lib/turnstile'
-import { createEmailJwt, verifyEmailJwt } from '@/lib/auth-jwt'
+import {
+	createEmailJwt,
+	verifyEmailJwt,
+	setEmailJwtCookie,
+	getEmailJwtFromCookie,
+	clearEmailJwtCookie,
+} from '@/lib/auth-jwt'
 import { isValidCodeFormat } from '@/lib/auth-code'
 import { getTokenByCode, incrementFailedAttempts } from '@/lib/auth-adapter'
 
@@ -40,8 +46,7 @@ function getSafeCallbackUrl(url: string | null): string {
  * Magic links always redirect to /dashboard (no callbackUrl support)
  *
  * @param formData.email - Email address to send magic link to
- * @param formData.turnstileToken - Cloudflare Turnstile token (required unless emailJwt provided)
- * @param formData.emailJwt - Optional JWT from previous request (allows skipping Turnstile on resend)
+ * @param formData.turnstileToken - Cloudflare Turnstile token (required)
  */
 export async function sendMagicLink(
 	_prevState: AuthActionState,
@@ -56,28 +61,14 @@ export async function sendMagicLink(
 		return { error: 'Email is required' }
 	}
 
-	// Verify Turnstile token (skip if valid emailJwt provided - for resend)
-	const emailJwt = formData.get('emailJwt') as string | null
+	// Verify Turnstile token
 	const turnstileToken = formData.get('turnstileToken') as string | null
-
-	// Check if we can skip Turnstile (valid JWT = resend scenario)
-	let skipTurnstile = false
-	if (emailJwt) {
-		const jwtEmail = await verifyEmailJwt(emailJwt)
-		// Only skip if JWT is valid and matches the requested email
-		if (jwtEmail && jwtEmail.toLowerCase() === trimmedEmail.toLowerCase()) {
-			skipTurnstile = true
-		}
+	if (!turnstileToken) {
+		return { error: 'Please complete the verification' }
 	}
-
-	if (!skipTurnstile) {
-		if (!turnstileToken) {
-			return { error: 'Please complete the verification' }
-		}
-		const turnstileValid = await verifyTurnstileToken(turnstileToken)
-		if (!turnstileValid) {
-			return { error: 'Verification failed. Please try again.' }
-		}
+	const turnstileValid = await verifyTurnstileToken(turnstileToken)
+	if (!turnstileValid) {
+		return { error: 'Verification failed. Please try again.' }
 	}
 
 	try {
@@ -93,24 +84,26 @@ export async function sendMagicLink(
 		throw error
 	}
 
-	// Create signed JWT with email for the check-email page
+	// Create signed JWT with email and store in HTTP-only cookie
 	const jwt = await createEmailJwt(trimmedEmail)
-	redirect(`/login/check-email?t=${encodeURIComponent(jwt)}`)
+	await setEmailJwtCookie(jwt)
+	redirect('/login/check-email')
 }
 
 /**
  * Verify a manually entered code
+ * Reads the email JWT from an HTTP-only cookie (set by sendMagicLink)
  *
  * @param formData.code - The 8-character verification code
- * @param formData.emailJwt - JWT containing the email address
  */
 export async function verifyCode(
 	_prevState: AuthActionState,
 	formData: FormData
 ): Promise<AuthActionState> {
 	const code = formData.get('code') as string | null
-	const emailJwt = formData.get('emailJwt') as string | null
 
+	// Read JWT from HTTP-only cookie
+	const emailJwt = await getEmailJwtFromCookie()
 	if (!emailJwt) {
 		return { error: 'Session expired. Please request a new code.' }
 	}
@@ -142,21 +135,12 @@ export async function verifyCode(
 		return { error: 'Invalid or expired code. Please try again or request a new code.' }
 	}
 
+	// Clear the email JWT cookie on successful verification
+	await clearEmailJwtCookie()
+
 	// Return redirect URL for client-side hard navigation
 	// (server-side redirect causes soft navigation which fails silently with NextAuth)
 	return { redirectUrl: `/login/magic?token=${encodeURIComponent(token)}` }
-}
-
-/**
- * Verify an email JWT and return the email address
- * Used by client components that need to display the email
- *
- * @param jwt - The JWT token from the URL
- * @returns The email address if valid, null otherwise
- */
-export async function getEmailFromJwt(jwt: string): Promise<string | null> {
-	if (!jwt) return null
-	return verifyEmailJwt(jwt)
 }
 
 /**

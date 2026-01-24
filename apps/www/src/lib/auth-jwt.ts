@@ -2,11 +2,17 @@
  * Email JWT utilities for magic link code entry flow
  *
  * Uses next-auth/jwt to create signed JWTs containing the email address.
- * This avoids storing email in cookies (which causes multi-tab issues)
- * and instead passes it in the URL as a signed token.
+ * The JWT is stored in an HTTP-only cookie to keep it out of browser history,
+ * server logs, and prevent XSS access.
+ *
+ * Multi-tab note: If a user opens multiple auth tabs, each new magic link
+ * request overwrites the cookie. This is acceptable - the latest auth flow wins.
  */
 
+import { cookies } from 'next/headers'
 import { encode, decode } from 'next-auth/jwt'
+
+export const EMAIL_JWT_COOKIE = 'pantolingo-email-jwt'
 
 const EMAIL_JWT_MAX_AGE = 10 * 60 // 10 minutes (matches auth token TTL)
 const EMAIL_JWT_SALT = 'pantolingo-email-verification'
@@ -68,4 +74,39 @@ export async function verifyEmailJwt(token: string): Promise<string | null> {
 		// Token expired or invalid
 		return null
 	}
+}
+
+/**
+ * Set the email JWT in an HTTP-only cookie
+ *
+ * @param jwt - The JWT string to store
+ */
+export async function setEmailJwtCookie(jwt: string): Promise<void> {
+	const cookieStore = await cookies()
+	cookieStore.set(EMAIL_JWT_COOKIE, jwt, {
+		httpOnly: true,
+		secure: process.env.NODE_ENV === 'production',
+		sameSite: 'lax',
+		path: '/login',
+		maxAge: EMAIL_JWT_MAX_AGE,
+	})
+}
+
+/**
+ * Get the email JWT from the HTTP-only cookie
+ *
+ * @returns The JWT string if present, null otherwise
+ */
+export async function getEmailJwtFromCookie(): Promise<string | null> {
+	const cookieStore = await cookies()
+	const cookie = cookieStore.get(EMAIL_JWT_COOKIE)
+	return cookie?.value ?? null
+}
+
+/**
+ * Clear the email JWT cookie
+ */
+export async function clearEmailJwtCookie(): Promise<void> {
+	const cookieStore = await cookies()
+	cookieStore.delete({ name: EMAIL_JWT_COOKIE, path: '/login' })
 }

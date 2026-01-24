@@ -141,7 +141,7 @@ export function LoginForm({ turnstileSiteKey }: LoginFormProps) {
 					<MessageDisplay hidden={hasSubmitted} />
 
 					{inlineError && (
-						<div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
+						<div className="mb-4 p-3 bg-[var(--error)]/10 text-[var(--error)] rounded-md text-sm">
 							{getErrorMessage(inlineError)}
 						</div>
 					)}

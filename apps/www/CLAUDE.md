@@ -7,7 +7,7 @@ Next.js 16 app with Tailwind CSS v4 and React 19.
 -   `/` - Marketing landing page
 -   `/login`, `/signup` - Auth pages (with Turnstile CAPTCHA)
 -   `/login/magic` - Magic link verification (redirects to `/api/auth/callback/smtp`)
--   `/login/check-email` - "Check your email" confirmation page (JWT-based, shows email and code entry link)
+-   `/login/check-email` - "Check your email" confirmation page (reads JWT from HTTP-only cookie)
 -   `/login/enter-code` - Manual 8-character code entry page
 -   `/onboarding` - Name setup for new users
 -   `/dashboard` - Websites overview with segment/path counts
@@ -21,8 +21,8 @@ Next.js 16 app with Tailwind CSS v4 and React 19.
 | User-Facing URL | Internal Route | Method |
 | --------------- | -------------- | ------ |
 | `/login/magic` | `/api/auth/callback/smtp` | Route redirect |
-| `/login/check-email` | N/A | Custom page (JWT in URL) |
-| `/login/enter-code` | N/A | Custom page (JWT in URL) |
+| `/login/check-email` | N/A | Custom page (JWT in HTTP-only cookie) |
+| `/login/enter-code` | N/A | Custom page (JWT in HTTP-only cookie) |
 
 ## Directory Structure
 
