@@ -13,6 +13,7 @@ declare global {
 					'error-callback'?: () => void
 					'expired-callback'?: () => void
 					theme?: 'light' | 'dark' | 'auto'
+					appearance?: 'always' | 'execute' | 'interaction-only'
 				}
 			) => string
 			reset: (widgetId: string) => void
@@ -43,7 +44,6 @@ export function Turnstile({ siteKey, onVerify, onError, onExpired }: TurnstilePr
 
 	const handleVerify = useCallback(
 		(token: string) => {
-			console.log('[Turnstile] Verification successful, token received')
 			onVerify(token)
 		},
 		[onVerify]
@@ -58,9 +58,7 @@ export function Turnstile({ siteKey, onVerify, onError, onExpired }: TurnstilePr
 	}, [onExpired])
 
 	useEffect(() => {
-		console.log('[Turnstile] useEffect running, siteKey:', siteKey ? 'present' : 'missing')
 		if (!siteKey) {
-			console.error('[Turnstile] siteKey prop is required')
 			return
 		}
 
@@ -76,12 +74,6 @@ export function Turnstile({ siteKey, onVerify, onError, onExpired }: TurnstilePr
 
 		// Render widget when script is ready
 		const renderWidget = () => {
-			console.log('[Turnstile] renderWidget called', {
-				hasContainer: !!containerRef.current,
-				hasTurnstile: !!window.turnstile,
-				alreadyRendered: renderedRef.current,
-				hasWidgetId: !!widgetIdRef.current
-			})
 			if (
 				!containerRef.current ||
 				!window.turnstile ||

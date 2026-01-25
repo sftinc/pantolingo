@@ -1,6 +1,5 @@
 'use server'
 
-import { redirect } from 'next/navigation'
 import { signIn } from '@/lib/auth'
 import { AuthError } from 'next-auth'
 import { pool } from '@pantolingo/db/pool'
@@ -14,6 +13,7 @@ import {
 } from '@/lib/auth-jwt'
 import { isValidCodeFormat } from '@/lib/auth-code'
 import { getTokenByCode, incrementFailedAttempts } from '@/lib/auth-adapter'
+import { isValidEmail } from '@/lib/validation'
 
 export type AuthActionState = { error?: string; redirectUrl?: string } | null
 
@@ -27,6 +27,28 @@ export async function checkEmailExists(email: string): Promise<boolean> {
 
 	const result = await pool.query(`SELECT 1 FROM account WHERE email = $1 LIMIT 1`, [trimmed])
 	return result.rows.length > 0
+}
+
+/**
+ * Prepare for verification by storing email in JWT cookie
+ * Called before redirecting to /signup/verify or /login/verify
+ *
+ * @param email - Email address to store
+ * @returns Object with optional error message (absence of error = success)
+ */
+export async function prepareVerification(email: string): Promise<{ error?: string }> {
+	const trimmed = email.trim()
+	if (!trimmed || !isValidEmail(trimmed)) {
+		return { error: 'Please enter a valid email address' }
+	}
+
+	try {
+		const jwt = await createEmailJwt(trimmed)
+		await setEmailJwtCookie(jwt)
+		return {}
+	} catch {
+		return { error: 'Something went wrong. Please try again.' }
+	}
 }
 
 /**
@@ -44,21 +66,24 @@ function getSafeCallbackUrl(url: string | null): string {
 /**
  * Send magic link to email
  * Magic links always redirect to /dashboard (no callbackUrl support)
+ * Reads email from JWT cookie (set by prepareVerification)
  *
- * @param formData.email - Email address to send magic link to
  * @param formData.turnstileToken - Cloudflare Turnstile token (required)
+ * @param formData.flow - 'signup' or 'login' to determine redirect destination
  */
 export async function sendMagicLink(
 	_prevState: AuthActionState,
 	formData: FormData
 ): Promise<AuthActionState> {
-	const email = formData.get('email')
-	if (typeof email !== 'string' || !email) {
-		return { error: 'Email is required' }
+	// Read email from JWT cookie (set by prepareVerification)
+	const emailJwt = await getEmailJwtFromCookie()
+	if (!emailJwt) {
+		return { error: 'Session expired. Please start over.' }
 	}
-	const trimmedEmail = email.trim()
-	if (!trimmedEmail) {
-		return { error: 'Email is required' }
+
+	const email = await verifyEmailJwt(emailJwt)
+	if (!email) {
+		return { error: 'Session expired. Please start over.' }
 	}
 
 	// Verify Turnstile token
@@ -73,7 +98,7 @@ export async function sendMagicLink(
 
 	try {
 		await signIn('smtp', {
-			email: trimmedEmail,
+			email,
 			redirect: false,
 			redirectTo: '/dashboard',
 		})
@@ -84,10 +109,10 @@ export async function sendMagicLink(
 		throw error
 	}
 
-	// Create signed JWT with email and store in HTTP-only cookie
-	const jwt = await createEmailJwt(trimmedEmail)
-	await setEmailJwtCookie(jwt)
-	redirect('/login/check-email')
+	// Redirect to appropriate check-email page based on flow
+	const flow = formData.get('flow') as string | null
+	const redirectUrl = flow === 'signup' ? '/signup/check-email' : '/login/check-email'
+	return { redirectUrl }
 }
 
 /**
@@ -173,5 +198,5 @@ export async function signInWithPassword(
 		throw error
 	}
 
-	redirect(callbackUrl)
+	return { redirectUrl: callbackUrl }
 }

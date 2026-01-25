@@ -6,22 +6,18 @@ import { getEmailJwtFromCookie, verifyEmailJwt } from '@/lib/auth-jwt'
 // Force dynamic rendering to ensure fresh cookie reads
 export const dynamic = 'force-dynamic'
 
-export default async function CheckEmailPage() {
+export default async function SignupCheckEmailPage() {
 	// Read JWT from HTTP-only cookie and verify
 	const emailJwt = await getEmailJwtFromCookie()
 	if (!emailJwt) {
-		redirect('/login?msg=sessionexpired')
+		redirect('/signup')
 	}
 
 	const email = await verifyEmailJwt(emailJwt)
 	if (!email) {
-		redirect('/login?msg=sessionexpired')
+		redirect('/signup')
 	}
 
-	return <CheckEmailContent email={email} />
-}
-
-function CheckEmailContent({ email }: { email: string }) {
 	return (
 		<main className="flex min-h-screen flex-col">
 			<div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8 flex justify-end">
@@ -52,10 +48,10 @@ function CheckEmailContent({ email }: { email: string }) {
 						</Link>
 
 						<Link
-							href="/login"
+							href="/signup"
 							className="block w-full py-3 text-[var(--text-muted)] hover:text-[var(--text-body)] transition text-center text-sm"
 						>
-							Back to Login
+							Back to Sign up
 						</Link>
 					</div>
 				</div>

@@ -5,7 +5,9 @@ Next.js 16 app with Tailwind CSS v4 and React 19.
 ## Routes
 
 -   `/` - Marketing landing page
--   `/login`, `/signup` - Auth pages (with Turnstile CAPTCHA)
+-   `/login`, `/signup` - Auth pages (email input)
+-   `/login/verify`, `/signup/verify` - Turnstile verification pages
+-   `/login/check-email`, `/signup/check-email` - "Check your email" confirmation pages
 -   `/login/magic` - Magic link verification (redirects to `/api/auth/callback/smtp`)
 -   `/login/check-email` - "Check your email" confirmation page (reads JWT from HTTP-only cookie)
 -   `/login/enter-code` - Manual 8-character code entry page
@@ -35,8 +37,11 @@ src/
 │   │   │   ├── check-email/    # /login/check-email - "check your email"
 │   │   │   ├── enter-code/     # /login/enter-code - manual code entry
 │   │   │   ├── error/          # /login/error - auth errors
-│   │   │   └── magic/          # /login/magic - redirects to NextAuth callback
+│   │   │   ├── magic/          # /login/magic - redirects to NextAuth callback
+│   │   │   └── verify/         # /login/verify - Turnstile verification
 │   │   ├── signup/             # /signup
+│   │   │   ├── check-email/    # /signup/check-email - "check your email"
+│   │   │   └── verify/         # /signup/verify - Turnstile verification
 │   │   └── onboarding/         # /onboarding - name setup
 │   ├── (dashboard)/            # Customer dashboard
 │   │   └── dashboard/

@@ -1,17 +1,16 @@
 'use client'
 
-import { useState, useActionState, useTransition, useRef, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useState, useActionState, useTransition, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { FormInput } from '@/components/ui/FormInput'
 import { MessageDisplay } from '@/components/ui/MessageDisplay'
 import { Spinner } from '@/components/ui/Spinner'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
-import { Turnstile } from '@/components/ui/Turnstile'
 import {
 	checkEmailExists,
-	sendMagicLink,
+	prepareVerification,
 	signInWithPassword,
 	type AuthActionState,
 } from '@/actions/auth'
@@ -19,12 +18,8 @@ import { isValidEmail, getSafeCallbackUrl } from '@/lib/validation'
 
 type LoginStep = 'email' | 'password'
 
-interface LoginFormProps {
-	turnstileSiteKey: string
-}
-
-export function LoginForm({ turnstileSiteKey }: LoginFormProps) {
-	console.log('LoginForm turnstileSiteKey:', turnstileSiteKey ? 'present' : 'missing')
+export function LoginForm() {
+	const router = useRouter()
 	const searchParams = useSearchParams()
 	const callbackUrl = getSafeCallbackUrl(searchParams.get('callbackUrl'))
 
@@ -33,21 +28,22 @@ export function LoginForm({ turnstileSiteKey }: LoginFormProps) {
 	const [password, setPassword] = useState('')
 	const [emailError, setEmailError] = useState<string | null>(null)
 	const [passwordError, setPasswordError] = useState<string | null>(null)
-	const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
-	const [showTurnstile, setShowTurnstile] = useState(false)
+	const [forgotPasswordError, setForgotPasswordError] = useState<string | null>(null)
 	const [isPending, startTransition] = useTransition()
+	const [isForgotPending, startForgotTransition] = useTransition()
 	const [hasSubmitted, setHasSubmitted] = useState(false)
-	const magicLinkFormRef = useRef<HTMLFormElement>(null)
 
 	const [passwordState, passwordAction] = useActionState<AuthActionState, FormData>(
 		signInWithPassword,
 		null
 	)
 
-	const [magicLinkState, magicLinkAction, isMagicLinkPending] = useActionState<AuthActionState, FormData>(
-		sendMagicLink,
-		null
-	)
+	// Handle redirect after successful password login
+	useEffect(() => {
+		if (passwordState?.redirectUrl) {
+			router.push(passwordState.redirectUrl)
+		}
+	}, [passwordState, router])
 
 	// Handle email step submission
 	const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -88,28 +84,18 @@ export function LoginForm({ turnstileSiteKey }: LoginFormProps) {
 		passwordAction(formData)
 	}
 
-	// Handle forgot password - show Turnstile first, then send magic link
+	// Handle forgot password - redirect to verify page
 	const handleForgotPassword = () => {
-		console.log('handleForgotPassword - turnstileToken:', turnstileToken, 'turnstileSiteKey:', turnstileSiteKey)
-		if (!turnstileToken) {
-			console.log('Setting showTurnstile to true')
-			setShowTurnstile(true)
-			return
-		}
-		magicLinkFormRef.current?.requestSubmit()
+		setForgotPasswordError(null)
+		startForgotTransition(async () => {
+			const result = await prepareVerification(email.trim())
+			if (result.error) {
+				setForgotPasswordError(result.error)
+			} else {
+				router.push('/login/verify')
+			}
+		})
 	}
-
-	// Called when Turnstile is verified
-	const handleTurnstileVerify = (token: string) => {
-		setTurnstileToken(token)
-	}
-
-	// Auto-submit magic link form when turnstile token is set
-	useEffect(() => {
-		if (turnstileToken && magicLinkFormRef.current) {
-			magicLinkFormRef.current.requestSubmit()
-		}
-	}, [turnstileToken])
 
 	// Map action error codes to user-friendly messages
 	const getErrorMessage = (error: string) => {
@@ -122,7 +108,7 @@ export function LoginForm({ turnstileSiteKey }: LoginFormProps) {
 	}
 
 	// Combine inline errors from form validation and action states
-	const inlineError = emailError || passwordError || passwordState?.error || magicLinkState?.error
+	const inlineError = emailError || passwordError || forgotPasswordError || passwordState?.error
 
 	return (
 		<main className="flex min-h-screen flex-col">
@@ -172,7 +158,6 @@ export function LoginForm({ turnstileSiteKey }: LoginFormProps) {
 							</button>
 						</form>
 					) : (
-						<>
 						<form action={handlePasswordSubmit}>
 							<input type="hidden" name="callbackUrl" value={callbackUrl} />
 							<input type="hidden" name="email" value={email.trim()} />
@@ -190,6 +175,7 @@ export function LoginForm({ turnstileSiteKey }: LoginFormProps) {
 											setStep('email')
 											setPassword('')
 											setPasswordError(null)
+											setForgotPasswordError(null)
 										}}
 										className="text-sm text-[var(--accent)] hover:underline"
 									>
@@ -218,28 +204,15 @@ export function LoginForm({ turnstileSiteKey }: LoginFormProps) {
 								<button
 									type="button"
 									onClick={handleForgotPassword}
-									disabled={isPending || isMagicLinkPending}
+									disabled={isForgotPending}
 									className="text-sm text-[var(--accent)] hover:underline disabled:opacity-50"
 								>
-									{isMagicLinkPending ? 'Sending...' : 'Forgot password?'}
+									{isForgotPending ? 'Loading...' : 'Forgot password?'}
 								</button>
 							</div>
 
-							{showTurnstile && !turnstileToken && turnstileSiteKey && (
-								<div className="mb-4">
-									<Turnstile siteKey={turnstileSiteKey} onVerify={handleTurnstileVerify} />
-								</div>
-							)}
-
 							<SubmitButton>Login to Pantolingo</SubmitButton>
 						</form>
-
-						{/* Hidden form for magic link submission (outside password form to avoid nesting) */}
-						<form ref={magicLinkFormRef} action={magicLinkAction} className="hidden">
-							<input type="hidden" name="email" value={email.trim()} />
-							<input type="hidden" name="turnstileToken" value={turnstileToken || ''} />
-						</form>
-						</>
 					)}
 
 					<p className="mt-6 text-center text-sm text-[var(--text-muted)]">

@@ -13,8 +13,7 @@ export default auth((req) => {
 	if (
 		pathname === '/login' ||
 		pathname === '/signup' ||
-		pathname === '/login/check-email' ||
-		pathname === '/login/enter-code'
+		pathname === '/login/check-email'
 	) {
 		if (isLoggedIn && userName) {
 			return NextResponse.redirect(new URL('/dashboard', req.url))
@@ -55,7 +54,6 @@ export const config = {
 		'/dashboard/:path*',
 		'/login',
 		'/login/check-email',
-		'/login/enter-code',
 		'/signup',
 		'/onboarding',
 	],

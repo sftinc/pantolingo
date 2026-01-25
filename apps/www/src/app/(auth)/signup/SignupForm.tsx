@@ -1,31 +1,30 @@
 'use client'
 
-import { useState, useActionState } from 'react'
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { FormInput } from '@/components/ui/FormInput'
-import { SubmitButton } from '@/components/ui/SubmitButton'
+import { Spinner } from '@/components/ui/Spinner'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
-import { Turnstile } from '@/components/ui/Turnstile'
-import { sendMagicLink, type AuthActionState } from '@/actions/auth'
+import { prepareVerification } from '@/actions/auth'
 import { isValidEmail } from '@/lib/validation'
 
-interface SignupFormProps {
-	turnstileSiteKey: string
-}
-
-export function SignupForm({ turnstileSiteKey }: SignupFormProps) {
+export function SignupForm() {
+	const router = useRouter()
 	const [email, setEmail] = useState('')
 	const [emailError, setEmailError] = useState<string | null>(null)
-	const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
-	const [state, formAction] = useActionState<AuthActionState, FormData>(sendMagicLink, null)
+	const [serverError, setServerError] = useState<string | null>(null)
+	const [isPending, startTransition] = useTransition()
 
 	const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setEmail(e.target.value)
 		setEmailError(null)
+		setServerError(null)
 	}
 
-	const handleSubmit = (formData: FormData) => {
-		const emailValue = (formData.get('email') as string)?.trim()
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault()
+		const emailValue = email.trim()
 		if (!emailValue) {
 			setEmailError('Email is required')
 			return
@@ -34,13 +33,18 @@ export function SignupForm({ turnstileSiteKey }: SignupFormProps) {
 			setEmailError('Please enter a valid email address')
 			return
 		}
-		if (turnstileToken) {
-			formData.set('turnstileToken', turnstileToken)
-		}
-		formAction(formData)
+
+		startTransition(async () => {
+			const result = await prepareVerification(emailValue)
+			if (result.error) {
+				setServerError(result.error)
+			} else {
+				router.push('/signup/verify')
+			}
+		})
 	}
 
-	const error = emailError || state?.error
+	const error = emailError || serverError
 
 	return (
 		<main className="flex min-h-screen flex-col">
@@ -60,7 +64,7 @@ export function SignupForm({ turnstileSiteKey }: SignupFormProps) {
 						<div className="mb-4 p-3 bg-[var(--error)]/10 text-[var(--error)] rounded-md text-sm">{error}</div>
 					)}
 
-					<form action={handleSubmit}>
+					<form onSubmit={handleSubmit}>
 						<FormInput
 							id="email"
 							name="email"
@@ -73,12 +77,13 @@ export function SignupForm({ turnstileSiteKey }: SignupFormProps) {
 							onChange={handleEmailChange}
 							className="mb-4"
 						/>
-						{turnstileSiteKey && (
-							<div className="mb-4">
-								<Turnstile siteKey={turnstileSiteKey} onVerify={setTurnstileToken} />
-							</div>
-						)}
-						<SubmitButton>Continue</SubmitButton>
+						<button
+							type="submit"
+							disabled={isPending}
+							className="w-full py-3 bg-[var(--accent)] text-white rounded-md font-medium hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+						>
+							{isPending ? <Spinner size="sm" /> : 'Continue'}
+						</button>
 					</form>
 
 					<p className="mt-6 text-center text-sm text-[var(--text-muted)]">

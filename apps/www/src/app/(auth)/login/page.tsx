@@ -1,13 +1,10 @@
 import { Suspense } from 'react'
-import { getTurnstileSiteKey } from '@/lib/turnstile'
 import { LoginForm } from './LoginForm'
 
 export default function LoginPage() {
-	const turnstileSiteKey = getTurnstileSiteKey()
-
 	return (
 		<Suspense fallback={<LoginSkeleton />}>
-			<LoginForm turnstileSiteKey={turnstileSiteKey} />
+			<LoginForm />
 		</Suspense>
 	)
 }

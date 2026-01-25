@@ -9,7 +9,7 @@
  * request overwrites the cookie. This is acceptable - the latest auth flow wins.
  */
 
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { encode, decode } from 'next-auth/jwt'
 
 export const EMAIL_JWT_COOKIE = 'pantolingo-email-jwt'
@@ -71,7 +71,6 @@ export async function verifyEmailJwt(token: string): Promise<string | null> {
 
 		return decoded.email
 	} catch {
-		// Token expired or invalid
 		return null
 	}
 }
@@ -83,11 +82,14 @@ export async function verifyEmailJwt(token: string): Promise<string | null> {
  */
 export async function setEmailJwtCookie(jwt: string): Promise<void> {
 	const cookieStore = await cookies()
+	const headerStore = await headers()
+	const host = headerStore.get('host') || ''
+	const isLocalhost = host.startsWith('localhost') || host.startsWith('127.0.0.1')
 	cookieStore.set(EMAIL_JWT_COOKIE, jwt, {
 		httpOnly: true,
-		secure: process.env.NODE_ENV === 'production',
+		secure: !isLocalhost,
 		sameSite: 'lax',
-		path: '/login',
+		path: '/',
 		maxAge: EMAIL_JWT_MAX_AGE,
 	})
 }
@@ -95,12 +97,21 @@ export async function setEmailJwtCookie(jwt: string): Promise<void> {
 /**
  * Get the email JWT from the HTTP-only cookie
  *
+ * Note: We read from the raw Cookie header instead of using cookies() API
+ * because cookies() can return stale/empty values in certain Next.js render contexts.
+ *
  * @returns The JWT string if present, null otherwise
  */
 export async function getEmailJwtFromCookie(): Promise<string | null> {
-	const cookieStore = await cookies()
-	const cookie = cookieStore.get(EMAIL_JWT_COOKIE)
-	return cookie?.value ?? null
+	const headerStore = await headers()
+	const cookieHeader = headerStore.get('cookie') || ''
+
+	// Parse the cookie header manually to get our specific cookie
+	const cookiePairs = cookieHeader.split(';').map((c) => c.trim())
+	const ourCookie = cookiePairs.find((c) => c.startsWith(`${EMAIL_JWT_COOKIE}=`))
+	const value = ourCookie ? ourCookie.substring(EMAIL_JWT_COOKIE.length + 1) : null
+
+	return value || null
 }
 
 /**
@@ -108,5 +119,5 @@ export async function getEmailJwtFromCookie(): Promise<string | null> {
  */
 export async function clearEmailJwtCookie(): Promise<void> {
 	const cookieStore = await cookies()
-	cookieStore.delete({ name: EMAIL_JWT_COOKIE, path: '/login' })
+	cookieStore.delete({ name: EMAIL_JWT_COOKIE, path: '/' })
 }

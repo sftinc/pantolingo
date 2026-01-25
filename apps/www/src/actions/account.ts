@@ -2,17 +2,16 @@
 
 import { auth } from '@/lib/auth'
 import { pool } from '@pantolingo/db/pool'
-import { redirect } from 'next/navigation'
 import { validatePassword, hashPassword } from '@/lib/password'
 
 const MAX_NAME_LENGTH = 50
 
-export type AccountActionState = { error?: string } | null
+export type AccountActionState = { error?: string; redirectUrl?: string } | null
 
 /**
  * Complete onboarding by setting name and password
  * Signature is compatible with useActionState: (prevState, formData) => Promise<state>
- * On success, redirects to /dashboard (throws, never returns)
+ * On success, returns { redirectUrl: '/dashboard' } for client-side navigation
  */
 export async function completeOnboarding(
 	_prevState: AccountActionState,
@@ -68,5 +67,5 @@ export async function completeOnboarding(
 		return { error: 'Failed to save account' }
 	}
 
-	redirect('/dashboard')
+	return { redirectUrl: '/dashboard' }
 }

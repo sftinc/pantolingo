@@ -3,6 +3,9 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { getEmailJwtFromCookie, verifyEmailJwt } from '@/lib/auth-jwt'
 import { EnterCodeForm } from './EnterCodeForm'
 
+// Force dynamic rendering to ensure fresh cookie reads
+export const dynamic = 'force-dynamic'
+
 export default async function EnterCodePage() {
 	// Read JWT from HTTP-only cookie and verify
 	const emailJwt = await getEmailJwtFromCookie()

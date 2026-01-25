@@ -38,7 +38,7 @@ export function SmtpProvider(): EmailConfig {
 			const result = await sendEmail({
 				from: emailFrom,
 				to: identifier,
-				subject: 'Your login code for PantoLingo',
+				subject: 'Your login code for Pantolingo',
 				text: `Your login code is: ${code}\n\nOr click to sign in to Pantolingo:\n\n${magicLinkUrl}\n\nThis link and code will only be valid for the next 10 minutes.`,
 				html: `
 <!DOCTYPE html>
@@ -49,12 +49,12 @@ export function SmtpProvider(): EmailConfig {
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 40px 20px; background: #f5f5f5;">
   <div style="max-width: 400px; margin: 0 auto; background: white; border-radius: 8px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-    <h1 style="margin: 0 0 24px; font-size: 24px; color: #333;">Your login code for PantoLingo</h1>
+    <h1 style="margin: 0 0 24px; font-size: 24px; color: #333;">Your login code for Pantolingo</h1>
     <p style="margin: 0 0 24px; color: #666; line-height: 1.5;">
       Click the button below to sign in to your account, or enter the code manually.
     </p>
     <a href="${magicLinkUrl}" style="display: inline-block; background: #0070f3; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 500;">
-      Login to PantoLingo
+      Login to Pantolingo
     </a>
     <div style="margin: 24px 0; padding: 20px; background: #f8f9fa; border-radius: 6px; text-align: center;">
       <p style="margin: 0 0 8px; font-size: 14px; color: #666;">Or enter this code:</p>

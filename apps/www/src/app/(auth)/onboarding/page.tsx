@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useActionState } from 'react'
+import { useState, useActionState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { completeOnboarding, type AccountActionState } from '@/actions/account'
 import { getPasswordRules, type PasswordRules } from '@/lib/password'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
@@ -35,6 +36,7 @@ function PasswordRulesList({ rules, password }: { rules: PasswordRules; password
 }
 
 export default function OnboardingPage() {
+	const router = useRouter()
 	const [password, setPassword] = useState('')
 	const rules = getPasswordRules(password)
 
@@ -42,6 +44,13 @@ export default function OnboardingPage() {
 		completeOnboarding,
 		null
 	)
+
+	// Handle redirect after successful onboarding
+	useEffect(() => {
+		if (state?.redirectUrl) {
+			router.push(state.redirectUrl)
+		}
+	}, [state, router])
 
 	return (
 		<main className="flex min-h-screen flex-col">
