@@ -5,11 +5,11 @@ interface Breadcrumb {
 	href?: string
 }
 
-interface DashboardNavProps {
+interface BreadcrumbNavProps {
 	breadcrumbs: Breadcrumb[]
 }
 
-export function DashboardNav({ breadcrumbs }: DashboardNavProps) {
+export function BreadcrumbNav({ breadcrumbs }: BreadcrumbNavProps) {
 	return (
 		<nav className="mb-6">
 			<ol className="flex items-center gap-2 text-sm">

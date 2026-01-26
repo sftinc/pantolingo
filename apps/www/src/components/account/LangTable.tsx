@@ -34,7 +34,7 @@ export function LangTable({ langs, websiteId }: LangTableProps) {
 					<TableRow
 						key={lang.targetLang}
 						clickable
-						onClick={() => router.push(`/dashboard/website/${websiteId}/lang/${lang.targetLang}`)}
+						onClick={() => router.push(`/account/website/${websiteId}/lang/${lang.targetLang}`)}
 					>
 						<TableCell className="font-medium">{getLanguageLabel(lang.targetLang)}</TableCell>
 						<TableCell className="text-right tabular-nums">

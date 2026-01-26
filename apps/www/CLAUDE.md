@@ -11,9 +11,9 @@ Next.js 16 app with Tailwind CSS v4 and React 19.
 -   `/auth/enter-code` - Manual 8-character code entry page
 -   `/auth/magic` - Magic link verification (redirects to `/api/auth/callback/smtp`)
 -   `/onboarding` - Name setup for new users
--   `/dashboard` - Websites overview with segment/path counts
--   `/dashboard/website/[id]` - Language list for a website
--   `/dashboard/website/[id]/lang/[langCd]` - Translation editor for segments and paths
+-   `/account` - Websites overview with segment/path counts
+-   `/account/website/[id]` - Language list for a website
+-   `/account/website/[id]/lang/[langCd]` - Translation editor for segments and paths
 
 ## Auth Flow
 
@@ -25,7 +25,7 @@ The auth flow uses a shared cookie (`pantolingo-auth`) scoped to `/auth` paths t
 3. Redirect to `/auth/verify` → Turnstile verification
 4. On success, magic link email sent → redirect to `/auth/check-email`
 5. User clicks email link OR enters code on `/auth/enter-code`
-6. `/auth/magic` redirects to NextAuth callback → dashboard
+6. `/auth/magic` redirects to NextAuth callback → account
 
 ## Clean URLs
 
@@ -53,19 +53,19 @@ src/
 │   │   │   └── error/          # /login/error - auth errors
 │   │   ├── signup/             # /signup - email input
 │   │   └── onboarding/         # /onboarding - name setup
-│   ├── (dashboard)/            # Customer dashboard
-│   │   └── dashboard/
-│   │       ├── page.tsx                        # /dashboard - websites overview
+│   ├── (account)/              # Customer account
+│   │   └── account/
+│   │       ├── page.tsx                        # /account - websites overview
 │   │       └── website/[id]/
-│   │           ├── page.tsx                    # /dashboard/website/:id - language list
-│   │           └── lang/[langCd]/page.tsx      # /dashboard/website/:id/lang/:langCd - translations
+│   │           ├── page.tsx                    # /account/website/:id - language list
+│   │           └── lang/[langCd]/page.tsx      # /account/website/:id/lang/:langCd - translations
 │   ├── api/
 │   │   └── auth/[...nextauth]/ # NextAuth API routes
 │   └── healthz/                # Health check endpoint
 ├── actions/                    # Server actions
 ├── components/
 │   ├── ui/                     # Reusable UI (Modal, Table, Badge, Lexical editor)
-│   └── dashboard/              # Dashboard-specific (SegmentEditModal, PathEditModal, tables)
+│   └── account/                # Account-specific (SegmentEditModal, PathEditModal, tables)
 ├── lib/                        # Utilities (auth, db queries)
 ├── proxy.ts                    # Auth middleware (route protection)
 └── types/                      # TypeScript type extensions

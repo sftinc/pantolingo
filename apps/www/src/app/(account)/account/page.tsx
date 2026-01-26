@@ -1,11 +1,11 @@
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { getWebsitesWithStats } from '@pantolingo/db'
-import { WebsiteCard } from '@/components/dashboard/WebsiteCard'
+import { WebsiteCard } from '@/components/account/WebsiteCard'
 
 export const dynamic = 'force-dynamic'
 
-export default async function DashboardPage() {
+export default async function AccountPage() {
 	const session = await auth()
 
 	if (!session) {

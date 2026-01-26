@@ -190,8 +190,10 @@ function serializeDOMToValue(node: Node): string {
 		if (child.nodeType === Node.TEXT_NODE) {
 			result += child.textContent || ''
 		} else if (child instanceof HTMLElement) {
-			// Skip cursor anchor spans (contain ZWSP for cursor positioning)
+			// Cursor anchor spans contain ZWSP for cursor positioning
+			// But user text might end up inside them, so extract it (minus the ZWSP)
 			if (child.dataset.cursorAnchor !== undefined) {
+				result += child.textContent?.replace(/\u200B/g, '') || ''
 				continue
 			}
 

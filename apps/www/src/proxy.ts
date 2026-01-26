@@ -12,14 +12,14 @@ export default auth((req) => {
 	const isLoggedIn = !!req.auth
 	const userName = req.auth?.user?.name
 
-	// Auth pages - redirect to dashboard if already logged in
+	// Auth pages - redirect to account if already logged in
 	if (
 		pathname === '/login' ||
 		pathname === '/signup' ||
 		pathname.startsWith('/auth/')
 	) {
 		if (isLoggedIn && userName) {
-			return NextResponse.redirect(new URL('/dashboard', req.url))
+			return NextResponse.redirect(new URL('/account', req.url))
 		}
 		return NextResponse.next()
 	}
@@ -29,15 +29,15 @@ export default auth((req) => {
 		if (!isLoggedIn) {
 			return NextResponse.redirect(new URL('/login', req.url))
 		}
-		// If they already have a name, send to dashboard
+		// If they already have a name, send to account
 		if (userName) {
-			return NextResponse.redirect(new URL('/dashboard', req.url))
+			return NextResponse.redirect(new URL('/account', req.url))
 		}
 		return NextResponse.next()
 	}
 
-	// Dashboard routes - require session with name
-	if (pathname.startsWith('/dashboard')) {
+	// Account routes - require session with name
+	if (pathname.startsWith('/account')) {
 		if (!isLoggedIn) {
 			const callbackUrl = encodeURIComponent(pathname + req.nextUrl.search)
 			return NextResponse.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, req.url))
@@ -46,7 +46,7 @@ export default auth((req) => {
 		if (!userName) {
 			return NextResponse.redirect(new URL('/onboarding', req.url))
 		}
-		// Clear auth cookie on authenticated dashboard access (cleanup after auth flow)
+		// Clear auth cookie on authenticated account access (cleanup after auth flow)
 		const response = NextResponse.next()
 		response.cookies.delete({ name: AUTH_COOKIE_NAME, path: '/auth' })
 		return response
@@ -57,7 +57,7 @@ export default auth((req) => {
 
 export const config = {
 	matcher: [
-		'/dashboard/:path*',
+		'/account/:path*',
 		'/login',
 		'/signup',
 		'/onboarding',

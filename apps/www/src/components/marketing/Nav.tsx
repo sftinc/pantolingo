@@ -46,10 +46,10 @@ export function Nav({ isAuthenticated }: NavProps) {
 						<ThemeToggle />
 						{isAuthenticated ? (
 							<Link
-								href="/dashboard"
+								href="/account"
 								className="text-sm px-3 py-1.5 rounded-md border border-[var(--border)] text-[var(--text-heading)] hover:bg-[var(--border)] transition"
 							>
-								Dashboard
+								Account
 							</Link>
 						) : (
 							<>
@@ -100,11 +100,11 @@ export function Nav({ isAuthenticated }: NavProps) {
 							<div className="pt-4 border-t border-[var(--border)] flex flex-col gap-4">
 								{isAuthenticated ? (
 									<Link
-										href="/dashboard"
+										href="/account"
 										onClick={() => setMenuOpen(false)}
 										className="text-sm px-3 py-1.5 rounded-md border border-[var(--border)] text-[var(--text-heading)] hover:bg-[var(--border)] transition text-center"
 									>
-										Dashboard
+										Account
 									</Link>
 								) : (
 									<>

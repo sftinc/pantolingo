@@ -8,9 +8,9 @@ import {
 	getSegmentsForLang,
 	getPathsForLang,
 } from '@pantolingo/db'
-import { DashboardNav } from '@/components/dashboard/DashboardNav'
-import { SegmentTable } from '@/components/dashboard/SegmentTable'
-import { PathTable } from '@/components/dashboard/PathTable'
+import { BreadcrumbNav } from '@/components/account/BreadcrumbNav'
+import { SegmentTable } from '@/components/account/SegmentTable'
+import { PathTable } from '@/components/account/PathTable'
 import { Toggle } from '@/components/ui/Toggle'
 import { PathSelect } from '@/components/ui/PathSelect'
 import { Pagination } from '@/components/ui/Pagination'
@@ -61,7 +61,7 @@ export default async function LangDetailPage({ params, searchParams }: LangDetai
 	// Invalid language for this website - redirect to website page
 	const validLang = await isValidLangForWebsite(websiteId, langCd)
 	if (!validLang) {
-		redirect(`/dashboard/website/${websiteId}`)
+		redirect(`/account/website/${websiteId}`)
 	}
 
 	const validView = view === 'paths' ? 'paths' : 'segments'
@@ -82,16 +82,16 @@ export default async function LangDetailPage({ params, searchParams }: LangDetai
 
 	// Build path param string for URLs
 	const pathParam = pathId !== undefined ? `&path=${pathId}` : ''
-	const baseUrl = `/dashboard/website/${websiteId}/lang/${langCd}?view=${validView}&filter=${validFilter}${pathParam}`
+	const baseUrl = `/account/website/${websiteId}/lang/${langCd}?view=${validView}&filter=${validFilter}${pathParam}`
 
 	return (
 		<div>
-			<DashboardNav
+			<BreadcrumbNav
 				breadcrumbs={[
-					{ label: 'Dashboard', href: '/dashboard' },
+					{ label: 'Account', href: '/account' },
 					{
 						label: `${website.hostname} ${getFlag(website.sourceLang)}`,
-						href: `/dashboard/website/${websiteId}`,
+						href: `/account/website/${websiteId}`,
 					},
 					{ label: `${getLanguageLabel(langCd)} (${formatNumber(data.total)})` },
 				]}
@@ -105,7 +105,7 @@ export default async function LangDetailPage({ params, searchParams }: LangDetai
 						{ value: 'paths', label: 'Paths' },
 					]}
 					value={validView}
-					baseUrl={`/dashboard/website/${websiteId}/lang/${langCd}?filter=${validFilter}`}
+					baseUrl={`/account/website/${websiteId}/lang/${langCd}?filter=${validFilter}`}
 					paramName="view"
 				/>
 				<Toggle
@@ -114,14 +114,14 @@ export default async function LangDetailPage({ params, searchParams }: LangDetai
 						{ value: 'all', label: 'All' },
 					]}
 					value={validFilter}
-					baseUrl={`/dashboard/website/${websiteId}/lang/${langCd}?view=${validView}${pathParam}`}
+					baseUrl={`/account/website/${websiteId}/lang/${langCd}?view=${validView}${pathParam}`}
 					paramName="filter"
 				/>
 				{validView === 'segments' && (
 					<PathSelect
 						paths={pathOptions}
 						selectedPathId={pathId ?? null}
-						baseUrl={`/dashboard/website/${websiteId}/lang/${langCd}?view=${validView}&filter=${validFilter}`}
+						baseUrl={`/account/website/${websiteId}/lang/${langCd}?view=${validView}&filter=${validFilter}`}
 						className="ml-auto"
 					/>
 				)}

@@ -55,7 +55,7 @@ export async function prepareVerification(email: string, flow: AuthFlow): Promis
 
 /**
  * Send magic link to email
- * Magic links always redirect to /dashboard (no callbackUrl support)
+ * Magic links always redirect to /account (no callbackUrl support)
  * Reads email from auth cookie (set by prepareVerification)
  *
  * @param formData.turnstileToken - Cloudflare Turnstile token (required)
@@ -89,7 +89,7 @@ export async function sendMagicLink(
 		await signIn('smtp', {
 			email: authData.email,
 			redirect: false,
-			redirectTo: '/dashboard',
+			redirectTo: '/account',
 		})
 	} catch (error) {
 		if (error instanceof AuthError) {

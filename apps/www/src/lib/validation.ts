@@ -34,7 +34,7 @@ export function sanitizeInput(value: string): string | null {
  * Only allows relative URLs starting with / (but not //)
  * Returns fallback if URL is invalid or missing
  */
-export function getSafeCallbackUrl(url: string | null, fallback = '/dashboard'): string {
+export function getSafeCallbackUrl(url: string | null, fallback = '/account'): string {
 	if (!url) return fallback
 	if (url.startsWith('/') && !url.startsWith('//')) {
 		return url

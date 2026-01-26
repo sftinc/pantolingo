@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # IMPORTANT User Instructions
 
 - **Planning Agent**
-    - Include the plan name at the end of the plan: `Plan Name: {thePlanName}`
+    - Include the plan file name at the end of the plan: `Plan Name: {filename}` (use the actual file name assigned to the plan, not a made-up name)
 
 - **Linear Issues**: When creating future work items, create a Linear issue in the **PantoLingo** project and assign to **me**.
     - `## Summary` - describe the change(s)

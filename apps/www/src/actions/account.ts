@@ -11,7 +11,7 @@ export type AccountActionState = { error?: string; redirectUrl?: string } | null
 /**
  * Complete onboarding by setting name and password
  * Signature is compatible with useActionState: (prevState, formData) => Promise<state>
- * On success, returns { redirectUrl: '/dashboard' } for client-side navigation
+ * On success, returns { redirectUrl: '/account' } for client-side navigation
  */
 export async function completeOnboarding(
 	_prevState: AccountActionState,
@@ -67,5 +67,5 @@ export async function completeOnboarding(
 		return { error: 'Failed to save account' }
 	}
 
-	return { redirectUrl: '/dashboard' }
+	return { redirectUrl: '/account' }
 }

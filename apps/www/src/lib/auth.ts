@@ -10,6 +10,35 @@ import { verifyPassword } from './password'
 const authConfig = {
 	trustHost: true,
 	adapter: PantolingoAdapter(),
+	cookies: {
+		sessionToken: {
+			name: 'pantolingo-session',
+			options: {
+				httpOnly: true,
+				sameSite: 'lax' as const,
+				path: '/',
+				secure: process.env.NODE_ENV === 'production',
+			},
+		},
+		csrfToken: {
+			name: 'pantolingo-csrf',
+			options: {
+				httpOnly: true,
+				sameSite: 'lax' as const,
+				path: '/',
+				secure: process.env.NODE_ENV === 'production',
+			},
+		},
+		callbackUrl: {
+			name: 'pantolingo-callback',
+			options: {
+				httpOnly: true,
+				sameSite: 'lax' as const,
+				path: '/',
+				secure: process.env.NODE_ENV === 'production',
+			},
+		},
+	},
 	providers: [
 		SmtpProvider(),
 		Credentials({

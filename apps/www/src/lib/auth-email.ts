@@ -20,7 +20,7 @@ export function SmtpProvider(): EmailConfig {
 			}
 
 			// Simplify URL to just include token (email looked up server-side)
-			// From: /api/auth/callback/smtp?callbackUrl=https://domain.com/dashboard&token=xxx
+			// From: /api/auth/callback/smtp?callbackUrl=https://domain.com/account&token=xxx
 			// To:   /auth/magic?token=xxx
 			const parsed = new URL(url)
 			const token = parsed.searchParams.get('token')

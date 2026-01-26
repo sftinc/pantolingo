@@ -2,7 +2,7 @@ import { auth, signOut } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function AccountLayout({ children }: { children: React.ReactNode }) {
 	const session = await auth()
 
 	if (!session) {

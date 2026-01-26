@@ -2,8 +2,8 @@ import { notFound, redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { canAccessWebsite, getWebsiteById, getLangsForWebsite } from '@pantolingo/db'
 import { getFlag } from '@pantolingo/lang'
-import { DashboardNav } from '@/components/dashboard/DashboardNav'
-import { LangTable } from '@/components/dashboard/LangTable'
+import { BreadcrumbNav } from '@/components/account/BreadcrumbNav'
+import { LangTable } from '@/components/account/LangTable'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,9 +40,9 @@ export default async function WebsiteDetailPage({ params }: WebsiteDetailPagePro
 
 	return (
 		<div>
-			<DashboardNav
+			<BreadcrumbNav
 				breadcrumbs={[
-					{ label: 'Dashboard', href: '/dashboard' },
+					{ label: 'Account', href: '/account' },
 					{ label: `${website.hostname} ${getFlag(website.sourceLang)}` },
 				]}
 			/>

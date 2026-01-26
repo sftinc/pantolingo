@@ -1,8 +1,8 @@
 import { notFound, redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { canAccessWebsite, getWebsiteById } from '@pantolingo/db'
-import { DashboardNav } from '@/components/dashboard/DashboardNav'
-import { WebsiteSettingsForm } from '@/components/dashboard/WebsiteSettingsForm'
+import { BreadcrumbNav } from '@/components/account/BreadcrumbNav'
+import { WebsiteSettingsForm } from '@/components/account/WebsiteSettingsForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,10 +36,10 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 
 	return (
 		<div>
-			<DashboardNav
+			<BreadcrumbNav
 				breadcrumbs={[
-					{ label: 'Dashboard', href: '/dashboard' },
-					{ label: website.hostname, href: `/dashboard/website/${websiteId}` },
+					{ label: 'Account', href: '/account' },
+					{ label: website.hostname, href: `/account/website/${websiteId}` },
 					{ label: 'Settings' },
 				]}
 			/>
