@@ -5,7 +5,7 @@
 /**
  * Pattern type for text normalization during translation
  */
-export type PatternType = 'numeric' | 'pii'
+export type PatternType = 'numeric' | 'email' | 'uuid' | 'url'
 
 /**
  * Represents a pattern replacement (original values → placeholders)

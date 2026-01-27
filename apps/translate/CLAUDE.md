@@ -50,21 +50,27 @@ Placeholders preserve content that shouldn't be translated or needs special hand
 | Code | Purpose | Example |
 | ---- | ------- | ------- |
 | `N` | Numbers (integers, decimals, formatted) | `[N1]` for "1,234.56" |
-| `P` | PII - Email addresses (redacted for privacy) | `[P1]` for "user@example.com" |
+| `E` | Emails (redacted for privacy) | `[E1]` for "user@example.com" |
+| `I` | Identifiers - UUIDs | `[I1]` for "550e8400-e29b-..." |
+| `U` | URLs (with protocol) | `[U1]` for "https://example.com" |
 | `S` | Skip words - Brand names, proper nouns | `[S1]` for "eBay" |
+
+**Processing order by context**:
+- Segments: U → E → I → N (URLs first to capture embedded emails/UUIDs)
+- Paths: E → I → N (no URL extraction for pathnames)
 
 ### Key Files
 
 - `config.ts`: `HTML_TAG_MAP`, `VOID_TAGS`, `INLINE_TAGS`
 - `fetch/dom-placeholders.ts`: HTML → placeholder conversion
-- `translation/skip-patterns.ts`: N (numeric) and P (PII) patterns
+- `translation/skip-patterns.ts`: E (email), I (UUID), U (URL), N (numeric) patterns
 - `translation/skip-words.ts`: S (skip word) handling
 
 ## Translation Engine
 
 -   Uses OpenRouter API (configured in `translation/translate.ts`)
 -   Prompts defined in `translation/prompts.ts` (SEGMENT_PROMPT for text, PATHNAME_PROMPT for URLs)
--   Skip patterns in `translation/skip-patterns.ts` (PII, numeric, code detection)
+-   Skip patterns in `translation/skip-patterns.ts` (email, UUID, URL, numeric patterns)
 
 ## Cache Control
 

@@ -24,8 +24,10 @@
   --input-bg: #fff;
 
   /* Placeholder colors */
-  --ph-number: #7c3aed;
-  --ph-email: #0891b2;
+  --ph-number: #7c3aed;   /* violet-600 */
+  --ph-email: #0891b2;    /* cyan-600 */
+  --ph-id: #059669;       /* emerald-600 */
+  --ph-url: #d946ef;      /* fuchsia-500 */
   --ph-skip: #ea580c;
   --ph-void: #64748b;
   --ph-bold: #dc2626;

@@ -7,7 +7,7 @@ import React from 'react'
 // Types
 // ============================================================================
 
-export type StandaloneKind = 'N' | 'P' | 'S' | 'HV'
+export type StandaloneKind = 'N' | 'E' | 'I' | 'U' | 'S' | 'HV'
 export type PairedKind = 'HB' | 'HE' | 'HA' | 'HS' | 'HG'
 
 export type ASTNode =
@@ -30,12 +30,14 @@ export interface Token {
 
 export const PLACEHOLDER_REGEX = /\[(\/?[A-Z]+)(\d+)\]/g
 
-export const STANDALONE_KINDS: StandaloneKind[] = ['N', 'P', 'S', 'HV']
+export const STANDALONE_KINDS: StandaloneKind[] = ['N', 'E', 'I', 'U', 'S', 'HV']
 export const PAIRED_KINDS: PairedKind[] = ['HB', 'HE', 'HA', 'HS', 'HG']
 
 export const STANDALONE_LABELS: Record<StandaloneKind, string> = {
 	N: 'number',
-	P: 'email',
+	E: 'email',
+	I: 'id',
+	U: 'url',
 	S: 'skip',
 	HV: 'element',
 }
@@ -50,7 +52,9 @@ export const PAIRED_LABELS: Record<PairedKind, string> = {
 
 export const STANDALONE_COLORS: Record<StandaloneKind, string> = {
 	N: 'var(--ph-number)',
-	P: 'var(--ph-email)',
+	E: 'var(--ph-email)',
+	I: 'var(--ph-id)',
+	U: 'var(--ph-url)',
 	S: 'var(--ph-skip)',
 	HV: 'var(--ph-void)',
 }
