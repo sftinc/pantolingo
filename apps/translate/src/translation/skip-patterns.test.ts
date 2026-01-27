@@ -79,6 +79,33 @@ describe('applyPatterns', () => {
 			expect(result.replacements[0].values).toEqual(['https://example.com'])
 		})
 
+		it('replaces bare domain without protocol', () => {
+			const result = applyPatterns('Visit example.com for more info')
+			expect(result.normalized).toBe('Visit [U1] for more info')
+			expect(result.replacements[0].values).toEqual(['example.com'])
+		})
+
+		it('replaces bare domain with path', () => {
+			const result = applyPatterns('Check docs.example.com/guide')
+			expect(result.normalized).toBe('Check [U1]')
+			expect(result.replacements[0].values).toEqual(['docs.example.com/guide'])
+		})
+
+		it('does not extract domain from email address', () => {
+			const result = applyPatterns('Contact user@example.com for help')
+			// Should capture as email, not URL - the domain should NOT be extracted
+			expect(result.normalized).toBe('Contact [E1] for help')
+			expect(result.replacements).toHaveLength(1)
+			expect(result.replacements[0].pattern).toBe('email')
+		})
+
+		it('handles email and bare domain in same text', () => {
+			const result = applyPatterns('Email user@test.com or visit example.com')
+			expect(result.normalized).toBe('Email [E1] or visit [U1]')
+			expect(result.replacements.find(r => r.pattern === 'url')?.values).toEqual(['example.com'])
+			expect(result.replacements.find(r => r.pattern === 'email')?.values).toEqual(['user@test.com'])
+		})
+
 		it('replaces URL with path and query', () => {
 			const result = applyPatterns('See https://example.com/path?query=value')
 			expect(result.normalized).toBe('See [U1]')
@@ -95,6 +122,12 @@ describe('applyPatterns', () => {
 			const result = applyPatterns('See https://a.com, https://b.com.')
 			expect(result.normalized).toBe('See [U1], [U2].')
 			expect(result.replacements[0].values).toEqual(['https://a.com', 'https://b.com'])
+		})
+
+		it('strips trailing period from bare domain', () => {
+			const result = applyPatterns('Visit example.com.')
+			expect(result.normalized).toBe('Visit [U1].')
+			expect(result.replacements[0].values).toEqual(['example.com'])
 		})
 
 		it('replaces localhost URL', () => {

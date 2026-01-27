@@ -104,7 +104,7 @@ The `PlaceholderEditor` component renders and validates placeholders in translat
 | `N` | number | Numbers (e.g., "1,234.56") |
 | `E` | email | Email addresses (redacted for privacy) |
 | `I` | id | Identifiers - UUIDs |
-| `U` | url | URLs (with protocol) |
+| `U` | url | URLs (with or without protocol) |
 | `S` | skip | Brand names, proper nouns |
 
 ### Key Files

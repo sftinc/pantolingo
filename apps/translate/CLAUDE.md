@@ -52,7 +52,7 @@ Placeholders preserve content that shouldn't be translated or needs special hand
 | `N` | Numbers (integers, decimals, formatted) | `[N1]` for "1,234.56" |
 | `E` | Emails (redacted for privacy) | `[E1]` for "user@example.com" |
 | `I` | Identifiers - UUIDs | `[I1]` for "550e8400-e29b-..." |
-| `U` | URLs (with protocol) | `[U1]` for "https://example.com" |
+| `U` | URLs (with or without protocol) | `[U1]` for "https://example.com" or "example.com" |
 | `S` | Skip words - Brand names, proper nouns | `[S1]` for "eBay" |
 
 **Processing order by context**:

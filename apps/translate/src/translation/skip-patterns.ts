@@ -8,7 +8,7 @@
  * Current patterns:
  * - [E] for emails (e.g., "user@example.com")
  * - [I] for identifiers - UUIDs (e.g., "550e8400-e29b-41d4-a716-446655440000")
- * - [U] for URLs (e.g., "https://example.com/path")
+ * - [U] for URLs (e.g., "https://example.com/path", "example.com")
  * - [N] for numbers (e.g., "123.45", "1,000")
  *
  * Processing order by context:
@@ -32,10 +32,10 @@ const EMAIL_PLACEHOLDER_PREFIX = '[E'
 const UUID_PATTERN = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi
 const UUID_PLACEHOLDER_PREFIX = '[I'
 
-// URL pattern: strict mode requires protocol prefix (http:// or https://)
-// This prevents matching bare domains from emails (e.g., example.com from user@example.com)
+// URL pattern: non-strict mode matches bare domains (e.g., example.com) without protocol
+// The replacement logic skips matches preceded by @ to avoid capturing email domains
 const URL_PATTERN = urlRegexSafe({
-	strict: true,
+	strict: false,
 	auth: false,
 	localhost: true,
 	parens: false,
@@ -103,7 +103,16 @@ export function applyPatterns(
 		const urlValues: string[] = []
 		let urlIndex = 1
 
-		normalized = normalized.replace(URL_PATTERN, (match) => {
+		normalized = normalized.replace(URL_PATTERN, (...args) => {
+			const match = args[0] as string
+			// Offset is second-to-last argument (before string and groups)
+			const offset = args[args.length - 2] as number
+
+			// Skip if preceded by @ (this is part of an email address, not a standalone URL)
+			if (offset > 0 && normalized[offset - 1] === '@') {
+				return match
+			}
+
 			// Strip trailing punctuation that's not part of the URL
 			const cleanUrl = match.replace(TRAILING_PUNCTUATION, '')
 			const trailingPunct = match.slice(cleanUrl.length)
