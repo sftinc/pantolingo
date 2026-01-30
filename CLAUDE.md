@@ -94,8 +94,8 @@ See app-specific CLAUDE.md files for additional environment variables.
 Uses **Vitest** for unit and integration tests.
 
 ```bash
-pnpm test          # Run all tests once
-pnpm test:watch    # Watch mode (re-runs on file changes)
+pnpm test          # Run unit tests once
+pnpm test:watch    # Watch mode (re-runs tests on file changes)
 ```
 
 ### Test File Conventions
