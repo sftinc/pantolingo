@@ -43,12 +43,9 @@ export {
 	type Website,
 	type WebsiteWithSettings,
 	type PathOption,
-	type ActivityType,
-	type ActivityChange,
-	type EditChanges,
-	type SegmentEditDetails,
-	type PathEditDetails,
-	type ActivityDetails,
+	type ChangelogType,
+	type ChangelogItem,
+	type ChangelogChange,
 } from './dashboard.js'
 export { recordLlmUsage } from './usage.js'
 export type { LlmFeature, TokenUsage, LlmUsageRecord } from './types.js'

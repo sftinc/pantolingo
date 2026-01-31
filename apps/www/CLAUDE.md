@@ -114,42 +114,50 @@ The `PlaceholderEditor` component renders and validates placeholders in translat
 - `components/ui/placeholder-shared.ts` - Labels, colors, tokenizer, AST parser
 - `components/ui/placeholder-utils.ts` - Validation logic
 
-## Activity Tracking
+## Changelog Tracking
 
-Translation edits are tracked in the `log_activity` table. Activity records are created when translation text or reviewed status changes.
+Translation edits are tracked in the `changelog` table. Records are created when translation text or reviewed status changes.
 
-### Activity Types
+### Changelog Types
 
 | Type | Description |
 | ---- | ----------- |
-| `segment_edit` | Segment translation text changed |
-| `path_edit` | Path translation text changed |
+| `segment` | Segment translation changed |
+| `path` | Path translation changed |
+| `setting` | Website setting changed (future) |
 
-### Details Schema
+### Change Schema
+
+The `change` column is a JSONB array of `ChangelogItem` objects, supporting batch operations:
 
 ```typescript
-// segment_edit
-{
-  translation_segment_id: number
-  lang: string
-  changes: {
-    text?: { old: string, new: string }
-    reviewed?: { old: boolean, new: boolean }
-  }
+interface ChangelogItem {
+  table: string                                    // e.g., 'translation_segment'
+  pk: Record<string, unknown>                      // e.g., { id: 123 }
+  columns: Record<string, { old: unknown; new: unknown }>
 }
 
-// path_edit
-{
-  translation_path_id: number
-  lang: string
-  changes: {
-    text?: { old: string, new: string }
-    reviewed?: { old: boolean, new: boolean }
+// Example: segment edit
+[{
+  table: 'translation_segment',
+  pk: { id: 456 },
+  columns: {
+    translated_text: { old: 'Hello', new: 'Hola' },
+    reviewed: { old: false, new: true }
   }
-}
+}]
+
+// Example: path edit
+[{
+  table: 'translation_path',
+  pk: { id: 789 },
+  columns: {
+    translated_path: { old: '/about', new: '/acerca-de' }
+  }
+}]
 ```
 
-Activity is logged when text OR reviewed status changes (or both). Both keys are optional.
+Records are logged when text OR reviewed status changes (or both). Only changed columns are included.
 
 ### Key Files
 

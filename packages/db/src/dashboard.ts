@@ -67,32 +67,16 @@ export interface PathOption {
 	path: string
 }
 
-// Activity types for tracking translation edits
-export type ActivityType = 'segment_edit' | 'path_edit'
+// Changelog types for tracking translation edits
+export type ChangelogType = 'segment' | 'path' | 'setting'
 
-export interface ActivityChange<T> {
-	old: T
-	new: T
+export interface ChangelogItem {
+	table: string
+	pk: Record<string, unknown> // flexible for composite keys
+	columns: Record<string, { old: unknown; new: unknown }>
 }
 
-export interface EditChanges {
-	text?: ActivityChange<string>
-	reviewed?: ActivityChange<boolean>
-}
-
-export interface SegmentEditDetails {
-	translation_segment_id: number
-	lang: string
-	changes: EditChanges
-}
-
-export interface PathEditDetails {
-	translation_path_id: number
-	lang: string
-	changes: EditChanges
-}
-
-export type ActivityDetails = SegmentEditDetails | PathEditDetails
+export type ChangelogChange = ChangelogItem[]
 
 // =============================================================================
 // Authorization
@@ -505,24 +489,25 @@ export async function updateSegmentTranslation(
 			[websiteId, websiteSegmentId, lang, translatedText, reviewed]
 		)
 
-		// Insert activity record if text or reviewed changed
+		// Insert changelog record if text or reviewed changed
 		if ((textChanged || reviewedChanged) && translationSegmentId) {
-			const changes: EditChanges = {}
+			const change: ChangelogChange = [
+				{
+					table: 'translation_segment',
+					pk: { id: translationSegmentId },
+					columns: {},
+				},
+			]
 			if (textChanged) {
-				changes.text = { old: previousText, new: translatedText }
+				change[0].columns.translated_text = { old: previousText, new: translatedText }
 			}
 			if (reviewedChanged) {
-				changes.reviewed = { old: wasReviewed, new: reviewed as boolean }
-			}
-			const details: SegmentEditDetails = {
-				translation_segment_id: translationSegmentId,
-				lang,
-				changes,
+				change[0].columns.reviewed = { old: wasReviewed, new: reviewed as boolean }
 			}
 			await client.query(
-				`INSERT INTO log_activity (website_id, account_id, type, details)
+				`INSERT INTO changelog (website_id, account_id, type, change)
 				 VALUES ($1, $2, $3, $4)`,
-				[websiteId, accountId, 'segment_edit', JSON.stringify(details)]
+				[websiteId, accountId, 'segment', JSON.stringify(change)]
 			)
 		}
 
@@ -606,24 +591,25 @@ export async function updatePathTranslation(
 			[websiteId, websitePathId, lang, translatedPath, reviewed]
 		)
 
-		// Insert activity record if text or reviewed changed
+		// Insert changelog record if text or reviewed changed
 		if ((textChanged || reviewedChanged) && translationPathId) {
-			const changes: EditChanges = {}
+			const change: ChangelogChange = [
+				{
+					table: 'translation_path',
+					pk: { id: translationPathId },
+					columns: {},
+				},
+			]
 			if (textChanged) {
-				changes.text = { old: previousPath, new: translatedPath }
+				change[0].columns.translated_path = { old: previousPath, new: translatedPath }
 			}
 			if (reviewedChanged) {
-				changes.reviewed = { old: wasReviewed, new: reviewed as boolean }
-			}
-			const details: PathEditDetails = {
-				translation_path_id: translationPathId,
-				lang,
-				changes,
+				change[0].columns.reviewed = { old: wasReviewed, new: reviewed as boolean }
 			}
 			await client.query(
-				`INSERT INTO log_activity (website_id, account_id, type, details)
+				`INSERT INTO changelog (website_id, account_id, type, change)
 				 VALUES ($1, $2, $3, $4)`,
-				[websiteId, accountId, 'path_edit', JSON.stringify(details)]
+				[websiteId, accountId, 'path', JSON.stringify(change)]
 			)
 		}
 
