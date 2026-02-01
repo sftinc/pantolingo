@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { htmlToPlaceholders, placeholdersToHtml } from './dom-placeholders.js'
+import { htmlToPlaceholders, placeholdersToHtml } from './placeholders.js'
 
 describe('htmlToPlaceholders', () => {
   describe('truly empty tags → void', () => {

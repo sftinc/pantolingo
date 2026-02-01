@@ -6,8 +6,8 @@
 
 import { TRANSLATE_ATTRS } from '../config.js'
 import type { Content } from '../types.js'
-import { placeholdersToHtml } from './dom-placeholders.js'
-import { shouldSkipNode, isInsideGroupedElement } from './dom-utils.js'
+import { placeholdersToHtml } from './placeholders.js'
+import { shouldSkipNode, isInsideGroupedElement } from './utils.js'
 
 /**
  * Apply translations to grouped HTML segments

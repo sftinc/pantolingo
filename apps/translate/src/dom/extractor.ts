@@ -6,8 +6,8 @@
 
 import { TRANSLATE_ATTRS, BLOCK_TAGS } from '../config.js'
 import type { Content } from '../types.js'
-import { isGroupableElement, htmlToPlaceholders, containsText } from './dom-placeholders.js'
-import { shouldSkipNode, isInsideGroupedElement } from './dom-utils.js'
+import { isGroupableElement, htmlToPlaceholders, containsText } from './placeholders.js'
+import { shouldSkipNode, isInsideGroupedElement } from './utils.js'
 
 /**
  * Extract grouped block elements as single segments with HTML placeholders

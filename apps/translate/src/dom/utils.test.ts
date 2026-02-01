@@ -5,7 +5,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { parseHTML } from 'linkedom'
-import { shouldSkipNode } from './dom-utils.js'
+import { shouldSkipNode } from './utils.js'
 
 // Helper to create a document with the given HTML
 function createDocument(html: string): Document {

@@ -5,12 +5,12 @@
  */
 
 import type { Request, Response } from 'express'
-import type { PatternizedText, Content } from './types.js'
-import { parseHTMLDocument } from './fetch/dom-parser.js'
-import { extractSegments, extractLinkPathnames } from './fetch/dom-extractor.js'
-import { applyTranslations } from './fetch/dom-applicator.js'
-import { rewriteLinks } from './fetch/dom-rewriter.js'
-import { addLangMetadata } from './fetch/dom-metadata.js'
+import type { Content } from './types.js'
+import { parseHTMLDocument } from './dom/parser.js'
+import { extractSegments, extractLinkPathnames } from './dom/extractor.js'
+import { applyTranslations } from './dom/applicator.js'
+import { rewriteLinks } from './dom/rewriter.js'
+import { addLangMetadata } from './dom/metadata.js'
 import { translateSegments } from './translation/translate-segments.js'
 import { applyPatterns, restorePatterns } from './translation/skip-patterns.js'
 import {
@@ -19,10 +19,11 @@ import {
 	denormalizePathname,
 	translatePathnamesBatch,
 } from './translation/translate-pathnames.js'
-import { isStaticAsset } from './utils.js'
-import { prepareResponseHeaders } from './fetch/filter-headers.js'
+import { prepareResponseHeaders } from './http/headers.js'
+import { rewriteRedirectLocation } from './http/redirect.js'
+import { proxyStaticAsset, proxyNonHtmlContent, isHtmlContent, isRedirect, type ProxyConfig } from './http/proxy.js'
 import { renderMessagePage } from './utils/message-page.js'
-import { getCacheControl, isDataFileExtension, isDataContentType } from './utils/cache-control.js'
+import { getCacheControl } from './utils/cache-control.js'
 import {
 	getTranslationConfig,
 	getWebsitePathId,
@@ -142,7 +143,7 @@ const proxyLogging = false // non-HTML resources (proxied)
 /**
  * Result from matching segments with cache
  */
-interface MatchResult {
+export interface MatchResult {
 	cached: Map<number, string> // Map of segment index → cached translation
 	newSegments: Content[] // Segments that need translation
 	newIndices: number[] // Original indices of new segments
@@ -154,7 +155,7 @@ interface MatchResult {
  * @param cache - Translation cache Map (original → translated)
  * @returns Match result with cached translations and new segments
  */
-function matchSegmentsWithMap(segments: Content[], cache: Map<string, string>): MatchResult {
+export function matchSegmentsWithMap(segments: Content[], cache: Map<string, string>): MatchResult {
 	const cached = new Map<number, string>()
 	const newSegments: Content[] = []
 	const newIndices: number[] = []
@@ -184,31 +185,6 @@ function matchSegmentsWithMap(segments: Content[], cache: Map<string, string>): 
 	}
 
 	return { cached, newSegments, newIndices }
-}
-
-/**
- * Rewrite redirect Location header from origin domain to translated domain
- * @param location - Original Location header value
- * @param translatedHost - The translated domain host (e.g., 'de.example' or 'localhost:8787')
- * @param originBase - The origin domain base URL (e.g., 'https://www.example.com')
- * @param currentUrl - Current request URL object
- * @returns Rewritten Location URL pointing to translated domain
- */
-function rewriteRedirectLocation(location: string, translatedHost: string, originBase: string, currentUrl: URL): string {
-	try {
-		// Parse the Location header
-		const locationUrl = new URL(location, originBase)
-
-		// Build the rewritten URL using the translated host
-		const protocol = currentUrl.protocol // http: or https:
-		const rewritten = `${protocol}//${translatedHost}${locationUrl.pathname}${locationUrl.search}${locationUrl.hash}`
-
-		return rewritten
-	} catch (error) {
-		// If parsing fails, return the original location
-		console.error('Failed to rewrite redirect location:', error)
-		return location
-	}
 }
 
 // Environment variables - read lazily to ensure dotenv has loaded
@@ -262,49 +238,13 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 		let originalPathname = incomingPathname
 
 		// CRITICAL: Early exit for static assets - skip ALL cache operations
-		if (isStaticAsset(incomingPathname)) {
-			const fetchUrl = originBase + incomingPathname + url.search
+		const proxyConfig: ProxyConfig = {
+			originBase,
+			targetLang,
+			cacheDisabledUntil: translationConfig.cacheDisabledUntil,
+		}
 
-			// Forward headers
-			const fetchHeaders: Record<string, string> = {}
-			const headersToForward = ['user-agent', 'accept-encoding', 'cookie', 'accept-language', 'referer']
-			for (const headerName of headersToForward) {
-				const headerValue = req.get(headerName)
-				if (headerValue) fetchHeaders[headerName] = headerValue
-			}
-			if (!fetchHeaders['user-agent']) {
-				fetchHeaders['user-agent'] = 'Mozilla/5.0 (Translation Proxy) AppleWebKit/537.36'
-			}
-			fetchHeaders['weglot-language'] = targetLang
-			fetchHeaders['pantolingo-language'] = targetLang
-
-			const originResponse = await fetch(fetchUrl, {
-				method: req.method,
-				headers: fetchHeaders,
-				redirect: 'manual',
-			})
-
-			// Handle redirects for static assets
-			if (originResponse.status >= 300 && originResponse.status < 400) {
-				const location = originResponse.headers.get('location')
-				if (location) {
-					const redirectUrl = rewriteRedirectLocation(location, host, originBase, url)
-					res.status(originResponse.status).set('Location', redirectUrl).send()
-					return
-				}
-			}
-
-			// Proxy static asset with filtered headers and security headers
-			// Data files (.json, .xml) respect origin cache; other static assets get 5-min minimum
-			const responseHeaders = prepareResponseHeaders(originResponse.headers)
-			responseHeaders['Cache-Control'] = getCacheControl({
-				originHeaders: originResponse.headers,
-				cacheDisabledUntil: translationConfig.cacheDisabledUntil,
-				applyMinimumCache: !isDataFileExtension(incomingPathname),
-			})
-
-			const body = Buffer.from(await originResponse.arrayBuffer())
-			res.status(originResponse.status).set(responseHeaders).send(body)
+		if (await proxyStaticAsset(req, res, url, host, proxyConfig)) {
 			return
 		}
 
@@ -363,9 +303,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 			})
 
 			// Handle redirects: detect and rewrite Location header to translated domain
-			const isRedirect = originResponse.status >= 300 && originResponse.status < 400
-
-			if (isRedirect) {
+			if (isRedirect(originResponse.status)) {
 				const location = originResponse.headers.get('location')
 
 				if (location) {
@@ -394,27 +332,9 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 				}
 			}
 
-			// Check Content-Type - only translate HTML
-			const contentType = originResponse.headers.get('content-type') || ''
-
 			// Handle non-HTML content (proxy)
-			if (!contentType.toLowerCase().includes('text/html')) {
-				// Proxy non-HTML resources with filtered headers and security headers
-				// Data content types (JSON, XML) respect origin cache; other types get 5-min minimum
-				const proxyHeaders = prepareResponseHeaders(originResponse.headers)
-				proxyHeaders['Cache-Control'] = getCacheControl({
-					originHeaders: originResponse.headers,
-					cacheDisabledUntil: translationConfig.cacheDisabledUntil,
-					applyMinimumCache: !isDataContentType(contentType),
-				})
-
-				if (proxyLogging) {
-					const truncatedUrl = fetchUrl.length > 50 ? fetchUrl.substring(0, 50) + '...' : fetchUrl
-					console.log(`▶ [${targetLang}] ${truncatedUrl} - Proxying: ${contentType} (${proxyHeaders['Cache-Control']})`)
-				}
-
-				const body = Buffer.from(await originResponse.arrayBuffer())
-				res.status(originResponse.status).set(proxyHeaders).send(body)
+			if (!isHtmlContent(originResponse)) {
+				await proxyNonHtmlContent(res, originResponse, proxyConfig, proxyLogging, fetchUrl)
 				return
 			}
 

@@ -11,7 +11,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') })
 
 import express from 'express'
-import { handleRequest } from './index.js'
+import { handleRequest } from './pipeline.js'
 import { testConnection, closePool } from '@pantolingo/db'
 import { renderMessagePage } from './utils/message-page.js'
 

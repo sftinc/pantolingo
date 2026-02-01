@@ -3,7 +3,7 @@
  * Handles header forwarding and redirect handling
  */
 
-import type { FetchResult } from './types.js'
+import type { FetchResult } from '../dom/types.js'
 import { TIMEOUT_FETCHER } from '../config.js'
 
 /**

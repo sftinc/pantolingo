@@ -5,8 +5,8 @@
 
 import { describe, it, expect } from 'vitest'
 import { parseHTML } from 'linkedom'
-import { extractSegments } from './dom-extractor.js'
-import { applyTranslations } from './dom-applicator.js'
+import { extractSegments } from './extractor.js'
+import { applyTranslations } from './applicator.js'
 
 // Helper to create a document with the given HTML
 function createDocument(bodyHtml: string, headHtml = ''): Document {
