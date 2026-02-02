@@ -14,7 +14,7 @@ export interface TranslationItem {
 
 export type TranslationStyle = 'literal' | 'balanced' | 'natural'
 
-interface TranslateSingleResult {
+export interface TranslateSingleResult {
 	translation: string
 	usage: TokenUsage
 }
@@ -42,9 +42,9 @@ const MODEL = 'anthropic/claude-haiku-4.5'
  * @param targetLanguageCode - Target language BCP 47 code (e.g., 'es-mx', 'fr-fr')
  * @param apiKey - OpenRouter API key
  * @param style - Translation style (only applies to segments, not pathnames)
- * @returns Translated text
+ * @returns Translated text and usage, or null on failure
  */
-async function translateSingle(
+export async function translateSingle(
 	text: string,
 	type: 'segment' | 'pathname',
 	sourceLanguageCode: string,
