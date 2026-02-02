@@ -14,6 +14,7 @@ import express from 'express'
 import { handleRequest } from './pipeline.js'
 import { testConnection, closePool } from '@pantolingo/db'
 import { renderMessagePage } from './utils/message-page.js'
+import { getRecoveryScript } from './recovery/index.js'
 
 const app = express()
 const PORT = process.env.PORT || 8787
@@ -24,6 +25,14 @@ app.use(express.raw({ type: '*/*', limit: '10mb' }))
 // Health check endpoint
 app.get('/healthz', (_req, res) => {
 	res.json({ status: 'ok' })
+})
+
+// Recovery script endpoint - serves the client-side translation recovery script
+// TODO: Increase cache duration after testing (e.g., max-age=86400, stale-while-revalidate=604800)
+app.get('/__pantolingo/recovery.js', (_req, res) => {
+	res.set('Content-Type', 'application/javascript')
+	res.set('Cache-Control', 'public, max-age=30')
+	res.send(getRecoveryScript())
 })
 
 // Maintenance mode middleware

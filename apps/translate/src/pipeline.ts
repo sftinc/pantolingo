@@ -2,6 +2,16 @@
  * Translation Proxy Server
  * Main request handler
  * Orchestrates: cache → fetch → parse → extract → translate → apply → rewrite → return
+ *
+ * Steps:
+ * 1. cache     - Config lookup from DB (in-memory cache, 60s TTL)
+ * 2. fetch     - HTTP fetch from origin, handle redirects and non-HTML
+ * 3. parse     - Parse HTML document with linkedom
+ * 4. extract   - Extract translatable segments and link pathnames
+ * 5. translate - Pattern normalization, cache lookup, LLM translation for misses
+ * 6. apply     - Restore patterns, apply translations to DOM
+ * 7. rewrite   - Rewrite links for translated domain, add lang metadata
+ * 8. return    - Inject recovery assets for SPAs, serialize HTML, send response
  */
 
 import type { Request, Response } from 'express'
@@ -24,6 +34,7 @@ import { rewriteRedirectLocation } from './http/redirect.js'
 import { proxyStaticAsset, proxyNonHtmlContent, isHtmlContent, isRedirect, type ProxyConfig } from './http/proxy.js'
 import { renderMessagePage } from './utils/message-page.js'
 import { getCacheControl } from './utils/cache-control.js'
+import { detectSpaFramework, buildTranslationDictionary, injectRecoveryAssets, markSkippedElements } from './recovery/index.js'
 import {
 	getTranslationConfig,
 	getWebsitePathId,
@@ -371,6 +382,9 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 			const extractedSegments = extractSegments(document, skipSelectors)
 			const fetchTime = parseStart - fetchStart
 
+			// Store original values for dictionary building (before any modifications)
+			const originalValues = extractedSegments.map((s) => s.value)
+
 			let cachedHits = 0
 			let cacheMisses = 0
 			let newTranslations: string[] = []
@@ -677,6 +691,29 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 							translated: pathnameTranslations[i],
 						}))
 						deferredWrites.pathnames.push(...linkUpdates)
+					}
+
+					// 16. Inject recovery assets for SPA frameworks (Next.js, Nuxt, etc.)
+					// These frameworks may revert server-translated content during hydration
+					if (detectSpaFramework(document)) {
+						const dictionary = buildTranslationDictionary(
+							document,
+							extractedSegments,
+							originalValues,
+							skipSelectors,
+							targetLang
+						)
+
+						// Only inject if dictionary has entries (avoid empty overhead)
+						const hasEntries =
+							Object.keys(dictionary.text).length > 0 ||
+							Object.keys(dictionary.html).length > 0 ||
+							Object.keys(dictionary.attrs).length > 0
+
+						if (hasEntries) {
+							markSkippedElements(document, skipSelectors)
+							injectRecoveryAssets(document, dictionary)
+						}
 					}
 				} catch (translationError) {
 					// Translation failed - return original HTML with debug header
