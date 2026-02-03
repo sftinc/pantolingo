@@ -621,13 +621,15 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 							extractedSegments,
 							originalValues,
 							skipSelectors,
-							targetLang
+							targetLang,
+							pathnameMap
 						)
 
 						const hasEntries =
 							Object.keys(dictionary.text).length > 0 ||
 							Object.keys(dictionary.html).length > 0 ||
-							Object.keys(dictionary.attrs).length > 0
+							Object.keys(dictionary.attrs).length > 0 ||
+							Object.keys(dictionary.paths).length > 0
 
 						if (hasEntries) {
 							markSkippedElements(document, skipSelectors)
@@ -938,14 +940,16 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 							extractedSegments,
 							originalValues,
 							skipSelectors,
-							targetLang
+							targetLang,
+							pathnameMap
 						)
 
 						// Only inject if dictionary has entries (avoid empty overhead)
 						const hasEntries =
 							Object.keys(dictionary.text).length > 0 ||
 							Object.keys(dictionary.html).length > 0 ||
-							Object.keys(dictionary.attrs).length > 0
+							Object.keys(dictionary.attrs).length > 0 ||
+							Object.keys(dictionary.paths).length > 0
 
 						if (hasEntries) {
 							markSkippedElements(document, skipSelectors)

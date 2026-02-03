@@ -19,6 +19,8 @@ export interface TranslationDictionary {
 	html: Record<string, string>
 	/** Attribute mappings: original value → translated value */
 	attrs: Record<string, string>
+	/** Pathname mappings: original path → translated path */
+	paths: Record<string, string>
 	/** Target language code (e.g., 'es', 'fr') */
 	targetLang: string
 }
@@ -43,12 +45,14 @@ export function buildTranslationDictionary(
 	segments: Content[],
 	originalValues: string[],
 	skipSelectors: string[],
-	targetLang: string
+	targetLang: string,
+	pathnameMap?: Map<string, string>
 ): TranslationDictionary {
 	const dictionary: TranslationDictionary = {
 		text: {},
 		html: {},
 		attrs: {},
+		paths: {},
 		targetLang,
 	}
 
@@ -96,10 +100,20 @@ export function buildTranslationDictionary(
 		}
 	}
 
+	// Build paths from pathnameMap
+	if (pathnameMap) {
+		for (const [original, translated] of pathnameMap) {
+			if (original !== translated) {
+				dictionary.paths[original] = translated
+			}
+		}
+	}
+
 	// Log dictionary size for monitoring
 	const totalEntries = Object.keys(dictionary.text).length +
 		Object.keys(dictionary.html).length +
-		Object.keys(dictionary.attrs).length
+		Object.keys(dictionary.attrs).length +
+		Object.keys(dictionary.paths).length
 
 	if (totalEntries > 0) {
 		const jsonSize = JSON.stringify(dictionary).length

@@ -72,6 +72,7 @@ describe('injectRecoveryAssets', () => {
 		text: { Hello: 'Hola', World: 'Mundo' },
 		html: { 'Hello world': '<em>Hola</em> mundo' },
 		attrs: { Search: 'Buscar' },
+		paths: { '/about': '/acerca-de' },
 		targetLang: 'es',
 	}
 
@@ -159,6 +160,7 @@ describe('injectRecoveryAssets', () => {
 			text: {},
 			html: {},
 			attrs: {},
+			paths: {},
 			targetLang: 'es',
 		}
 

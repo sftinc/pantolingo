@@ -16,6 +16,7 @@
  *   text: { "Hello": "Hola", ... },      // text node translations
  *   html: { "Hello world": "<em>Hola</em> mundo", ... },  // innerHTML translations
  *   attrs: { "Search": "Buscar", ... },   // attribute translations
+ *   paths: { "/about": "/acerca-de", ... },  // pathname translations
  *   lang: "es"
  * }
  */
@@ -25,6 +26,7 @@ interface PantolingoDictionary {
 	text: Record<string, string>
 	html: Record<string, string>
 	attrs: Record<string, string>
+	paths: Record<string, string>
 	lang: string
 }
 
@@ -166,6 +168,47 @@ function applyAttrTranslations(
 }
 
 /**
+ * Apply pathname translations to links and forms
+ * Restores translated hrefs/actions after SPA hydration reverts them
+ */
+function applyPathTranslations(dictionary: PantolingoDictionary): void {
+	const pathsDict = dictionary.paths
+	if (!pathsDict || Object.keys(pathsDict).length === 0) return
+
+	// Query links and forms with href/action attributes
+	const elements = document.querySelectorAll('a[href], form[action]')
+
+	for (let i = 0; i < elements.length; i++) {
+		const elem = elements[i]
+		if (shouldSkip(elem)) continue
+
+		const attrName = elem.tagName === 'FORM' ? 'action' : 'href'
+		const url = elem.getAttribute(attrName)
+		if (!url) continue
+
+		// Parse URL to extract pathname
+		try {
+			const parsed = new URL(url, location.origin)
+			// Only process same-origin URLs
+			if (parsed.origin !== location.origin) continue
+
+			const translated = pathsDict[parsed.pathname]
+			if (translated) {
+				parsed.pathname = translated
+				elem.setAttribute(attrName, parsed.href)
+			}
+		} catch {
+			// Handle relative paths without protocol
+			const path = url.split('?')[0].split('#')[0]
+			const translated = pathsDict[path]
+			if (translated) {
+				elem.setAttribute(attrName, url.replace(path, translated))
+			}
+		}
+	}
+}
+
+/**
  * Main recovery function - applies all translations
  */
 function recoverTranslations(): void {
@@ -174,10 +217,11 @@ function recoverTranslations(): void {
 
 	const processed = new Set<Element>()
 
-	// Apply translations in order: HTML blocks first, then text, then attributes
+	// Apply translations in order: HTML blocks first, then text, then attributes, then paths
 	applyHtmlTranslations(dictionary, document.body, processed)
 	applyTextTranslations(dictionary, document.body, processed)
 	applyAttrTranslations(dictionary, document.body)
+	applyPathTranslations(dictionary)
 
 	// Mark page as ready (triggers CSS visibility)
 	document.body.classList.add('pantolingo-ready')
@@ -191,6 +235,7 @@ function handleMutations(mutations: MutationRecord[]): void {
 	if (!dictionary) return
 
 	const processed = new Set<Element>()
+	let hasAddedElements = false
 
 	for (const mutation of mutations) {
 		if (mutation.type === 'childList') {
@@ -198,6 +243,7 @@ function handleMutations(mutations: MutationRecord[]): void {
 			for (let i = 0; i < mutation.addedNodes.length; i++) {
 				const node = mutation.addedNodes[i]
 				if (node.nodeType === Node.ELEMENT_NODE) {
+					hasAddedElements = true
 					const elem = node as Element
 					applyHtmlTranslations(dictionary, elem, processed)
 					applyTextTranslations(dictionary, elem, processed)
@@ -222,6 +268,11 @@ function handleMutations(mutations: MutationRecord[]): void {
 				textNode.data = leading + dictionary.text[trimmed] + trailing
 			}
 		}
+	}
+
+	// Apply path translations if elements were added (links may have been reverted)
+	if (hasAddedElements) {
+		applyPathTranslations(dictionary)
 	}
 }
 

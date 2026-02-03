@@ -156,6 +156,87 @@ describe('buildTranslationDictionary', () => {
 		})
 	})
 
+	describe('pathname translations', () => {
+		it('returns empty paths when pathnameMap is undefined', () => {
+			const { document } = parseHTMLDocument(`
+				<!DOCTYPE html>
+				<html>
+					<head><title>Test</title></head>
+					<body><p>Content</p></body>
+				</html>
+			`)
+
+			const segments = extractSegments(document, [])
+			const originalValues = segments.map((s) => s.value)
+			applyTranslations(document, originalValues, segments, [])
+
+			const dictionary = buildTranslationDictionary(document, segments, originalValues, [], 'es')
+			expect(dictionary.paths).toEqual({})
+		})
+
+		it('returns empty paths when pathnameMap is empty', () => {
+			const { document } = parseHTMLDocument(`
+				<!DOCTYPE html>
+				<html>
+					<head><title>Test</title></head>
+					<body><p>Content</p></body>
+				</html>
+			`)
+
+			const segments = extractSegments(document, [])
+			const originalValues = segments.map((s) => s.value)
+			applyTranslations(document, originalValues, segments, [])
+
+			const dictionary = buildTranslationDictionary(document, segments, originalValues, [], 'es', new Map())
+			expect(dictionary.paths).toEqual({})
+		})
+
+		it('includes translated paths in dictionary', () => {
+			const { document } = parseHTMLDocument(`
+				<!DOCTYPE html>
+				<html>
+					<head><title>Test</title></head>
+					<body><p>Content</p></body>
+				</html>
+			`)
+
+			const segments = extractSegments(document, [])
+			const originalValues = segments.map((s) => s.value)
+			applyTranslations(document, originalValues, segments, [])
+
+			const pathnameMap = new Map([
+				['/about', '/acerca-de'],
+				['/contact', '/contacto'],
+			])
+			const dictionary = buildTranslationDictionary(document, segments, originalValues, [], 'es', pathnameMap)
+			expect(dictionary.paths).toEqual({
+				'/about': '/acerca-de',
+				'/contact': '/contacto',
+			})
+		})
+
+		it('excludes paths where original equals translated', () => {
+			const { document } = parseHTMLDocument(`
+				<!DOCTYPE html>
+				<html>
+					<head><title>Test</title></head>
+					<body><p>Content</p></body>
+				</html>
+			`)
+
+			const segments = extractSegments(document, [])
+			const originalValues = segments.map((s) => s.value)
+			applyTranslations(document, originalValues, segments, [])
+
+			const pathnameMap = new Map([
+				['/about', '/acerca-de'],
+				['/api/v1', '/api/v1'],  // unchanged - should be excluded
+			])
+			const dictionary = buildTranslationDictionary(document, segments, originalValues, [], 'es', pathnameMap)
+			expect(dictionary.paths).toEqual({ '/about': '/acerca-de' })
+		})
+	})
+
 	describe('edge cases', () => {
 		it('handles mismatched array lengths gracefully', () => {
 			const { document } = parseHTMLDocument(`

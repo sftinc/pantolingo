@@ -37,12 +37,21 @@ var sel=ATTRS.map(function(x){return'['+x+']'}).join(',');
 var els=document.body.querySelectorAll(sel);
 for(var i=0;i<els.length;i++){var e=els[i];if(skip(e))continue;for(var j=0;j<ATTRS.length;j++){var v=e.getAttribute(ATTRS[j]);if(v&&a[v])e.setAttribute(ATTRS[j],a[v])}}
 }
-function recover(){var p=new Set();html(p);text(p);attr();document.body.classList.add('pantolingo-ready')}
+function paths(){
+var ps=d.paths;if(!ps||!Object.keys(ps).length)return;
+var els=document.querySelectorAll('a[href],form[action]');
+for(var i=0;i<els.length;i++){var e=els[i];if(skip(e))continue;
+var attr=e.tagName==='FORM'?'action':'href',url=e.getAttribute(attr);if(!url)continue;
+try{var u=new URL(url,location.origin);if(u.origin!==location.origin)continue;var tr=ps[u.pathname];if(tr){u.pathname=tr;e.setAttribute(attr,u.href)}}
+catch(x){var p=url.split('?')[0].split('#')[0],tr=ps[p];if(tr)e.setAttribute(attr,url.replace(p,tr))}}
+}
+function recover(){var p=new Set();html(p);text(p);attr();paths();document.body.classList.add('pantolingo-ready')}
 function mut(ms){
-var p=new Set();
+var p=new Set(),added=false;
 for(var i=0;i<ms.length;i++){var m=ms[i];
-if(m.type==='childList'){for(var j=0;j<m.addedNodes.length;j++){var n=m.addedNodes[j];if(n.nodeType===1){html(p);text(p);attr()}else if(n.nodeType===3){var s=n.data,tr=s.trim();if(tr&&d.text[tr]){var w2=ws(s);n.data=w2[0]+d.text[tr]+w2[1]}}}}
+if(m.type==='childList'){for(var j=0;j<m.addedNodes.length;j++){var n=m.addedNodes[j];if(n.nodeType===1){added=true;html(p);text(p);attr()}else if(n.nodeType===3){var s=n.data,tr=s.trim();if(tr&&d.text[tr]){var w2=ws(s);n.data=w2[0]+d.text[tr]+w2[1]}}}}
 else if(m.type==='characterData'){var n=m.target,s=n.data,tr=s.trim();if(tr&&d.text[tr]){var w2=ws(s);n.data=w2[0]+d.text[tr]+w2[1]}}}
+if(added)paths();
 }
 function init(){
 recover();
