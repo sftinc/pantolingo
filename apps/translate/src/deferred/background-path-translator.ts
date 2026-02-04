@@ -51,6 +51,13 @@ export async function startBackgroundPathTranslation(params: BackgroundPathTrans
 		const inFlightKey = buildInFlightKey(websiteId, lang, path.normalized)
 
 		try {
+			// Root path maps to itself - record for DB but skip LLM translation
+			if (path.normalized === '/') {
+				await batchUpsertPathnames(websiteId, lang, [{ original: '/', translated: '/' }])
+				successCount++
+				return
+			}
+
 			// Apply skip words (preserve brand names like "eBay" in paths)
 			const { text: textToTranslate, replacements: skipWordReplacements } = replaceSkipWords(
 				path.normalized,
