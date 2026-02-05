@@ -241,7 +241,7 @@ async function pollForTranslations(
 			})),
 		}
 
-		const response = await fetch('/__pantolingo/translate', {
+		const response = await fetch('/__pantolingo/deferred', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(requestBody),

@@ -12,10 +12,10 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') })
 
 import express from 'express'
 import { handleRequest } from './pipeline.js'
-import { testConnection, closePool, getTranslationConfig, batchGetTranslationsByHash } from '@pantolingo/db'
+import { testConnection, closePool } from '@pantolingo/db'
 import { renderMessagePage } from './utils/message-page.js'
 import { getRecoveryScript } from './recovery/index.js'
-import { getDeferredScript, handleTranslateRequest } from './deferred/index.js'
+import { getDeferredScript, handlePollingRequest } from './deferred/index.js'
 
 const app = express()
 const PORT = process.env.PORT || 8787
@@ -40,21 +40,21 @@ app.get('/__pantolingo/deferred.js', (_req, res) => {
 	res.send(getDeferredScript())
 })
 
-// Translation lookup endpoint - returns completed translations for polling
+// Deferred translation polling endpoint - returns completed translations
 // IMPORTANT: Must be defined BEFORE the raw body parser middleware
-app.post('/__pantolingo/translate', express.json(), async (req, res) => {
+app.post('/__pantolingo/deferred', express.json(), async (req, res) => {
 	try {
 		const host = req.get('x-forwarded-host') || req.get('host') || ''
-		const result = await handleTranslateRequest(host, req.body)
+		const result = await handlePollingRequest(host, req.body)
 		res.json(result)
 	} catch (error) {
-		console.error('[Translate Endpoint] Error:', error)
+		console.error('[Deferred Endpoint] Error:', error)
 		res.status(500).json({ error: 'Internal server error' })
 	}
 })
 
 // Parse raw body for POST/PUT requests (for proxied requests to origin)
-// This must come AFTER the /__pantolingo/translate endpoint
+// This must come AFTER the /__pantolingo/deferred endpoint
 app.use(express.raw({ type: '*/*', limit: '10mb' }))
 
 // Maintenance mode middleware

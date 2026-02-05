@@ -37,7 +37,7 @@ interface BackgroundTranslationParams {
  * @param params - Translation parameters
  * @returns Promise that resolves when all translations complete (or fail)
  */
-export async function startBackgroundTranslation(params: BackgroundTranslationParams): Promise<void> {
+export async function startBackgroundSegmentTranslation(params: BackgroundTranslationParams): Promise<void> {
 	const { websiteId, lang, sourceLang, segments, hashes, skipWords, apiKey, context } = params
 
 	// Aggregate usage stats for logging

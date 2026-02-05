@@ -35,7 +35,7 @@ import { proxyStaticAsset, proxyNonHtmlContent, isHtmlContent, isRedirect, type 
 import { renderMessagePage } from './utils/message-page.js'
 import { getCacheControl } from './utils/cache-control.js'
 import { detectSpaFramework, buildTranslationDictionary, injectRecoveryAssets, markSkippedElements } from './recovery/index.js'
-import { isInFlight, setInFlight, buildInFlightKey, startBackgroundTranslation, startBackgroundPathTranslation, injectDeferredAssets } from './deferred/index.js'
+import { isInFlight, setInFlight, buildInFlightKey, startBackgroundSegmentTranslation, startBackgroundPathTranslation, injectDeferredAssets } from './deferred/index.js'
 import type { PendingSegment, ApplyTranslationsResult } from './dom/applicator.js'
 import {
 	getTranslationConfig,
@@ -471,7 +471,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 
 					// Fire-and-forget background translation
 					if (segmentsToTranslate.length > 0) {
-						deferredWrites.backgroundSegmentPromise = startBackgroundTranslation({
+						deferredWrites.backgroundSegmentPromise = startBackgroundSegmentTranslation({
 							websiteId: translationConfig.websiteId,
 							lang: targetLang,
 							sourceLang,

@@ -1,6 +1,6 @@
 /**
- * Translation Lookup Handler
- * Handles the /__pantolingo/translate POST endpoint for deferred translation polling
+ * Deferred Polling Handler
+ * Handles the POST /__pantolingo/deferred endpoint for deferred translation polling
  */
 
 import { getTranslationConfig, batchGetTranslationsByHash } from '@pantolingo/db'
@@ -27,7 +27,7 @@ interface TranslateRequestBody {
  * @param body - Request body containing segments to look up
  * @returns Flat object mapping hash -> restored translation (only completed translations)
  */
-export async function handleTranslateRequest(
+export async function handlePollingRequest(
 	host: string,
 	body: TranslateRequestBody
 ): Promise<Record<string, string>> {
@@ -39,7 +39,7 @@ export async function handleTranslateRequest(
 	// Get translation config from hostname
 	const config = await getTranslationConfig(host.startsWith('localhost') ? host.split(':')[0] : host)
 	if (!config) {
-		console.warn(`[Translate Handler] No config for host: ${host}`)
+		console.warn(`[Deferred Polling] No config for host: ${host}`)
 		return {}
 	}
 
@@ -54,7 +54,7 @@ export async function handleTranslateRequest(
 	// Look up translations by hash
 	const translationMap = await batchGetTranslationsByHash(websiteId, targetLang, hashes)
 
-	console.log(`[Translate Handler] Looking up ${hashes.length} hashes, found ${translationMap.size} translations`)
+	console.log(`[Deferred Polling] Looking up ${hashes.length} hashes, found ${translationMap.size} translations`)
 
 	// Build response with pattern/placeholder restoration
 	const result: Record<string, string> = {}
@@ -94,7 +94,7 @@ export async function handleTranslateRequest(
 
 			result[segment.hash] = restoredTranslation
 		} catch (error) {
-			console.error(`[Translate Handler] Restoration error for hash ${segment.hash}:`, error)
+			console.error(`[Deferred Polling] Restoration error for hash ${segment.hash}:`, error)
 			// Fall back to raw translation without restoration
 			result[segment.hash] = rawTranslation
 		}
