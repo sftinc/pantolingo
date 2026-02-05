@@ -73,6 +73,8 @@ interface DeferredWrites {
 	websitePathId?: number // ID from stage 1 lookup (for existing paths)
 	statusCode: number // Website response status code
 	llmUsage: LlmUsageRecord[]
+	backgroundSegmentPromise?: Promise<void>
+	backgroundPathPromise?: Promise<void>
 }
 
 /**
@@ -80,7 +82,7 @@ interface DeferredWrites {
  * All operations are non-blocking and errors are logged but don't affect the response
  */
 async function executeDeferredWrites(writes: DeferredWrites): Promise<void> {
-	const { websiteId, lang, translationId, translations, pathnames, currentPath, newSegmentHashes, cachedSegmentHashes, cachedPaths, websitePathId, statusCode, llmUsage } =
+	const { websiteId, lang, translationId, translations, pathnames, currentPath, newSegmentHashes, cachedSegmentHashes, cachedPaths, websitePathId, statusCode, llmUsage, backgroundSegmentPromise, backgroundPathPromise } =
 		writes
 
 	const isErrorResponse = statusCode >= 400
@@ -103,6 +105,14 @@ async function executeDeferredWrites(writes: DeferredWrites): Promise<void> {
 				updateSegmentLastUsed(websiteId, lang, cachedSegmentHashes)
 			}
 			return
+		}
+
+		// Wait for background translations to complete before querying their results
+		if (backgroundSegmentPromise) {
+			await backgroundSegmentPromise
+		}
+		if (backgroundPathPromise) {
+			await backgroundPathPromise
 		}
 
 		// 2. Upsert pathnames (always includes current path) and get IDs
@@ -456,9 +466,12 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 						}
 					}
 
+					// Track new segment hashes for path-segment linking in deferred writes
+					deferredWrites.newSegmentHashes = newIndices.map(i => segmentHashes[i])
+
 					// Fire-and-forget background translation
 					if (segmentsToTranslate.length > 0) {
-						startBackgroundTranslation({
+						deferredWrites.backgroundSegmentPromise = startBackgroundTranslation({
 							websiteId: translationConfig.websiteId,
 							lang: targetLang,
 							sourceLang,
@@ -578,7 +591,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 									}
 
 									if (pathsToTranslate.length > 0) {
-										startBackgroundPathTranslation({
+										deferredWrites.backgroundPathPromise = startBackgroundPathTranslation({
 											websiteId: translationConfig.websiteId,
 											lang: targetLang,
 											sourceLang,
