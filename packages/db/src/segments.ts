@@ -220,14 +220,17 @@ export async function batchGetWebsiteSegmentIds(
 
 /**
  * Batch lookup translations by text hash (for deferred polling)
- * Used by the /__pantolingo/translate endpoint to fetch completed translations
+ * Used by the POST /__pantolingo/deferred endpoint to fetch completed translations
+ *
+ * Security: Only returns translations created within the last 20 seconds.
+ * This prevents hash probing attacks (guessing hashes to extract old translations)
+ * and limits abuse since the endpoint is only useful for recent page loads.
+ * The 20s window covers the 10s translation timeout + 12s client polling window.
  *
  * @param websiteId - Website ID
  * @param lang - Target language code
  * @param hashes - Array of text hashes to look up
- * @returns Map of text_hash -> translated_text (only for completed translations)
- *
- * SQL: 1 query joining website_segment -> translation_segment
+ * @returns Map of text_hash -> translated_text (only for recently completed translations)
  */
 export async function batchGetTranslationsByHash(
 	websiteId: number,
@@ -248,7 +251,8 @@ export async function batchGetTranslationsByHash(
 			JOIN translation_segment ts ON ts.website_segment_id = ws.id
 			WHERE ws.website_id = $1
 			  AND ts.lang = $2
-			  AND ws.text_hash = ANY($3::text[])`,
+			  AND ws.text_hash = ANY($3::text[])
+			  AND ts.created_at > NOW() - INTERVAL '20 seconds'`,
 			[websiteId, lang, hashes]
 		)
 
