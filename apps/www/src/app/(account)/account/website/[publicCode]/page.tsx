@@ -1,6 +1,6 @@
-import { notFound, redirect } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
-import { canAccessWebsite, getWebsiteById, getLangsForWebsite } from '@pantolingo/db'
+import { canAccessWebsiteByPublicCode, getWebsiteByPublicCode, getLangsForWebsite } from '@pantolingo/db'
 import { getFlag } from '@pantolingo/lang'
 import { BreadcrumbNav } from '@/components/account/BreadcrumbNav'
 import { LangTable } from '@/components/account/LangTable'
@@ -8,7 +8,7 @@ import { LangTable } from '@/components/account/LangTable'
 export const dynamic = 'force-dynamic'
 
 interface WebsiteDetailPageProps {
-	params: Promise<{ id: string }>
+	params: Promise<{ publicCode: string }>
 }
 
 export default async function WebsiteDetailPage({ params }: WebsiteDetailPageProps) {
@@ -18,22 +18,23 @@ export default async function WebsiteDetailPage({ params }: WebsiteDetailPagePro
 		redirect('/login')
 	}
 
-	const { id } = await params
-	const websiteId = parseInt(id, 10)
+	const { publicCode } = await params
 
-	if (isNaN(websiteId)) {
-		notFound()
+	// Validate publicCode format (16-char hex)
+	if (!/^[0-9a-f]{16}$/i.test(publicCode)) {
+		redirect('/account')
 	}
 
-	// Check authorization
-	if (!(await canAccessWebsite(session.user.accountId, websiteId))) {
-		notFound()
+	// Check authorization and get websiteId
+	const websiteId = await canAccessWebsiteByPublicCode(session.user.accountId, publicCode)
+	if (!websiteId) {
+		redirect('/account')
 	}
 
-	const website = await getWebsiteById(websiteId)
+	const website = await getWebsiteByPublicCode(publicCode)
 
 	if (!website) {
-		notFound()
+		redirect('/account')
 	}
 
 	const langs = await getLangsForWebsite(websiteId)
@@ -49,7 +50,7 @@ export default async function WebsiteDetailPage({ params }: WebsiteDetailPagePro
 
 			<h2 className="mb-4 text-2xl font-semibold text-[var(--text-heading)]">Languages</h2>
 
-			<LangTable langs={langs} websiteId={websiteId} />
+			<LangTable langs={langs} publicCode={publicCode} />
 		</div>
 	)
 }

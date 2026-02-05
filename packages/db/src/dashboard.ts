@@ -11,6 +11,7 @@ import { pool } from './pool.js'
 
 export interface WebsiteWithStats {
 	id: number
+	publicCode: string
 	hostname: string
 	sourceLang: string
 	langCount: number
@@ -52,6 +53,7 @@ export interface PaginatedResult<T> {
 
 export interface Website {
 	id: number
+	publicCode: string
 	hostname: string
 	sourceLang: string
 }
@@ -108,6 +110,7 @@ export async function canAccessWebsite(accountId: number, websiteId: number): Pr
 export async function getWebsitesWithStats(accountId: number): Promise<WebsiteWithStats[]> {
 	const result = await pool.query<{
 		id: number
+		public_code: string
 		hostname: string
 		source_lang: string
 		lang_count: string
@@ -117,6 +120,7 @@ export async function getWebsitesWithStats(accountId: number): Promise<WebsiteWi
 		`
 		SELECT
 			w.id,
+			w.public_code,
 			w.hostname,
 			w.source_lang,
 			(SELECT COUNT(DISTINCT target_lang) FROM translation t WHERE t.website_id = w.id) as lang_count,
@@ -132,6 +136,7 @@ export async function getWebsitesWithStats(accountId: number): Promise<WebsiteWi
 
 	return result.rows.map((row) => ({
 		id: row.id,
+		publicCode: row.public_code,
 		hostname: row.hostname,
 		sourceLang: row.source_lang,
 		langCount: parseInt(row.lang_count, 10),
@@ -141,13 +146,14 @@ export async function getWebsitesWithStats(accountId: number): Promise<WebsiteWi
 }
 
 /**
- * Get a single website by ID
- * Note: Authorization should be checked separately with canAccessWebsite()
- * @param websiteId - Website ID
+ * Get a single website by public_code
+ * Note: Authorization should be checked separately with canAccessWebsiteByPublicCode()
+ * @param publicCode - 16-character hex public code
  */
-export async function getWebsiteById(websiteId: number): Promise<WebsiteWithSettings | null> {
+export async function getWebsiteByPublicCode(publicCode: string): Promise<WebsiteWithSettings | null> {
 	const result = await pool.query<{
 		id: number
+		public_code: string
 		hostname: string
 		source_lang: string
 		skip_words: string[] | null
@@ -155,8 +161,8 @@ export async function getWebsiteById(websiteId: number): Promise<WebsiteWithSett
 		skip_selectors: string[] | null
 		translate_path: boolean | null
 	}>(
-		`SELECT id, hostname, source_lang, skip_words, skip_path, skip_selectors, translate_path FROM website WHERE id = $1`,
-		[websiteId]
+		`SELECT id, public_code, hostname, source_lang, skip_words, skip_path, skip_selectors, translate_path FROM website WHERE public_code = $1`,
+		[publicCode]
 	)
 
 	if (result.rows.length === 0) return null
@@ -164,6 +170,7 @@ export async function getWebsiteById(websiteId: number): Promise<WebsiteWithSett
 	const row = result.rows[0]
 	return {
 		id: row.id,
+		publicCode: row.public_code,
 		hostname: row.hostname,
 		sourceLang: row.source_lang,
 		skipWords: row.skip_words || [],
@@ -171,6 +178,24 @@ export async function getWebsiteById(websiteId: number): Promise<WebsiteWithSett
 		skipSelectors: row.skip_selectors || [],
 		translatePath: row.translate_path ?? true,
 	}
+}
+
+/**
+ * Check if an account can access a website by public_code
+ * @param accountId - Account ID
+ * @param publicCode - 16-character hex public code
+ * @returns websiteId if the account has access, null otherwise
+ */
+export async function canAccessWebsiteByPublicCode(accountId: number, publicCode: string): Promise<number | null> {
+	const result = await pool.query<{ website_id: number }>(
+		`SELECT aw.website_id
+		 FROM account_website aw
+		 JOIN website w ON w.id = aw.website_id
+		 WHERE w.public_code = $1 AND aw.account_id = $2
+		 LIMIT 1`,
+		[publicCode, accountId]
+	)
+	return result.rows[0]?.website_id ?? null
 }
 
 /**

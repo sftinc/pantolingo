@@ -26,8 +26,9 @@ export {
 export { recordPageView, updateSegmentLastUsed, updatePathLastUsed } from './views.js'
 export {
 	canAccessWebsite,
+	canAccessWebsiteByPublicCode,
 	getWebsitesWithStats,
-	getWebsiteById,
+	getWebsiteByPublicCode,
 	getLangsForWebsite,
 	isValidLangForWebsite,
 	getPathsForWebsite,

@@ -1,8 +1,8 @@
-import { notFound, redirect } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import {
-	canAccessWebsite,
-	getWebsiteById,
+	canAccessWebsiteByPublicCode,
+	getWebsiteByPublicCode,
 	isValidLangForWebsite,
 	getPathsForWebsite,
 	getSegmentsForLang,
@@ -20,7 +20,7 @@ import { getFlag, getLanguageLabel } from '@pantolingo/lang'
 export const dynamic = 'force-dynamic'
 
 interface LangDetailPageProps {
-	params: Promise<{ id: string; langCd: string }>
+	params: Promise<{ publicCode: string; langCd: string }>
 	searchParams: Promise<{ view?: string; filter?: string; page?: string; path?: string }>
 }
 
@@ -31,9 +31,8 @@ export default async function LangDetailPage({ params, searchParams }: LangDetai
 		redirect('/login')
 	}
 
-	const { id, langCd } = await params
+	const { publicCode, langCd } = await params
 	const { view = 'segments', filter = 'unreviewed', page = '1', path } = await searchParams
-	const websiteId = parseInt(id, 10)
 	const pageNum = parseInt(page, 10) || 1
 	const limit = 50
 
@@ -41,27 +40,28 @@ export default async function LangDetailPage({ params, searchParams }: LangDetai
 	const pathId: number | 'none' | undefined =
 		path === undefined ? undefined : path === 'none' ? 'none' : parseInt(path, 10) || undefined
 
-	// Invalid websiteId - show 404
-	if (isNaN(websiteId)) {
-		notFound()
+	// Validate publicCode format (16-char hex)
+	if (!/^[0-9a-f]{16}$/i.test(publicCode)) {
+		redirect('/account')
 	}
 
-	// Check authorization
-	if (!(await canAccessWebsite(session.user.accountId, websiteId))) {
-		notFound()
+	// Check authorization and get websiteId
+	const websiteId = await canAccessWebsiteByPublicCode(session.user.accountId, publicCode)
+	if (!websiteId) {
+		redirect('/account')
 	}
 
-	const website = await getWebsiteById(websiteId)
+	const website = await getWebsiteByPublicCode(publicCode)
 
-	// Website not found - show 404
+	// Website not found - redirect to account
 	if (!website) {
-		notFound()
+		redirect('/account')
 	}
 
 	// Invalid language for this website - redirect to website page
 	const validLang = await isValidLangForWebsite(websiteId, langCd)
 	if (!validLang) {
-		redirect(`/account/website/${websiteId}`)
+		redirect(`/account/website/${publicCode}`)
 	}
 
 	const validView = view === 'paths' ? 'paths' : 'segments'
@@ -82,7 +82,7 @@ export default async function LangDetailPage({ params, searchParams }: LangDetai
 
 	// Build path param string for URLs
 	const pathParam = pathId !== undefined ? `&path=${pathId}` : ''
-	const baseUrl = `/account/website/${websiteId}/lang/${langCd}?view=${validView}&filter=${validFilter}${pathParam}`
+	const baseUrl = `/account/website/${publicCode}/lang/${langCd}?view=${validView}&filter=${validFilter}${pathParam}`
 
 	return (
 		<div>
@@ -91,7 +91,7 @@ export default async function LangDetailPage({ params, searchParams }: LangDetai
 					{ label: 'Account', href: '/account' },
 					{
 						label: `${website.hostname} ${getFlag(website.sourceLang)}`,
-						href: `/account/website/${websiteId}`,
+						href: `/account/website/${publicCode}`,
 					},
 					{ label: `${getLanguageLabel(langCd)} (${formatNumber(data.total)})` },
 				]}
@@ -105,7 +105,7 @@ export default async function LangDetailPage({ params, searchParams }: LangDetai
 						{ value: 'paths', label: 'Paths' },
 					]}
 					value={validView}
-					baseUrl={`/account/website/${websiteId}/lang/${langCd}?filter=${validFilter}`}
+					baseUrl={`/account/website/${publicCode}/lang/${langCd}?filter=${validFilter}`}
 					paramName="view"
 				/>
 				<Toggle
@@ -114,14 +114,14 @@ export default async function LangDetailPage({ params, searchParams }: LangDetai
 						{ value: 'all', label: 'All' },
 					]}
 					value={validFilter}
-					baseUrl={`/account/website/${websiteId}/lang/${langCd}?view=${validView}${pathParam}`}
+					baseUrl={`/account/website/${publicCode}/lang/${langCd}?view=${validView}${pathParam}`}
 					paramName="filter"
 				/>
 				{validView === 'segments' && (
 					<PathSelect
 						paths={pathOptions}
 						selectedPathId={pathId ?? null}
-						baseUrl={`/account/website/${websiteId}/lang/${langCd}?view=${validView}&filter=${validFilter}`}
+						baseUrl={`/account/website/${publicCode}/lang/${langCd}?view=${validView}&filter=${validFilter}`}
 						className="ml-auto"
 					/>
 				)}

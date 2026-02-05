@@ -12,8 +12,8 @@ Next.js 16 app with Tailwind CSS v4 and React 19.
 -   `/auth/magic` - Magic link verification (redirects to `/api/auth/callback/smtp`)
 -   `/onboarding` - Name setup for new users
 -   `/account` - Websites overview with segment/path counts
--   `/account/website/[id]` - Language list for a website
--   `/account/website/[id]/lang/[langCd]` - Translation editor for segments and paths
+-   `/account/website/[publicCode]` - Language list for a website
+-   `/account/website/[publicCode]/lang/[langCd]` - Translation editor for segments and paths
 
 ## Auth Flow
 
@@ -56,9 +56,9 @@ src/
 │   ├── (account)/              # Customer account
 │   │   └── account/
 │   │       ├── page.tsx                        # /account - websites overview
-│   │       └── website/[id]/
-│   │           ├── page.tsx                    # /account/website/:id - language list
-│   │           └── lang/[langCd]/page.tsx      # /account/website/:id/lang/:langCd - translations
+│   │       └── website/[publicCode]/
+│   │           ├── page.tsx                    # /account/website/:publicCode - language list
+│   │           └── lang/[langCd]/page.tsx      # /account/website/:publicCode/lang/:langCd - translations
 │   ├── api/
 │   │   └── auth/[...nextauth]/ # NextAuth API routes
 │   └── healthz/                # Health check endpoint

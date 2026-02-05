@@ -1,13 +1,13 @@
-import { notFound, redirect } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
-import { canAccessWebsite, getWebsiteById } from '@pantolingo/db'
+import { canAccessWebsiteByPublicCode, getWebsiteByPublicCode } from '@pantolingo/db'
 import { BreadcrumbNav } from '@/components/account/BreadcrumbNav'
 import { WebsiteSettingsForm } from '@/components/account/WebsiteSettingsForm'
 
 export const dynamic = 'force-dynamic'
 
 interface SettingsPageProps {
-	params: Promise<{ id: string }>
+	params: Promise<{ publicCode: string }>
 }
 
 export default async function SettingsPage({ params }: SettingsPageProps) {
@@ -17,21 +17,23 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 		redirect('/login')
 	}
 
-	const { id } = await params
-	const websiteId = parseInt(id, 10)
+	const { publicCode } = await params
 
-	if (isNaN(websiteId)) {
-		notFound()
+	// Validate publicCode format (16-char hex)
+	if (!/^[0-9a-f]{16}$/i.test(publicCode)) {
+		redirect('/account')
 	}
 
-	if (!(await canAccessWebsite(session.user.accountId, websiteId))) {
-		notFound()
+	// Check authorization and get websiteId
+	const websiteId = await canAccessWebsiteByPublicCode(session.user.accountId, publicCode)
+	if (!websiteId) {
+		redirect('/account')
 	}
 
-	const website = await getWebsiteById(websiteId)
+	const website = await getWebsiteByPublicCode(publicCode)
 
 	if (!website) {
-		notFound()
+		redirect('/account')
 	}
 
 	return (
@@ -39,7 +41,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 			<BreadcrumbNav
 				breadcrumbs={[
 					{ label: 'Account', href: '/account' },
-					{ label: website.hostname, href: `/account/website/${websiteId}` },
+					{ label: website.hostname, href: `/account/website/${website.publicCode}` },
 					{ label: 'Settings' },
 				]}
 			/>
