@@ -42,6 +42,30 @@ The nav collapses to two elements:
 
 The main nav links (Home, Features, Pricing) and auth controls are hidden behind the hamburger menu.
 
+### Mobile Menu (Hamburger Expanded)
+
+When the hamburger icon is tapped, the menu expands inline (push-down/accordion style) and pushes the content and footer down. The menu does NOT overlay the page — the content remains visible below. White background (light mode) or dark charcoal (dark mode).
+
+**Header row** (same as collapsed nav):
+- **Left**: "Pantolingo" wordmark (bold)
+- **Right**: Light/dark mode toggle icon + close icon (X) replacing the hamburger
+
+**Menu content** (stacked vertically, left-aligned, separated by thin horizontal dividers):
+
+1. Navigation links (each on its own line, regular weight text):
+    - Home
+    - Features
+    - Pricing
+2. _(thin divider line)_
+3. Auth controls:
+    - **Logged out**:
+        - "Login" (text link)
+        - "Sign up" (full-width outlined/bordered button, centered text)
+    - **Logged in**:
+        - "Account" (full-width outlined/bordered button, centered text)
+
+The menu section ends with the same thin bottom border as the nav, visually separating it from the content area below.
+
 ---
 
 # Content
