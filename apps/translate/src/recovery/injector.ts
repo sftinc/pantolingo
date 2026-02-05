@@ -10,10 +10,10 @@ import { RECOVERY_SCRIPT } from './recovery-script-content.js'
  * CSS to prevent flash of untranslated content during hydration
  * Body starts hidden, becomes visible when .pantolingo-ready is added
  */
-const FLICKER_GUARD_CSS = `body:not(.pantolingo-ready){opacity:0}`
+const FLICKER_GUARD_CSS = `body:not(.pantolingo-recovery-ready){opacity:0}`
 
 /**
- * Mark elements matching skip selectors with data-pantolingo-skip attribute
+ * Mark elements matching skip selectors with data-pantolingo-recovery-skip attribute
  * The recovery script will skip these elements during translation recovery
  *
  * @param document - The parsed HTML document
@@ -28,7 +28,7 @@ export function markSkippedElements(document: Document, skipSelectors: string[])
 		try {
 			const elements = document.querySelectorAll(selector)
 			for (let i = 0; i < elements.length; i++) {
-				elements[i].setAttribute('data-pantolingo-skip', '')
+				elements[i].setAttribute('data-pantolingo-recovery-skip', '')
 			}
 		} catch (error) {
 			// Invalid selector - skip silently
@@ -59,7 +59,7 @@ export function injectRecoveryAssets(document: Document, dictionary: Translation
 
 	// 1. Inject flicker guard CSS at the start of <head>
 	const styleElement = document.createElement('style')
-	styleElement.setAttribute('data-pantolingo', 'flicker-guard')
+	styleElement.setAttribute('data-pantolingo', 'recovery-css')
 	styleElement.textContent = FLICKER_GUARD_CSS
 	// Insert at the beginning of head for earliest possible application
 	if (head.firstChild) {
@@ -72,12 +72,12 @@ export function injectRecoveryAssets(document: Document, dictionary: Translation
 	const scriptElement = document.createElement('script')
 	scriptElement.setAttribute('defer', '')
 	scriptElement.setAttribute('src', '/__pantolingo/recovery.js')
-	scriptElement.setAttribute('data-pantolingo', 'recovery')
+	scriptElement.setAttribute('data-pantolingo', 'recovery-script')
 	body.appendChild(scriptElement)
 
 	// 3. Inject dictionary as inline script before </body> (after script reference)
 	const dictionaryScript = document.createElement('script')
-	dictionaryScript.setAttribute('data-pantolingo', 'dictionary')
+	dictionaryScript.setAttribute('data-pantolingo', 'recovery-data')
 	// Use a compact JSON format
 	const dictionaryJson = JSON.stringify({
 		text: dictionary.text,

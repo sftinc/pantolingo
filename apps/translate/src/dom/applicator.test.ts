@@ -243,8 +243,8 @@ describe('applyTranslations deferred mode', () => {
 
 			// Check DOM was marked
 			const p = doc.querySelector('p')
-			expect(p?.classList.contains('pantolingo-skeleton')).toBe(true)
-			expect(p?.getAttribute('data-pantolingo-pending')).toBe('hash1')
+			expect(p?.classList.contains('pantolingo-deferred-loading')).toBe(true)
+			expect(p?.getAttribute('data-pantolingo-deferred')).toBe('hash1')
 		})
 
 		it('marks null translations as pending for text segments with comment marker', () => {
@@ -265,7 +265,7 @@ describe('applyTranslations deferred mode', () => {
 			// The first child should now be the comment, followed by the text node
 			const firstChild = span?.firstChild
 			expect(firstChild?.nodeType).toBe(8) // Comment node
-			expect((firstChild as Comment).data).toBe('pantolingo:hash1')
+			expect((firstChild as Comment).data).toBe('pantolingo-deferred:hash1')
 		})
 
 		it('marks null translations as pending for attr segments', () => {
@@ -285,8 +285,8 @@ describe('applyTranslations deferred mode', () => {
 
 			// Check DOM was marked
 			const img = doc.querySelector('img')
-			expect(img?.getAttribute('data-pantolingo-pending')).toBe('hash1')
-			expect(img?.getAttribute('data-pantolingo-attr')).toBe('alt')
+			expect(img?.getAttribute('data-pantolingo-deferred')).toBe('hash1')
+			expect(img?.getAttribute('data-pantolingo-deferred-attr')).toBe('alt')
 		})
 
 		it('handles mixed cached and pending translations', () => {
@@ -305,7 +305,7 @@ describe('applyTranslations deferred mode', () => {
 
 			const paragraphs = doc.querySelectorAll('p')
 			expect(paragraphs[0].textContent).toBe('Primero')
-			expect(paragraphs[1].getAttribute('data-pantolingo-pending')).toBe('hash2')
+			expect(paragraphs[1].getAttribute('data-pantolingo-deferred')).toBe('hash2')
 			expect(paragraphs[2].textContent).toBe('Tercero')
 		})
 	})
@@ -323,7 +323,7 @@ describe('applyTranslations deferred mode', () => {
 			expect(result.pending[0].showSkeleton).toBe(true)
 
 			const p = doc.querySelector('p')
-			expect(p?.classList.contains('pantolingo-skeleton')).toBe(true)
+			expect(p?.classList.contains('pantolingo-deferred-loading')).toBe(true)
 		})
 
 		it('does not add skeleton when text node has siblings', () => {
@@ -339,7 +339,7 @@ describe('applyTranslations deferred mode', () => {
 			// "Hello" text has a sibling (span), so no skeleton on parent div
 			expect(result.pending[0].showSkeleton).toBe(false)
 			const div = doc.querySelector('div')
-			expect(div?.classList.contains('pantolingo-skeleton')).toBe(false)
+			expect(div?.classList.contains('pantolingo-deferred-loading')).toBe(false)
 		})
 	})
 })

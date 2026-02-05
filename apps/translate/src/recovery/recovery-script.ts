@@ -9,7 +9,7 @@
  * 2. Applies translations from window.__PANTOLINGO_RECOVERY__ dictionary
  * 3. Sets up MutationObserver for hydration changes
  * 4. Disconnects observer after 2 seconds
- * 5. Adds .pantolingo-ready to body (triggers CSS visibility)
+ * 5. Adds .pantolingo-recovery-ready to body (triggers CSS visibility)
  *
  * Dictionary structure:
  * window.__PANTOLINGO_RECOVERY__ = {
@@ -48,11 +48,11 @@ const BLOCK_ELEMENTS = new Set([
 
 /**
  * Check if an element or its ancestors should be skipped
- * Also skips elements with data-pantolingo-pending (deferred translation in progress)
+ * Also skips elements with data-pantolingo-deferred (deferred translation in progress)
  */
 function shouldSkip(element: Element | null): boolean {
 	while (element) {
-		if (element.hasAttribute('data-pantolingo-skip') || element.hasAttribute('data-pantolingo-pending')) {
+		if (element.hasAttribute('data-pantolingo-recovery-skip') || element.hasAttribute('data-pantolingo-deferred')) {
 			return true
 		}
 		element = element.parentElement
@@ -224,7 +224,7 @@ function recoverTranslations(): void {
 	applyPathTranslations(dictionary)
 
 	// Mark page as ready (triggers CSS visibility)
-	document.body.classList.add('pantolingo-ready')
+	document.body.classList.add('pantolingo-recovery-ready')
 }
 
 /**

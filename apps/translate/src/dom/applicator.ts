@@ -89,8 +89,8 @@ function applyToGroupedBlocks(
 				// Deferred mode: cache miss - mark as pending with skeleton
 				const elem = segment.htmlMeta.element
 
-				elem.classList.add('pantolingo-skeleton')
-				elem.setAttribute('data-pantolingo-pending', hash)
+				elem.classList.add('pantolingo-deferred-loading')
+				elem.setAttribute('data-pantolingo-deferred', hash)
 
 				pending.push({
 					hash,
@@ -169,12 +169,12 @@ function applyToTextNodes(
 
 					if (isSole && node.parentElement) {
 						// Sole child: add skeleton to parent
-						node.parentElement.classList.add('pantolingo-skeleton')
-						node.parentElement.setAttribute('data-pantolingo-pending', hash)
+						node.parentElement.classList.add('pantolingo-deferred-loading')
+						node.parentElement.setAttribute('data-pantolingo-deferred', hash)
 					}
 
 					// Always insert comment marker for text node replacement
-					const comment = document.createComment(`pantolingo:${hash}`)
+					const comment = document.createComment(`pantolingo-deferred:${hash}`)
 					node.parentNode?.insertBefore(comment, node)
 
 					pending.push({
@@ -243,8 +243,8 @@ function applyToAttributes(
 					if (translation === null && hash && pending) {
 						// Deferred mode: cache miss - mark as pending
 						// Attributes can't show skeleton, so just mark with data attribute
-						elem.setAttribute('data-pantolingo-pending', hash)
-						elem.setAttribute('data-pantolingo-attr', attr)
+						elem.setAttribute('data-pantolingo-deferred', hash)
+						elem.setAttribute('data-pantolingo-deferred-attr', attr)
 
 						pending.push({
 							hash,
@@ -300,7 +300,7 @@ function applyHeadTitle(
 			if (translation === null && hash && pending) {
 				// Deferred mode: cache miss - mark as pending
 				// Title can't show skeleton visually, treat like attr
-				titleElement.setAttribute('data-pantolingo-pending', hash)
+				titleElement.setAttribute('data-pantolingo-deferred', hash)
 
 				pending.push({
 					hash,
@@ -353,8 +353,8 @@ function applyHeadDescription(
 
 			if (translation === null && hash && pending) {
 				// Deferred mode: cache miss - mark as pending
-				descElement.setAttribute('data-pantolingo-pending', hash)
-				descElement.setAttribute('data-pantolingo-attr', 'content')
+				descElement.setAttribute('data-pantolingo-deferred', hash)
+				descElement.setAttribute('data-pantolingo-deferred-attr', 'content')
 
 				pending.push({
 					hash,

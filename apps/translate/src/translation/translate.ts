@@ -100,7 +100,12 @@ export async function translateSingle(
 
 		if (!response.ok) {
 			const errorText = await response.text()
-			throw new Error(`OpenRouter API error: ${response.status} ${response.statusText}\n${errorText}`)
+			// Truncate error body - it may be a full HTML error page from Cloudflare
+			const isHtml = errorText.trimStart().startsWith('<')
+			const truncatedError = isHtml
+				? '(HTML error page)'
+				: errorText.slice(0, 200) + (errorText.length > 200 ? '...' : '')
+			throw new Error(`OpenRouter API error: ${response.status} ${response.statusText} - ${truncatedError}`)
 		}
 
 		const data = (await response.json()) as any

@@ -40,8 +40,9 @@ declare global {
 }
 
 const INITIAL_DELAY = 1000 // 1s before first poll
-const POLL_INTERVAL = 1000 // 1s between polls
-const MAX_POLLS = 10 // 10 polls max before timeout
+const BASE_INTERVAL = 1500 // 1.5s between polls
+const BACKOFF_INCREMENT = 250 // +0.25s on zero results
+const MAX_POLL_TIME = 12000 // 12s max total polling time
 
 /**
  * Find ALL elements by hash and apply translation
@@ -51,12 +52,12 @@ function applyTranslation(hash: string, translation: string, kind: 'html' | 'tex
 	let found = false
 
 	if (kind === 'html') {
-		// HTML segment: find ALL elements with data-pantolingo-pending attribute
-		const elems = document.querySelectorAll(`[data-pantolingo-pending="${hash}"]`)
+		// HTML segment: find ALL elements with data-pantolingo-deferred attribute
+		const elems = document.querySelectorAll(`[data-pantolingo-deferred="${hash}"]`)
 		for (let i = 0; i < elems.length; i++) {
 			;(elems[i] as HTMLElement).innerHTML = translation
-			elems[i].classList.remove('pantolingo-skeleton')
-			elems[i].removeAttribute('data-pantolingo-pending')
+			elems[i].classList.remove('pantolingo-deferred-loading')
+			elems[i].removeAttribute('data-pantolingo-deferred')
 			found = true
 		}
 	} else if (kind === 'text') {
@@ -67,7 +68,7 @@ function applyTranslation(hash: string, translation: string, kind: 'html' | 'tex
 			NodeFilter.SHOW_COMMENT,
 			{
 				acceptNode: (node) => {
-					if ((node as Comment).data === `pantolingo:${hash}`) {
+					if ((node as Comment).data === `pantolingo-deferred:${hash}`) {
 						return NodeFilter.FILTER_ACCEPT
 					}
 					return NodeFilter.FILTER_SKIP
@@ -93,9 +94,9 @@ function applyTranslation(hash: string, translation: string, kind: 'html' | 'tex
 
 				// Remove skeleton from parent if present
 				const parent = textNode.parentElement
-				if (parent?.classList.contains('pantolingo-skeleton')) {
-					parent.classList.remove('pantolingo-skeleton')
-					parent.removeAttribute('data-pantolingo-pending')
+				if (parent?.classList.contains('pantolingo-deferred-loading')) {
+					parent.classList.remove('pantolingo-deferred-loading')
+					parent.removeAttribute('data-pantolingo-deferred')
 				}
 
 				// Remove comment marker
@@ -105,27 +106,27 @@ function applyTranslation(hash: string, translation: string, kind: 'html' | 'tex
 		}
 
 		// Fallback: if comment was destroyed by client JS, clean up by attribute
-		const fallbackEls = document.querySelectorAll(`[data-pantolingo-pending="${hash}"]:not(title)`)
+		const fallbackEls = document.querySelectorAll(`[data-pantolingo-deferred="${hash}"]:not(title)`)
 		for (let i = 0; i < fallbackEls.length; i++) {
-			fallbackEls[i].classList.remove('pantolingo-skeleton')
-			fallbackEls[i].removeAttribute('data-pantolingo-pending')
+			fallbackEls[i].classList.remove('pantolingo-deferred-loading')
+			fallbackEls[i].removeAttribute('data-pantolingo-deferred')
 			found = true
 		}
 
 		// Title check runs unconditionally (body text and title may share hash)
-		const title = document.querySelector(`title[data-pantolingo-pending="${hash}"]`)
+		const title = document.querySelector(`title[data-pantolingo-deferred="${hash}"]`)
 		if (title) {
 			title.textContent = translation
-			title.removeAttribute('data-pantolingo-pending')
+			title.removeAttribute('data-pantolingo-deferred')
 			found = true
 		}
 	} else if (kind === 'attr' && attr) {
 		// Attribute segment: find ALL elements and update attribute
-		const elems = document.querySelectorAll(`[data-pantolingo-pending="${hash}"][data-pantolingo-attr="${attr}"]`)
+		const elems = document.querySelectorAll(`[data-pantolingo-deferred="${hash}"][data-pantolingo-deferred-attr="${attr}"]`)
 		for (let i = 0; i < elems.length; i++) {
 			elems[i].setAttribute(attr, translation)
-			elems[i].removeAttribute('data-pantolingo-pending')
-			elems[i].removeAttribute('data-pantolingo-attr')
+			elems[i].removeAttribute('data-pantolingo-deferred')
+			elems[i].removeAttribute('data-pantolingo-deferred-attr')
 			found = true
 		}
 	}
@@ -141,10 +142,10 @@ function showOriginal(segment: PendingSegment): void {
 
 	if (kind === 'html') {
 		// Clear ALL matching html elements
-		const elems = document.querySelectorAll(`[data-pantolingo-pending="${hash}"]`)
+		const elems = document.querySelectorAll(`[data-pantolingo-deferred="${hash}"]`)
 		for (let i = 0; i < elems.length; i++) {
-			elems[i].classList.remove('pantolingo-skeleton')
-			elems[i].removeAttribute('data-pantolingo-pending')
+			elems[i].classList.remove('pantolingo-deferred-loading')
+			elems[i].removeAttribute('data-pantolingo-deferred')
 		}
 	} else if (kind === 'text') {
 		// Collect ALL matching comments first to avoid DOM mutation during TreeWalker
@@ -153,7 +154,7 @@ function showOriginal(segment: PendingSegment): void {
 			NodeFilter.SHOW_COMMENT,
 			{
 				acceptNode: (node) => {
-					if ((node as Comment).data === `pantolingo:${hash}`) {
+					if ((node as Comment).data === `pantolingo-deferred:${hash}`) {
 						return NodeFilter.FILTER_ACCEPT
 					}
 					return NodeFilter.FILTER_SKIP
@@ -170,31 +171,31 @@ function showOriginal(segment: PendingSegment): void {
 		// Process collected comments
 		for (const comment of comments) {
 			const parent = comment.parentElement
-			if (parent?.classList.contains('pantolingo-skeleton')) {
-				parent.classList.remove('pantolingo-skeleton')
-				parent.removeAttribute('data-pantolingo-pending')
+			if (parent?.classList.contains('pantolingo-deferred-loading')) {
+				parent.classList.remove('pantolingo-deferred-loading')
+				parent.removeAttribute('data-pantolingo-deferred')
 			}
 			comment.remove()
 		}
 
 		// Fallback: if comment was destroyed by client JS, clean up by attribute
-		const fallbackEls = document.querySelectorAll(`[data-pantolingo-pending="${hash}"]:not(title)`)
+		const fallbackEls = document.querySelectorAll(`[data-pantolingo-deferred="${hash}"]:not(title)`)
 		for (let i = 0; i < fallbackEls.length; i++) {
-			fallbackEls[i].classList.remove('pantolingo-skeleton')
-			fallbackEls[i].removeAttribute('data-pantolingo-pending')
+			fallbackEls[i].classList.remove('pantolingo-deferred-loading')
+			fallbackEls[i].removeAttribute('data-pantolingo-deferred')
 		}
 
 		// Title check runs unconditionally
-		const title = document.querySelector(`title[data-pantolingo-pending="${hash}"]`)
+		const title = document.querySelector(`title[data-pantolingo-deferred="${hash}"]`)
 		if (title) {
-			title.removeAttribute('data-pantolingo-pending')
+			title.removeAttribute('data-pantolingo-deferred')
 		}
 	} else if (kind === 'attr' && attr) {
 		// Clear ALL matching attr elements
-		const elems = document.querySelectorAll(`[data-pantolingo-pending="${hash}"][data-pantolingo-attr="${attr}"]`)
+		const elems = document.querySelectorAll(`[data-pantolingo-deferred="${hash}"][data-pantolingo-deferred-attr="${attr}"]`)
 		for (let i = 0; i < elems.length; i++) {
-			elems[i].removeAttribute('data-pantolingo-pending')
-			elems[i].removeAttribute('data-pantolingo-attr')
+			elems[i].removeAttribute('data-pantolingo-deferred')
+			elems[i].removeAttribute('data-pantolingo-deferred-attr')
 		}
 	}
 }
@@ -204,18 +205,23 @@ function showOriginal(segment: PendingSegment): void {
  * Called after polling ends (timeout or all resolved) as a safety net.
  */
 function cleanup(): void {
-	const els = document.querySelectorAll('.pantolingo-skeleton')
+	const els = document.querySelectorAll('.pantolingo-deferred-loading')
 	for (let i = 0; i < els.length; i++) {
-		els[i].classList.remove('pantolingo-skeleton')
-		els[i].removeAttribute('data-pantolingo-pending')
+		els[i].classList.remove('pantolingo-deferred-loading')
+		els[i].removeAttribute('data-pantolingo-deferred')
 	}
 }
 
 /**
  * Poll for translations and apply them
  */
-async function pollForTranslations(pending: PendingSegment[], pollCount: number): Promise<void> {
-	if (pending.length === 0 || pollCount >= MAX_POLLS) {
+async function pollForTranslations(
+	pending: PendingSegment[],
+	startTime: number,
+	interval: number
+): Promise<void> {
+	// Time-based cutoff
+	if (pending.length === 0 || Date.now() - startTime >= MAX_POLL_TIME) {
 		// Done or timeout - show original for any remaining
 		for (const segment of pending) {
 			showOriginal(segment)
@@ -263,18 +269,22 @@ async function pollForTranslations(pending: PendingSegment[], pollCount: number)
 
 		// Schedule next poll if still have pending, otherwise cleanup
 		if (stillPending.length > 0) {
+			// Back off if no progress, otherwise keep current interval
+			const foundCount = pending.length - stillPending.length
+			const nextInterval = foundCount === 0 ? interval + BACKOFF_INCREMENT : interval
+
 			setTimeout(() => {
-				pollForTranslations(stillPending, pollCount + 1)
-			}, POLL_INTERVAL)
+				pollForTranslations(stillPending, startTime, nextInterval)
+			}, nextInterval)
 		} else {
 			cleanup()
 		}
 	} catch (error) {
 		console.error('[Pantolingo] Polling error:', error)
-		// Retry on next interval
+		// Retry at same interval (errors are typically transient)
 		setTimeout(() => {
-			pollForTranslations(pending, pollCount + 1)
-		}, POLL_INTERVAL)
+			pollForTranslations(pending, startTime, interval)
+		}, interval)
 	}
 }
 
@@ -289,7 +299,7 @@ function init(): void {
 
 	// Wait initial delay before first poll
 	setTimeout(() => {
-		pollForTranslations([...pending], 0)
+		pollForTranslations([...pending], Date.now(), BASE_INTERVAL)
 	}, INITIAL_DELAY)
 }
 

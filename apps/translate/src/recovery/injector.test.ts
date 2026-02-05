@@ -27,9 +27,9 @@ describe('markSkippedElements', () => {
 		const translate = document.querySelector('.translate')
 		const navSkip = document.querySelector('#nav-skip')
 
-		expect(skipMe?.hasAttribute('data-pantolingo-skip')).toBe(true)
-		expect(translate?.hasAttribute('data-pantolingo-skip')).toBe(false)
-		expect(navSkip?.hasAttribute('data-pantolingo-skip')).toBe(true)
+		expect(skipMe?.hasAttribute('data-pantolingo-recovery-skip')).toBe(true)
+		expect(translate?.hasAttribute('data-pantolingo-recovery-skip')).toBe(false)
+		expect(navSkip?.hasAttribute('data-pantolingo-recovery-skip')).toBe(true)
 	})
 
 	it('handles empty skip selectors', () => {
@@ -45,7 +45,7 @@ describe('markSkippedElements', () => {
 		markSkippedElements(document, [])
 
 		const div = document.querySelector('div')
-		expect(div?.hasAttribute('data-pantolingo-skip')).toBe(false)
+		expect(div?.hasAttribute('data-pantolingo-recovery-skip')).toBe(false)
 	})
 
 	it('handles invalid selectors gracefully', () => {
@@ -63,7 +63,7 @@ describe('markSkippedElements', () => {
 		}).not.toThrow()
 
 		const valid = document.querySelector('.valid')
-		expect(valid?.hasAttribute('data-pantolingo-skip')).toBe(true)
+		expect(valid?.hasAttribute('data-pantolingo-recovery-skip')).toBe(true)
 	})
 })
 
@@ -87,9 +87,9 @@ describe('injectRecoveryAssets', () => {
 
 		injectRecoveryAssets(document, mockDictionary)
 
-		const style = document.querySelector('style[data-pantolingo="flicker-guard"]')
+		const style = document.querySelector('style[data-pantolingo="recovery-css"]')
 		expect(style).not.toBeNull()
-		expect(style?.textContent).toContain('body:not(.pantolingo-ready)')
+		expect(style?.textContent).toContain('body:not(.pantolingo-recovery-ready)')
 		expect(style?.textContent).toContain('opacity:0')
 	})
 
@@ -104,7 +104,7 @@ describe('injectRecoveryAssets', () => {
 
 		injectRecoveryAssets(document, mockDictionary)
 
-		const script = document.querySelector('body script[data-pantolingo="recovery"]')
+		const script = document.querySelector('body script[data-pantolingo="recovery-script"]')
 		expect(script).not.toBeNull()
 		expect(script?.getAttribute('src')).toBe('/__pantolingo/recovery.js')
 		expect(script?.hasAttribute('defer')).toBe(true)
@@ -121,7 +121,7 @@ describe('injectRecoveryAssets', () => {
 
 		injectRecoveryAssets(document, mockDictionary)
 
-		const dictScript = document.querySelector('script[data-pantolingo="dictionary"]')
+		const dictScript = document.querySelector('script[data-pantolingo="recovery-data"]')
 		expect(dictScript).not.toBeNull()
 		expect(dictScript?.textContent).toContain('window.__PANTOLINGO_RECOVERY__')
 		expect(dictScript?.textContent).toContain('"Hello":"Hola"')
@@ -166,7 +166,7 @@ describe('injectRecoveryAssets', () => {
 
 		injectRecoveryAssets(document, emptyDict)
 
-		const dictScript = document.querySelector('script[data-pantolingo="dictionary"]')
+		const dictScript = document.querySelector('script[data-pantolingo="recovery-data"]')
 		expect(dictScript).not.toBeNull()
 		expect(dictScript?.textContent).toContain('"text":{}')
 	})
@@ -187,7 +187,7 @@ describe('getRecoveryScript', () => {
 	it('contains expected recovery functions', () => {
 		const script = getRecoveryScript()
 		expect(script).toContain('__PANTOLINGO_RECOVERY__')
-		expect(script).toContain('pantolingo-ready')
+		expect(script).toContain('pantolingo-recovery-ready')
 		expect(script).toContain('MutationObserver')
 	})
 })
