@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stats - Pantolingo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              sidebar: {
+                light: '#ffffff',
+                dark: '#1a1a1a',
+              },
+              content: {
+                light: '#f5f5f5',
+                dark: '#111111',
+              },
+              card: {
+                light: '#ffffff',
+                dark: '#2a2a2a',
+              },
+            },
+          },
+        },
+      }
+    </script>
+    <link rel="stylesheet" href="shared.css" />
+    <script>
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark')
+      }
+    </script>
+    <style>
+      /* Period selector active pill */
+      .period-btn.active {
+        background-color: #3b82f6;
+        color: #ffffff;
+      }
+      .dark .period-btn.active {
+        background-color: #2563eb;
+      }
+    </style>
+  </head>
+  <body class="h-full bg-content-light dark:bg-content-dark text-gray-900 dark:text-gray-100">
+    <!-- Mobile Top Bar (visible < md) -->
+    <div
+      class="md:hidden sticky top-0 z-30 flex items-center gap-3 bg-white dark:bg-sidebar-dark border-b border-gray-200 dark:border-gray-700 px-4 h-14"
+    >
+      <button id="mobile-menu-btn" aria-label="Open menu" class="p-1 text-gray-600 dark:text-gray-300">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      <span class="text-sm font-semibold text-gray-900 dark:text-white">eSnipe</span>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="mobile-overlay" class="md:hidden fixed inset-0 bg-black/40 z-40 hidden"></div>
+
+    <!-- Sidebar -->
+    <aside
+      id="sidebar"
+      class="fixed top-0 left-0 z-50 h-full w-60 bg-sidebar-light dark:bg-sidebar-dark border-r border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden md:overflow-visible transition-transform -translate-x-full md:translate-x-0"
+    >
+      <!-- Main nav view -->
+      <div id="sidebar-nav" class="h-full flex flex-col transition-transform duration-200">
+      <!-- Website Switcher -->
+      <div class="px-3 pt-14 md:pt-6 pb-7">
+        <div class="relative">
+          <button
+            id="website-switcher-btn"
+            class="w-full flex items-center gap-3 px-3 py-3 min-h-[64px] rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            <span
+              class="flex-shrink-0 w-8 h-8 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center text-sm font-bold"
+              >E</span
+            >
+            <span class="flex-1 text-left text-sm font-semibold text-gray-900 dark:text-white truncate"
+              >eSnipe</span
+            >
+            <svg
+              id="website-switcher-chevron"
+              class="w-4 h-4 text-gray-400 transition-transform flex-shrink-0 -rotate-90 md:rotate-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          <!-- Website Switcher Dropdown (desktop) -->
+          <div
+            id="website-switcher-dropdown"
+            class="hidden absolute left-0 top-full mt-1 w-64 bg-white dark:bg-sidebar-dark border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg overflow-hidden z-50"
+          >
+            <div class="flex flex-col items-center py-4 my-2">
+              <span class="text-sm font-semibold text-gray-900 dark:text-white">eSnipe</span>
+              <span class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">www.esnipe.com</span>
+            </div>
+            <div id="switcher-items">
+              <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <circle cx="12" cy="12" r="3" stroke-width="1.5" />
+                </svg>
+                Settings
+              </a>
+              <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+              <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <span class="w-6 h-6 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center text-xs font-semibold">A</span>
+                AuctionStealer
+              </a>
+              <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <span class="w-6 h-6 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center text-xs font-semibold">B</span>
+                Buy Me a Coffee
+              </a>
+              <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4" />
+                </svg>
+                Add website
+              </a>
+              <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+              <a href="#" class="flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <div class="flex items-center gap-3">
+                  <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="8" r="4" stroke-width="1.5" />
+                    <path stroke-width="1.5" d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+                  </svg>
+                  W. Williams
+                </div>
+              </a>
+              <button class="switcher-theme-toggle w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="5" stroke-width="1.5" />
+                  <path stroke-linecap="round" stroke-width="1.5" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                </svg>
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z" />
+                </svg>
+                <span class="dark:hidden">Dark mode</span>
+                <span class="hidden dark:inline">Light mode</span>
+              </button>
+              <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+                </svg>
+                Sign out
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Primary Nav -->
+      <nav class="px-2 space-y-1">
+        <a
+          href="languages.html"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        >
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5h8M7 5V3m2.5 7.5L7 9m0 0L5 12m2-3l2 3m5-3h6m-3 0v8m-2-4h4" />
+            <text x="14" y="9" font-size="7" fill="currentColor" stroke="none" font-weight="600">A</text>
+          </svg>
+          <span>Languages</span>
+        </a>
+
+        <a
+          href="segments.html"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        >
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h12M4 14h16M4 18h8" />
+          </svg>
+          <span>Segments</span>
+        </a>
+
+        <a
+          href="paths.html"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        >
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+          </svg>
+          <span>Paths</span>
+        </a>
+
+        <a
+          href="stats.html"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 nav-item-active transition-colors"
+        >
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3v18h18M7 16v-3m4 3v-6m4 6v-4m4 4V7" />
+          </svg>
+          <span>Stats</span>
+        </a>
+      </nav>
+
+      <!-- Mobile close button -->
+      <button id="sidebar-close" aria-label="Close menu" class="md:hidden absolute top-2 left-2 p-1 text-gray-500 dark:text-gray-400">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      </div>
+
+      <!-- Mobile switcher panel -->
+      <div
+        id="sidebar-switcher"
+        class="absolute inset-0 flex flex-col bg-sidebar-light dark:bg-sidebar-dark transition-transform duration-200 translate-x-full md:hidden"
+      >
+        <button id="switcher-back" aria-label="Back to navigation" class="absolute top-2 left-2 p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <div class="flex-1 overflow-y-auto">
+          <div class="flex flex-col items-center pt-[4.5rem] pb-4 mb-2">
+            <span class="w-10 h-10 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center text-base font-bold">E</span>
+            <span class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">eSnipe</span>
+            <span class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">www.esnipe.com</span>
+          </div>
+          <div id="switcher-panel-items"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="md:ml-60 min-h-full flex flex-col">
+      <main class="flex-1 p-6">
+        <!-- Page Title + Period Selector -->
+        <div class="px-0 py-3 mb-4 min-h-[52px] flex items-center justify-between flex-wrap gap-3">
+          <h1 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Stats</h1>
+          <div class="flex items-center gap-1 bg-white dark:bg-card-dark border border-gray-200 dark:border-gray-600 rounded-lg p-1">
+            <button class="period-btn active px-3 py-1.5 text-xs font-medium rounded-md text-gray-600 dark:text-gray-300 transition-colors" data-period="7d">7D</button>
+            <button class="period-btn px-3 py-1.5 text-xs font-medium rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-period="30d">30D</button>
+            <button class="period-btn px-3 py-1.5 text-xs font-medium rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" data-period="90d">90D</button>
+          </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <!-- Page Views -->
+          <div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <div class="flex items-center gap-2 mb-1">
+              <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Page Views</span>
+            </div>
+            <div class="text-2xl font-bold text-gray-900 dark:text-white" id="stat-views">4,218</div>
+            <div class="flex items-center gap-1 mt-1">
+              <svg class="w-3 h-3 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+              <span class="text-xs text-green-600 dark:text-green-400 font-medium">+12.3%</span>
+              <span class="text-xs text-gray-400">vs prior</span>
+            </div>
+          </div>
+
+          <!-- Words Translated -->
+          <div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <div class="flex items-center gap-2 mb-1">
+              <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5h8M7 5V3m2.5 7.5L7 9m0 0L5 12m2-3l2 3m5-3h6m-3 0v8m-2-4h4" />
+              </svg>
+              <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Words Translated</span>
+            </div>
+            <div class="text-2xl font-bold text-gray-900 dark:text-white" id="stat-words">18,742</div>
+            <div class="flex items-center gap-1 mt-1">
+              <svg class="w-3 h-3 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+              <span class="text-xs text-green-600 dark:text-green-400 font-medium">+8.7%</span>
+              <span class="text-xs text-gray-400">vs prior</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row 1: Page Views + Words by Language -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+          <!-- Page Views Over Time (wider) -->
+          <div class="lg:col-span-2 bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-5">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-sm font-semibold text-gray-800 dark:text-gray-200">Page Views</h2>
+              <div class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>Spanish</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>French</span>
+              </div>
+            </div>
+            <div class="h-56">
+              <canvas id="chart-pageviews"></canvas>
+            </div>
+          </div>
+
+          <!-- Words by Language (narrower) -->
+          <div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-5">
+            <h2 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-4">Words by Language</h2>
+            <div class="h-56">
+              <canvas id="chart-words-lang"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Pages + Translation Coverage -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-5">
+            <h2 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-4">Top Pages</h2>
+            <div class="space-y-3">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs text-gray-700 dark:text-gray-300 font-mono truncate max-w-[70%]">/</span>
+                  <span class="text-xs font-semibold text-gray-800 dark:text-gray-200">1,247</span>
+                </div>
+                <div class="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div class="h-full bg-blue-500 rounded-full" style="width: 100%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs text-gray-700 dark:text-gray-300 font-mono truncate max-w-[70%]">/features</span>
+                  <span class="text-xs font-semibold text-gray-800 dark:text-gray-200">892</span>
+                </div>
+                <div class="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div class="h-full bg-blue-500 rounded-full" style="width: 71.5%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs text-gray-700 dark:text-gray-300 font-mono truncate max-w-[70%]">/pricing</span>
+                  <span class="text-xs font-semibold text-gray-800 dark:text-gray-200">641</span>
+                </div>
+                <div class="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div class="h-full bg-blue-500 rounded-full" style="width: 51.4%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs text-gray-700 dark:text-gray-300 font-mono truncate max-w-[70%]">/about</span>
+                  <span class="text-xs font-semibold text-gray-800 dark:text-gray-200">528</span>
+                </div>
+                <div class="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div class="h-full bg-blue-500 rounded-full" style="width: 42.3%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs text-gray-700 dark:text-gray-300 font-mono truncate max-w-[70%]">/blog/sniping-tips</span>
+                  <span class="text-xs font-semibold text-gray-800 dark:text-gray-200">387</span>
+                </div>
+                <div class="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div class="h-full bg-blue-500 rounded-full" style="width: 31.0%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs text-gray-700 dark:text-gray-300 font-mono truncate max-w-[70%]">/faq</span>
+                  <span class="text-xs font-semibold text-gray-800 dark:text-gray-200">256</span>
+                </div>
+                <div class="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div class="h-full bg-blue-500 rounded-full" style="width: 20.5%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-5">
+            <h2 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-4">Translation Coverage</h2>
+            <div class="space-y-4">
+              <!-- Spanish -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                    <span class="text-base">&#127466;&#127480;</span> Spanish
+                  </span>
+                  <span class="text-xs font-semibold text-gray-800 dark:text-gray-200">221 / 235 segments</span>
+                </div>
+                <div class="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full bg-gradient-to-r from-green-400 to-emerald-500" style="width: 94%"></div>
+                </div>
+                <div class="flex items-center justify-between mt-1">
+                  <span class="text-xs text-gray-500 dark:text-gray-400">94% translated</span>
+                  <span class="text-xs text-amber-600 dark:text-amber-400 font-medium">14 unreviewed</span>
+                </div>
+              </div>
+              <!-- French -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                    <span class="text-base">&#127467;&#127479;</span> French
+                  </span>
+                  <span class="text-xs font-semibold text-gray-800 dark:text-gray-200">198 / 235 segments</span>
+                </div>
+                <div class="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full bg-gradient-to-r from-blue-400 to-blue-500" style="width: 84%"></div>
+                </div>
+                <div class="flex items-center justify-between mt-1">
+                  <span class="text-xs text-gray-500 dark:text-gray-400">84% translated</span>
+                  <span class="text-xs text-amber-600 dark:text-amber-400 font-medium">32 unreviewed</span>
+                </div>
+              </div>
+              <!-- Path Coverage -->
+              <div class="pt-3 border-t border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                    </svg>
+                    Path Translation
+                  </span>
+                  <span class="text-xs font-semibold text-gray-800 dark:text-gray-200">8 / 9 paths</span>
+                </div>
+                <div class="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full bg-gradient-to-r from-violet-400 to-purple-500" style="width: 89%"></div>
+                </div>
+                <span class="text-xs text-gray-500 dark:text-gray-400 mt-1 inline-block">89% paths translated (both languages)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daily Activity Heatmap -->
+        <div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-5">
+          <h2 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-4">Translation Activity</h2>
+          <div class="overflow-x-auto">
+            <div class="flex items-end gap-1 min-w-[400px]" id="activity-heatmap">
+              <!-- Generated by JS -->
+            </div>
+            <div class="flex items-center justify-between mt-3 text-xs text-gray-400">
+              <span>4 weeks ago</span>
+              <div class="flex items-center gap-1.5">
+                <span>Less</span>
+                <span class="w-3 h-3 rounded-sm bg-gray-100 dark:bg-gray-700"></span>
+                <span class="w-3 h-3 rounded-sm bg-blue-200 dark:bg-blue-900"></span>
+                <span class="w-3 h-3 rounded-sm bg-blue-400 dark:bg-blue-700"></span>
+                <span class="w-3 h-3 rounded-sm bg-blue-600 dark:bg-blue-500"></span>
+                <span>More</span>
+              </div>
+              <span>Today</span>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+      // ── Theme-aware chart colors ──
+      function isDark() {
+        return document.documentElement.classList.contains('dark');
+      }
+      function gridColor() { return isDark() ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'; }
+      function labelColor() { return isDark() ? '#9ca3af' : '#6b7280'; }
+
+      // ── Mock Data Generators ──
+      // Last 7 days labels
+      function dayLabels(n) {
+        const labels = [];
+        const today = new Date();
+        for (let i = n - 1; i >= 0; i--) {
+          const d = new Date(today);
+          d.setDate(d.getDate() - i);
+          labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+        }
+        return labels;
+      }
+
+      const labels7 = dayLabels(7);
+
+      // ── Page Views Chart (stacked area) ──
+      const ctxPV = document.getElementById('chart-pageviews').getContext('2d');
+      new Chart(ctxPV, {
+        type: 'line',
+        data: {
+          labels: labels7,
+          datasets: [
+            {
+              label: 'Spanish',
+              data: [410, 385, 520, 478, 612, 590, 648],
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59,130,246,0.12)',
+              fill: true,
+              tension: 0.35,
+              borderWidth: 2,
+              pointRadius: 3,
+              pointBackgroundColor: '#3b82f6',
+            },
+            {
+              label: 'French',
+              data: [180, 210, 165, 230, 195, 245, 275],
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16,185,129,0.10)',
+              fill: true,
+              tension: 0.35,
+              borderWidth: 2,
+              pointRadius: 3,
+              pointBackgroundColor: '#10b981',
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { intersect: false, mode: 'index' },
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: labelColor(), font: { size: 11 } } },
+            y: { grid: { color: gridColor() }, ticks: { color: labelColor(), font: { size: 11 } }, beginAtZero: true }
+          }
+        }
+      });
+
+      // ── Words by Language (horizontal bar) ──
+      const ctxWL = document.getElementById('chart-words-lang').getContext('2d');
+      new Chart(ctxWL, {
+        type: 'bar',
+        data: {
+          labels: ['Spanish', 'French'],
+          datasets: [
+            {
+              label: 'Segments',
+              data: [12480, 6262],
+              backgroundColor: ['rgba(59,130,246,0.75)', 'rgba(16,185,129,0.75)'],
+              borderRadius: 4,
+              barThickness: 28,
+            }
+          ]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: gridColor() }, ticks: { color: labelColor(), font: { size: 11 }, callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'k' : v } },
+            y: { grid: { display: false }, ticks: { color: labelColor(), font: { size: 12 } } }
+          }
+        }
+      });
+
+      // ── Activity Heatmap (GitHub-style) ──
+      const heatmap = document.getElementById('activity-heatmap');
+      // Generate 28 days of mock translation activity
+      const activityData = [
+        // Week 1 (4 weeks ago)
+        [3, 8, 0, 12, 5, 1, 0],
+        // Week 2
+        [6, 14, 22, 9, 0, 3, 0],
+        // Week 3
+        [11, 7, 18, 25, 15, 0, 2],
+        // Week 4 (this week)
+        [19, 32, 14, 28, 21, 8, 0],
+      ];
+
+      const dayNames = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+      // Day labels column
+      const dayLabelCol = document.createElement('div');
+      dayLabelCol.className = 'flex flex-col gap-1 mr-2';
+      dayNames.forEach(d => {
+        const lbl = document.createElement('span');
+        lbl.className = 'text-[10px] text-gray-400 h-3 leading-3';
+        lbl.textContent = d;
+        dayLabelCol.appendChild(lbl);
+      });
+      heatmap.appendChild(dayLabelCol);
+
+      function heatColor(val) {
+        if (val === 0) return isDark() ? 'bg-gray-700' : 'bg-gray-100';
+        if (val <= 5) return isDark() ? 'bg-blue-900' : 'bg-blue-200';
+        if (val <= 15) return isDark() ? 'bg-blue-700' : 'bg-blue-400';
+        return isDark() ? 'bg-blue-500' : 'bg-blue-600';
+      }
+
+      activityData.forEach(week => {
+        const col = document.createElement('div');
+        col.className = 'flex flex-col gap-1 flex-1';
+        week.forEach(val => {
+          const cell = document.createElement('div');
+          cell.className = `h-3 rounded-sm ${heatColor(val)}`;
+          cell.title = `${val} translations`;
+          col.appendChild(cell);
+        });
+        heatmap.appendChild(col);
+      });
+
+      // ── Period Selector (UI-only, swaps card values) ──
+      const periodData = {
+        '7d': { views: '4,218', words: '18,742' },
+        '30d': { views: '16,934', words: '72,518' },
+        '90d': { views: '48,217', words: '198,340' },
+      };
+
+      document.querySelectorAll('.period-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const p = btn.dataset.period;
+          const d = periodData[p];
+          document.getElementById('stat-views').textContent = d.views;
+          document.getElementById('stat-words').textContent = d.words;
+        });
+      });
+    </script>
+  </body>
+</html>

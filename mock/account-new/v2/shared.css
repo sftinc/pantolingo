@@ -1,0 +1,7 @@
+/* Sidebar nav active state */
+.nav-item-active {
+  background-color: #e8f0fe;
+}
+.dark .nav-item-active {
+  background-color: #2a2a3a;
+}

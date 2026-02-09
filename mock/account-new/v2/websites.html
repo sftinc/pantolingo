@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Websites - Pantolingo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              sidebar: {
+                light: '#ffffff',
+                dark: '#1a1a1a',
+              },
+              content: {
+                light: '#f5f5f5',
+                dark: '#111111',
+              },
+              card: {
+                light: '#ffffff',
+                dark: '#2a2a2a',
+              },
+            },
+          },
+        },
+      }
+    </script>
+    <link rel="stylesheet" href="shared.css" />
+    <script>
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark')
+      }
+    </script>
+  </head>
+  <body class="h-full bg-content-light dark:bg-content-dark text-gray-900 dark:text-gray-100">
+    <!-- Mobile Top Bar (visible < md) -->
+    <div
+      class="md:hidden sticky top-0 z-30 flex items-center gap-3 bg-white dark:bg-sidebar-dark border-b border-gray-200 dark:border-gray-700 px-4 h-14"
+    >
+      <button id="mobile-menu-btn" aria-label="Open menu" class="p-1 text-gray-600 dark:text-gray-300">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      <span class="text-sm font-semibold text-gray-900 dark:text-white">eSnipe</span>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="mobile-overlay" class="md:hidden fixed inset-0 bg-black/40 z-40 hidden"></div>
+
+    <!-- Sidebar -->
+    <aside
+      id="sidebar"
+      class="fixed top-0 left-0 z-50 h-full w-60 bg-sidebar-light dark:bg-sidebar-dark border-r border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden md:overflow-visible transition-transform -translate-x-full md:translate-x-0"
+    >
+      <!-- Main nav view -->
+      <div id="sidebar-nav" class="h-full flex flex-col transition-transform duration-200">
+      <!-- Website Switcher -->
+      <div class="px-3 pt-14 md:pt-6 pb-7">
+        <div class="relative">
+          <button
+            id="website-switcher-btn"
+            class="w-full flex items-center gap-3 px-3 py-3 min-h-[64px] rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            <span
+              class="flex-shrink-0 w-8 h-8 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center text-sm font-bold"
+              >E</span
+            >
+            <span class="flex-1 text-left text-sm font-semibold text-gray-900 dark:text-white truncate"
+              >eSnipe</span
+            >
+            <svg
+              id="website-switcher-chevron"
+              class="w-4 h-4 text-gray-400 transition-transform flex-shrink-0 -rotate-90 md:rotate-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          <!-- Website Switcher Dropdown (desktop) -->
+          <div
+            id="website-switcher-dropdown"
+            class="hidden absolute left-0 top-full mt-1 w-64 bg-white dark:bg-sidebar-dark border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg overflow-hidden z-50"
+          >
+            <!-- Dropdown Header -->
+            <div class="flex flex-col items-center py-4 my-2">
+              <span class="text-sm font-semibold text-gray-900 dark:text-white">eSnipe</span>
+              <span class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">www.esnipe.com</span>
+            </div>
+            <!-- Shared switcher items (single source of truth) -->
+            <div id="switcher-items">
+              <!-- Settings -->
+              <a
+                href="#"
+                class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
+                  <circle cx="12" cy="12" r="3" stroke-width="1.5" />
+                </svg>
+                Settings
+              </a>
+              <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+              <!-- Websites -->
+              <a
+                href="#"
+                class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span
+                  class="w-6 h-6 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center text-xs font-semibold"
+                  >A</span
+                >
+                AuctionStealer
+              </a>
+              <a
+                href="#"
+                class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <span
+                  class="w-6 h-6 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center text-xs font-semibold"
+                  >B</span
+                >
+                Buy Me a Coffee
+              </a>
+              <!-- Add website -->
+              <a
+                href="#"
+                class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4" />
+                </svg>
+                Add website
+              </a>
+              <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+              <!-- User -->
+              <a
+                href="#"
+                class="flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <div class="flex items-center gap-3">
+                  <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="8" r="4" stroke-width="1.5" />
+                    <path stroke-width="1.5" d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+                  </svg>
+                  W. Williams
+                </div>
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke-width="1.5" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4m0 4h.01" />
+                </svg>
+              </a>
+              <!-- Theme toggle -->
+              <button
+                class="switcher-theme-toggle w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="5" stroke-width="1.5" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-width="1.5"
+                    d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                  />
+                </svg>
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"
+                  />
+                </svg>
+                <span class="dark:hidden">Dark mode</span>
+                <span class="hidden dark:inline">Light mode</span>
+              </button>
+              <!-- Sign out -->
+              <a
+                href="#"
+                class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"
+                  />
+                </svg>
+                Sign out
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Primary Nav -->
+      <nav class="px-2 space-y-1">
+        <a
+          href="languages.html"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        >
+          <!-- Translate icon -->
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              d="M3 5h8M7 5V3m2.5 7.5L7 9m0 0L5 12m2-3l2 3m5-3h6m-3 0v8m-2-4h4"
+            />
+            <text x="14" y="9" font-size="7" fill="currentColor" stroke="none" font-weight="600">A</text>
+          </svg>
+          <span>Languages</span>
+        </a>
+
+        <a
+          href="segments.html"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        >
+          <!-- Segments/text icon -->
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              d="M4 6h16M4 10h12M4 14h16M4 18h8"
+            />
+          </svg>
+          <span>Segments</span>
+        </a>
+
+        <a
+          href="paths.html"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        >
+          <!-- Paths/route icon -->
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+            />
+          </svg>
+          <span>Paths</span>
+        </a>
+
+        <a
+          href="stats.html"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        >
+          <!-- Stats/chart icon -->
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              d="M3 3v18h18M7 16v-3m4 3v-6m4 6v-4m4 4V7"
+            />
+          </svg>
+          <span>Stats</span>
+        </a>
+      </nav>
+
+      <!-- Mobile close button -->
+      <button id="sidebar-close" aria-label="Close menu" class="md:hidden absolute top-2 left-2 p-1 text-gray-500 dark:text-gray-400">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      </div>
+
+      <!-- Mobile switcher panel (slides in from right) -->
+      <div
+        id="sidebar-switcher"
+        class="absolute inset-0 flex flex-col bg-sidebar-light dark:bg-sidebar-dark transition-transform duration-200 translate-x-full md:hidden"
+      >
+        <button
+          id="switcher-back"
+          aria-label="Back to navigation"
+          class="absolute top-2 left-2 p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <div class="flex-1 overflow-y-auto">
+          <!-- Panel Header -->
+          <div class="flex flex-col items-center pt-[4.5rem] pb-4 mb-2">
+            <span
+              class="w-10 h-10 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center text-base font-bold"
+              >E</span
+            >
+            <span class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">eSnipe</span>
+            <span class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">www.esnipe.com</span>
+          </div>
+          <!-- Cloned from #switcher-items -->
+          <div id="switcher-panel-items"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="md:ml-60 min-h-full flex flex-col">
+      <!-- Page Content -->
+      <main class="flex-1 p-6">
+        <!-- Page Title -->
+        <div
+          class="px-0 py-3 mb-4 min-h-[52px] flex items-center justify-between"
+        >
+          <h1 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Websites</h1>
+          <button
+            class="p-2.5 rounded-md border border-gray-300 dark:border-gray-500 text-gray-500 dark:text-gray-400 bg-white dark:bg-card-dark hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            title="Add website"
+            aria-label="Add website"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Websites Table -->
+        <div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-gray-200 dark:border-gray-700">
+                  <th class="text-left px-6 py-3 text-sm font-medium text-gray-500 dark:text-gray-400">Hostname</th>
+                  <th class="text-left px-6 py-3 text-sm font-medium text-gray-500 dark:text-gray-400">Languages</th>
+                  <th class="text-left px-6 py-3 text-sm font-medium text-gray-500 dark:text-gray-400">Segments</th>
+                  <th class="text-left px-6 py-3 text-sm font-medium text-gray-500 dark:text-gray-400">Paths</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                <!-- Row 1 -->
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors">
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-2">
+                      <span class="text-base" title="English (US)">&#127482;&#127480;</span>
+                      <span class="text-sm font-medium text-gray-900 dark:text-white">www.esnipe.com</span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">2</td>
+                  <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">235</td>
+                  <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">9</td>
+                </tr>
+                <!-- Row 2 -->
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors">
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-2">
+                      <span class="text-base" title="English (UK)">&#127468;&#127463;</span>
+                      <span class="text-sm font-medium text-gray-900 dark:text-white">www.example.com</span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">3</td>
+                  <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">150</td>
+                  <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">12</td>
+                </tr>
+                <!-- Row 3 -->
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors">
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-2">
+                      <span class="text-base" title="English (US)">&#127482;&#127480;</span>
+                      <span class="text-sm font-medium text-gray-900 dark:text-white">shop.mysite.com</span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">1</td>
+                  <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">89</td>
+                  <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">5</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="shared.js"></script>
+  </body>
+</html>
