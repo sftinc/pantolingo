@@ -38,14 +38,14 @@ export function LanguageDropdown({ langs, currentLangCd, publicCode, basePath }:
 				className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[var(--card-bg)] border border-[var(--border)] text-sm font-medium text-[var(--text-heading)] hover:border-[var(--border-hover)] transition-colors cursor-pointer"
 			>
 				<span>{getFlag(currentLangCd)}</span>
-				<span>{getLanguageName(currentLangCd)}</span>
+				<span>{getLanguageName(currentLangCd).split(' (')[0]}</span>
 				<svg className={`w-4 h-4 text-[var(--text-subtle)] transition-transform ${isOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 					<path d="m6 9 6 6 6-6" />
 				</svg>
 			</button>
 
 			{isOpen && (
-				<ul className="absolute left-0 top-full z-50 mt-1 w-56 max-h-64 overflow-y-auto rounded-lg bg-[var(--card-bg)] border border-[var(--border)] shadow-lg [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
+				<ul className="absolute right-0 top-full z-50 mt-1 w-56 max-h-64 overflow-y-auto rounded-lg bg-[var(--card-bg)] border border-[var(--border)] shadow-lg [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
 					{langs.map((lang) => (
 						<li key={lang.langCd}>
 							<button
@@ -58,7 +58,7 @@ export function LanguageDropdown({ langs, currentLangCd, publicCode, basePath }:
 								}`}
 							>
 								<span>{getFlag(lang.langCd)}</span>
-								<span>{getLanguageName(lang.langCd)}</span>
+								<span>{getLanguageName(lang.langCd).split(' (')[0]}</span>
 							</button>
 						</li>
 					))}

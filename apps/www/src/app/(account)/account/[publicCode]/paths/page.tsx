@@ -64,8 +64,6 @@ export default async function PathsPage({ params, searchParams }: PathsPageProps
 
 	const data = await getPathsForLang(websiteId, resolvedLangCd, validFilter, pageNum, limit)
 
-	const baseUrl = `/account/${publicCode}/paths?lang=${resolvedLangCd}&filter=${validFilter}`
-
 	return (
 		<div>
 			<div className="mb-6 flex flex-wrap items-center justify-between gap-4">
@@ -88,7 +86,7 @@ export default async function PathsPage({ params, searchParams }: PathsPageProps
 						{ value: 'unreviewed', label: 'Unreviewed' },
 					]}
 					value={validFilter}
-					baseUrl={`/account/${publicCode}/paths?lang=${resolvedLangCd}`}
+					baseUrl={`/account/${publicCode}/paths`}
 					paramName="filter"
 				/>
 			</div>
@@ -102,7 +100,7 @@ export default async function PathsPage({ params, searchParams }: PathsPageProps
 			<PathTable paths={data.items} targetLang={resolvedLangCd} websiteId={websiteId} />
 
 			<div className="mt-6">
-				<Pagination currentPage={data.page} totalPages={data.totalPages} baseUrl={baseUrl} />
+				<Pagination currentPage={data.page} totalPages={data.totalPages} baseUrl={`/account/${publicCode}/paths?filter=${validFilter}`} />
 			</div>
 		</div>
 	)

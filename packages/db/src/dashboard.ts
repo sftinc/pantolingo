@@ -13,6 +13,7 @@ export interface WebsiteWithStats {
 	id: number
 	publicCode: string
 	hostname: string
+	name: string
 	sourceLang: string
 	langCount: number
 	segmentCount: number
@@ -55,6 +56,7 @@ export interface Website {
 	id: number
 	publicCode: string
 	hostname: string
+	name: string
 	sourceLang: string
 }
 
@@ -112,6 +114,7 @@ export async function getWebsitesWithStats(accountId: number): Promise<WebsiteWi
 		id: number
 		public_code: string
 		hostname: string
+		name: string
 		source_lang: string
 		lang_count: string
 		segment_count: string
@@ -122,6 +125,7 @@ export async function getWebsitesWithStats(accountId: number): Promise<WebsiteWi
 			w.id,
 			w.public_code,
 			w.hostname,
+			w.name,
 			w.source_lang,
 			(SELECT COUNT(DISTINCT target_lang) FROM translation t WHERE t.website_id = w.id) as lang_count,
 			(SELECT COUNT(*) FROM translation_segment ts JOIN website_segment ws ON ws.id = ts.website_segment_id WHERE ws.website_id = w.id) as segment_count,
@@ -138,6 +142,7 @@ export async function getWebsitesWithStats(accountId: number): Promise<WebsiteWi
 		id: row.id,
 		publicCode: row.public_code,
 		hostname: row.hostname,
+		name: row.name,
 		sourceLang: row.source_lang,
 		langCount: parseInt(row.lang_count, 10),
 		segmentCount: parseInt(row.segment_count, 10),
@@ -155,13 +160,14 @@ export async function getWebsiteByPublicCode(publicCode: string): Promise<Websit
 		id: number
 		public_code: string
 		hostname: string
+		name: string
 		source_lang: string
 		skip_words: string[] | null
 		skip_path: string[] | null
 		skip_selectors: string[] | null
 		translate_path: boolean | null
 	}>(
-		`SELECT id, public_code, hostname, source_lang, skip_words, skip_path, skip_selectors, translate_path FROM website WHERE public_code = $1`,
+		`SELECT id, public_code, hostname, name, source_lang, skip_words, skip_path, skip_selectors, translate_path FROM website WHERE public_code = $1`,
 		[publicCode]
 	)
 
@@ -172,6 +178,7 @@ export async function getWebsiteByPublicCode(publicCode: string): Promise<Websit
 		id: row.id,
 		publicCode: row.public_code,
 		hostname: row.hostname,
+		name: row.name,
 		sourceLang: row.source_lang,
 		skipWords: row.skip_words || [],
 		skipPath: row.skip_path || [],
@@ -724,6 +731,7 @@ export async function updatePathTranslation(
 export async function updateWebsiteSettings(
 	websiteId: number,
 	settings: {
+		name: string
 		skipWords: string[]
 		skipPath: string[]
 		skipSelectors: string[]
@@ -733,13 +741,14 @@ export async function updateWebsiteSettings(
 	try {
 		await pool.query(
 			`UPDATE website
-			 SET skip_words = $2,
-			     skip_path = $3,
-			     skip_selectors = $4,
-			     translate_path = $5,
+			 SET name = $2,
+			     skip_words = $3,
+			     skip_path = $4,
+			     skip_selectors = $5,
+			     translate_path = $6,
 			     updated_at = NOW()
 			 WHERE id = $1`,
-			[websiteId, settings.skipWords, settings.skipPath, settings.skipSelectors, settings.translatePath]
+			[websiteId, settings.name, settings.skipWords, settings.skipPath, settings.skipSelectors, settings.translatePath]
 		)
 		return { success: true }
 	} catch (error) {

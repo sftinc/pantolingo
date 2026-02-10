@@ -71,8 +71,7 @@ export default async function SegmentsPage({ params, searchParams }: SegmentsPag
 		getPathsForWebsite(websiteId),
 	])
 
-	const pathParam = pathId !== undefined ? `&path=${pathId}` : ''
-	const baseUrl = `/account/${publicCode}/segments?lang=${resolvedLangCd}&filter=${validFilter}${pathParam}`
+	const pathParam = pathId !== undefined ? `path=${pathId}` : ''
 
 	return (
 		<div>
@@ -96,14 +95,13 @@ export default async function SegmentsPage({ params, searchParams }: SegmentsPag
 						{ value: 'unreviewed', label: 'Unreviewed' },
 					]}
 					value={validFilter}
-					baseUrl={`/account/${publicCode}/segments?lang=${resolvedLangCd}${pathParam}`}
+					baseUrl={`/account/${publicCode}/segments${pathParam ? `?${pathParam}` : ''}`}
 					paramName="filter"
 				/>
 				<PathSelect
 					paths={pathOptions}
 					selectedPathId={pathId ?? null}
-					baseUrl={`/account/${publicCode}/segments?lang=${resolvedLangCd}&filter=${validFilter}`}
-					className="ml-auto"
+					baseUrl={`/account/${publicCode}/segments?filter=${validFilter}`}
 				/>
 			</div>
 
@@ -116,7 +114,7 @@ export default async function SegmentsPage({ params, searchParams }: SegmentsPag
 			<SegmentTable segments={data.items} targetLang={resolvedLangCd} websiteId={websiteId} />
 
 			<div className="mt-6">
-				<Pagination currentPage={data.page} totalPages={data.totalPages} baseUrl={baseUrl} />
+				<Pagination currentPage={data.page} totalPages={data.totalPages} baseUrl={`/account/${publicCode}/segments?filter=${validFilter}${pathParam ? `&${pathParam}` : ''}`} />
 			</div>
 		</div>
 	)

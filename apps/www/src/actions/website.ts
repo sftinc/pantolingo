@@ -6,6 +6,7 @@ import { canAccessWebsite, updateWebsiteSettings as dbUpdateWebsiteSettings } fr
 export async function saveWebsiteSettings(
 	websiteId: number,
 	settings: {
+		name: string
 		skipWords: string[]
 		skipPath: string[]
 		skipSelectors: string[]
@@ -13,6 +14,12 @@ export async function saveWebsiteSettings(
 	}
 ): Promise<{ success: boolean; error?: string }> {
 	try {
+		if (!settings.name.trim()) {
+			return { success: false, error: 'Name is required' }
+		}
+		if (settings.name.length > 20) {
+			return { success: false, error: 'Name too long (max 20 characters)' }
+		}
 		if (settings.skipWords.length > 50) {
 			return { success: false, error: 'Too many skip words (max 50)' }
 		}

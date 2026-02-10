@@ -5,8 +5,8 @@ import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 interface SidebarLayoutProps {
-	currentWebsite: { publicCode: string; hostname: string; sourceLang: string }
-	websites: { publicCode: string; hostname: string }[]
+	currentWebsite: { publicCode: string; hostname: string; name: string; sourceLang: string }
+	websites: { publicCode: string; hostname: string; name: string }[]
 	userName: string
 	signOutAction: () => Promise<void>
 	children: React.ReactNode
@@ -23,8 +23,8 @@ export function SidebarLayout({ currentWebsite, websites, userName, signOutActio
 	const pathname = usePathname()
 	const router = useRouter()
 	const [mobileOpen, setMobileOpen] = useState(false)
-	const [switcherOpen, setSwitcherOpen] = useState(false)
-	const [mobileSwitcherOpen, setMobileSwitcherOpen] = useState(false)
+	const [switcherDropdownOpen, setSwitcherDropdownOpen] = useState(false)
+	const [switcherPanelOpen, setSwitcherPanelOpen] = useState(false)
 	const switcherRef = useRef<HTMLDivElement>(null)
 	const [theme, setTheme] = useState<'light' | 'dark'>('light')
 	const [mounted, setMounted] = useState(false)
@@ -50,14 +50,14 @@ export function SidebarLayout({ currentWebsite, websites, userName, signOutActio
 	// Close mobile sidebar on navigation
 	useEffect(() => {
 		setMobileOpen(false)
-		setMobileSwitcherOpen(false)
+		setSwitcherPanelOpen(false)
 	}, [pathname])
 
 	// Close desktop switcher on click outside
 	useEffect(() => {
 		const handler = (e: MouseEvent) => {
 			if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) {
-				setSwitcherOpen(false)
+				setSwitcherDropdownOpen(false)
 			}
 		}
 		document.addEventListener('mousedown', handler)
@@ -66,10 +66,24 @@ export function SidebarLayout({ currentWebsite, websites, userName, signOutActio
 
 	const basePath = `/account/${currentWebsite.publicCode}`
 	const otherWebsites = websites.filter((w) => w.publicCode !== currentWebsite.publicCode)
-	const letterAvatar = currentWebsite.hostname[0].toUpperCase()
+	const letterAvatar = currentWebsite.name[0].toUpperCase()
 
 	function isActive(navPath: string) {
 		return pathname.startsWith(`${basePath}/${navPath}`)
+	}
+
+	// Switcher button click: mobile opens panel, desktop toggles dropdown
+	function handleSwitcherClick() {
+		if (window.innerWidth < 768) {
+			setSwitcherPanelOpen(true)
+		} else {
+			setSwitcherDropdownOpen(!switcherDropdownOpen)
+		}
+	}
+
+	function closeMobile() {
+		setMobileOpen(false)
+		setSwitcherPanelOpen(false)
 	}
 
 	// Shared nav items renderer
@@ -94,7 +108,7 @@ export function SidebarLayout({ currentWebsite, websites, userName, signOutActio
 		})
 	}
 
-	// Shared dropdown items (used in both desktop dropdown and mobile switcher panel)
+	// Shared switcher items (used in both desktop dropdown and mobile switcher panel)
 	function renderSwitcherItems(onNavigate: () => void) {
 		return (
 			<>
@@ -120,9 +134,9 @@ export function SidebarLayout({ currentWebsite, websites, userName, signOutActio
 						className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-active-bg)] transition-colors cursor-pointer"
 					>
 						<span className="w-6 h-6 rounded bg-[var(--border)] text-[var(--text-muted)] flex items-center justify-center text-xs font-semibold">
-							{site.hostname[0].toUpperCase()}
+							{site.name[0].toUpperCase()}
 						</span>
-						{site.hostname}
+						{site.name}
 					</button>
 				))}
 
@@ -175,40 +189,6 @@ export function SidebarLayout({ currentWebsite, websites, userName, signOutActio
 
 	return (
 		<div className="min-h-screen bg-[var(--content-bg)]">
-			{/* Desktop sidebar */}
-			<aside className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-60 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)]">
-				{/* Website switcher */}
-				<div ref={switcherRef} className="relative px-3 pt-6 pb-7">
-					<button
-						onClick={() => setSwitcherOpen(!switcherOpen)}
-						className="w-full flex items-center gap-3 px-3 py-3 min-h-[64px] rounded-md hover:bg-[var(--nav-active-bg)] transition-colors cursor-pointer"
-					>
-						<span className="shrink-0 w-8 h-8 rounded-md bg-[var(--border)] text-[var(--text-muted)] flex items-center justify-center text-sm font-bold">
-							{letterAvatar}
-						</span>
-						<span className="flex-1 text-left text-sm font-semibold text-[var(--text-heading)] truncate">
-							{currentWebsite.hostname}
-						</span>
-						<ChevronIcon className={`w-4 h-4 text-[var(--text-subtle)] shrink-0 transition-transform ${switcherOpen ? 'rotate-180' : ''}`} />
-					</button>
-
-					{/* Desktop switcher dropdown */}
-					{switcherOpen && (
-						<div className="absolute left-0 top-full mt-1 w-64 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg shadow-lg overflow-hidden z-50">
-							{/* Centered site header */}
-							<div className="flex flex-col items-center py-4 my-2">
-								<span className="text-sm font-semibold text-[var(--text-heading)]">{currentWebsite.hostname}</span>
-							</div>
-
-							{renderSwitcherItems(() => setSwitcherOpen(false))}
-						</div>
-					)}
-				</div>
-
-				{/* Navigation */}
-				<nav className="px-2 space-y-1">{renderNavItems()}</nav>
-			</aside>
-
 			{/* Mobile top bar */}
 			<div className="md:hidden sticky top-0 z-30 flex items-center gap-3 bg-[var(--sidebar-bg)] border-b border-[var(--sidebar-border)] px-4 h-14">
 				<button
@@ -218,76 +198,91 @@ export function SidebarLayout({ currentWebsite, websites, userName, signOutActio
 				>
 					<HamburgerIcon className="w-6 h-6" />
 				</button>
-				<span className="text-sm font-semibold text-[var(--text-heading)]">{currentWebsite.hostname}</span>
+				<span className="text-sm font-semibold text-[var(--text-heading)]">{currentWebsite.name}</span>
 			</div>
 
-			{/* Mobile sidebar overlay */}
+			{/* Mobile overlay */}
 			{mobileOpen && (
-				<>
-					<div className="md:hidden fixed inset-0 bg-black/40 z-40" onClick={() => { setMobileOpen(false); setMobileSwitcherOpen(false) }} />
+				<div className="md:hidden fixed inset-0 bg-black/40 z-40" onClick={closeMobile} />
+			)}
 
-					<aside className="md:hidden fixed top-0 left-0 z-50 h-full w-60 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col overflow-hidden">
-						{!mobileSwitcherOpen ? (
-							// Main nav panel
-							<div className="h-full flex flex-col">
-								{/* Close button */}
-								<button
-									onClick={() => setMobileOpen(false)}
-									aria-label="Close menu"
-									className="absolute top-2 left-2 p-1 text-[var(--text-subtle)] cursor-pointer"
-								>
-									<CloseIcon className="w-5 h-5" />
-								</button>
+			{/* ONE sidebar — always in DOM, toggled via translate on mobile */}
+			<aside
+				className={`fixed top-0 left-0 z-50 h-full w-60 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col overflow-hidden md:overflow-visible transition-transform duration-200 ${
+					mobileOpen ? 'translate-x-0' : '-translate-x-full'
+				} md:translate-x-0`}
+			>
+				{/* Panel 1: Main nav (slides left when switcher panel opens on mobile) */}
+				<div className={`h-full flex flex-col transition-transform duration-200 ${switcherPanelOpen ? '-translate-x-full' : 'translate-x-0'}`}>
+					{/* Close button (mobile only) */}
+					<button
+						onClick={closeMobile}
+						aria-label="Close menu"
+						className="md:hidden absolute top-2 left-2 p-1 text-[var(--text-subtle)] cursor-pointer z-10"
+					>
+						<CloseIcon className="w-5 h-5" />
+					</button>
 
-								{/* Website switcher */}
-								<div className="px-3 pt-14 pb-7">
-									<button
-										onClick={() => setMobileSwitcherOpen(true)}
-										className="w-full flex items-center gap-3 px-3 py-3 min-h-[64px] rounded-md hover:bg-[var(--nav-active-bg)] transition-colors cursor-pointer"
-									>
-										<span className="shrink-0 w-8 h-8 rounded-md bg-[var(--border)] text-[var(--text-muted)] flex items-center justify-center text-sm font-bold">
-											{letterAvatar}
-										</span>
-										<span className="flex-1 text-left text-sm font-semibold text-[var(--text-heading)] truncate">
-											{currentWebsite.hostname}
-										</span>
-										<ChevronIcon className="w-4 h-4 text-[var(--text-subtle)] shrink-0 -rotate-90" />
-									</button>
-								</div>
+					{/* Website switcher button */}
+					<div className="px-3 pt-14 md:pt-6 pb-7">
+						<div ref={switcherRef} className="relative">
+							<button
+								onClick={handleSwitcherClick}
+								className="w-full flex items-center gap-3 px-3 py-3 min-h-[64px] rounded-md hover:bg-[var(--nav-active-bg)] transition-colors cursor-pointer"
+							>
+								<span className="shrink-0 w-8 h-8 rounded-md bg-[var(--border)] text-[var(--text-muted)] flex items-center justify-center text-sm font-bold">
+									{letterAvatar}
+								</span>
+								<span className="flex-1 text-left text-sm font-semibold text-[var(--text-heading)] truncate">
+									{currentWebsite.name}
+								</span>
+								<ChevronIcon className={`w-4 h-4 text-[var(--text-subtle)] shrink-0 transition-transform -rotate-90 md:rotate-0 ${switcherDropdownOpen ? 'md:rotate-180' : ''}`} />
+							</button>
 
-								{/* Nav */}
-								<nav className="px-2 space-y-1">
-									{renderNavItems(() => setMobileOpen(false))}
-								</nav>
-							</div>
-						) : (
-							// Switcher panel
-							<div className="h-full flex flex-col">
-								{/* Back button */}
-								<button
-									onClick={() => setMobileSwitcherOpen(false)}
-									aria-label="Back to navigation"
-									className="absolute top-2 left-2 p-1 text-[var(--text-subtle)] hover:text-[var(--text-muted)] cursor-pointer"
-								>
-									<ChevronLeftIcon className="w-5 h-5" />
-								</button>
-
-								<div className="flex-1 overflow-y-auto">
-									{/* Centered site header */}
-									<div className="flex flex-col items-center pt-[4.5rem] pb-4 mb-2">
-										<span className="w-10 h-10 rounded-md bg-[var(--border)] text-[var(--text-muted)] flex items-center justify-center text-base font-bold">
-											{letterAvatar}
-										</span>
-										<span className="mt-2 text-sm font-semibold text-[var(--text-heading)]">{currentWebsite.hostname}</span>
+							{/* Desktop switcher dropdown */}
+							{switcherDropdownOpen && (
+								<div className="hidden md:block absolute left-0 top-full mt-1 w-64 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg shadow-lg overflow-hidden z-50">
+									{/* Header: name bold + hostname subtitle */}
+									<div className="flex flex-col items-center py-4 my-2">
+										<span className="text-sm font-semibold text-[var(--text-heading)]">{currentWebsite.name}</span>
+										<span className="mt-0.5 text-xs text-[var(--text-muted)]">{currentWebsite.hostname}</span>
 									</div>
 
-									{renderSwitcherItems(() => setMobileOpen(false))}
+									{renderSwitcherItems(() => setSwitcherDropdownOpen(false))}
 								</div>
-							</div>
-						)}
-					</aside>
-				</>
-			)}
+							)}
+						</div>
+					</div>
+
+					{/* Navigation */}
+					<nav className="px-2 space-y-1">{renderNavItems(() => { if (window.innerWidth < 768) closeMobile() })}</nav>
+				</div>
+
+				{/* Panel 2: Mobile switcher (slides in from right) */}
+				<div className={`md:hidden absolute inset-0 bg-[var(--sidebar-bg)] flex flex-col transition-transform duration-200 ${switcherPanelOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+					{/* Back button */}
+					<button
+						onClick={() => setSwitcherPanelOpen(false)}
+						aria-label="Back to navigation"
+						className="absolute top-2 left-2 p-1 text-[var(--text-subtle)] hover:text-[var(--text-muted)] cursor-pointer"
+					>
+						<ChevronLeftIcon className="w-5 h-5" />
+					</button>
+
+					<div className="flex-1 overflow-y-auto">
+						{/* Header: large avatar + name + hostname */}
+						<div className="flex flex-col items-center pt-[4.5rem] pb-4 mb-2">
+							<span className="w-10 h-10 rounded-md bg-[var(--border)] text-[var(--text-muted)] flex items-center justify-center text-base font-bold">
+								{letterAvatar}
+							</span>
+							<span className="mt-2 text-sm font-semibold text-[var(--text-heading)]">{currentWebsite.name}</span>
+							<span className="mt-0.5 text-xs text-[var(--text-muted)]">{currentWebsite.hostname}</span>
+						</div>
+
+						{renderSwitcherItems(closeMobile)}
+					</div>
+				</div>
+			</aside>
 
 			{/* Content area */}
 			<main className="md:ml-60 min-h-screen">

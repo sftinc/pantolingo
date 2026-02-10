@@ -6,9 +6,13 @@ import { TagInput } from '@/components/ui/TagInput'
 import { Switch } from '@/components/ui/Switch'
 import { Button } from '@/components/ui/Modal'
 import { saveWebsiteSettings } from '@/actions/website'
+import { getFlag, getLanguageName } from '@pantolingo/lang'
 
 interface WebsiteSettingsFormProps {
 	websiteId: number
+	initialName: string
+	hostname: string
+	sourceLang: string
 	initialSkipWords: string[]
 	initialSkipPath: string[]
 	initialSkipSelectors: string[]
@@ -101,6 +105,9 @@ function validateSelector(selector: string): string | null {
 
 export function WebsiteSettingsForm({
 	websiteId,
+	initialName,
+	hostname,
+	sourceLang,
 	initialSkipWords,
 	initialSkipPath,
 	initialSkipSelectors,
@@ -113,6 +120,7 @@ export function WebsiteSettingsForm({
 
 	const { contains: initialContains, regex: initialRegex } = parseSkipPath(initialSkipPath)
 
+	const [name, setName] = useState(initialName)
 	const [skipWords, setSkipWords] = useState(initialSkipWords)
 	const [skipPathContains, setSkipPathContains] = useState(initialContains)
 	const [skipPathRegex, setSkipPathRegex] = useState(initialRegex)
@@ -125,6 +133,7 @@ export function WebsiteSettingsForm({
 
 		startTransition(async () => {
 			const result = await saveWebsiteSettings(websiteId, {
+				name: name.trim(),
 				skipWords,
 				skipPath: combineSkipPath(skipPathContains, skipPathRegex),
 				skipSelectors,
@@ -153,6 +162,45 @@ export function WebsiteSettingsForm({
 					{error}
 				</div>
 			)}
+
+			{/* Name */}
+			<div>
+				<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
+					Name
+				</label>
+				<input
+					type="text"
+					value={name}
+					onChange={(e) => setName(e.target.value)}
+					disabled={isPending}
+					className="w-full px-3 py-2 text-sm rounded-md bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] disabled:opacity-50"
+					maxLength={20}
+				/>
+			</div>
+
+			{/* Hostname (read-only) */}
+			<div>
+				<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
+					Hostname
+				</label>
+				<input
+					type="text"
+					value={hostname}
+					readOnly
+					className="w-full px-3 py-2 text-sm rounded-md bg-[var(--border)]/30 border border-[var(--border)] text-[var(--text-muted)] cursor-not-allowed"
+				/>
+			</div>
+
+			{/* Source Language (read-only) */}
+			<div>
+				<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
+					Source Language
+				</label>
+				<div className="flex items-center gap-2 px-3 py-2 text-sm rounded-md bg-[var(--border)]/30 border border-[var(--border)] text-[var(--text-muted)]">
+					<span>{getFlag(sourceLang)}</span>
+					<span>{getLanguageName(sourceLang).split(' (')[0]}</span>
+				</div>
+			</div>
 
 			{/* Skip Words */}
 			<div>

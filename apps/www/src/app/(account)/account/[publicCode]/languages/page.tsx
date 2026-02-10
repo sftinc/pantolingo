@@ -36,23 +36,24 @@ export default async function LanguagesPage({ params, searchParams }: LanguagesP
 		<div>
 			<div className="mb-6 flex flex-wrap items-center justify-between gap-4">
 				<h1 className="text-2xl font-semibold text-[var(--text-heading)]">Languages</h1>
-				<div className="flex items-center gap-3">
-					<Toggle
-						options={[
-							{ value: 'all', label: 'All' },
-							{ value: 'unreviewed', label: 'Unreviewed' },
-						]}
-						value={validFilter}
-						baseUrl={`/account/${publicCode}/languages`}
-						paramName="filter"
-					/>
-					<button
-						disabled
-						className="px-3 py-1.5 text-sm font-medium rounded-md bg-[var(--accent)] text-white opacity-50 cursor-not-allowed"
-					>
-						+ Add Language
-					</button>
-				</div>
+				<button
+					disabled
+					className="px-3 py-1.5 text-sm font-medium rounded-md bg-[var(--accent)] text-white opacity-50 cursor-not-allowed"
+				>
+					+ Add Language
+				</button>
+			</div>
+
+			<div className="mb-6 flex flex-wrap items-center gap-4">
+				<Toggle
+					options={[
+						{ value: 'all', label: 'All' },
+						{ value: 'unreviewed', label: 'Unreviewed' },
+					]}
+					value={validFilter}
+					baseUrl={`/account/${publicCode}/languages`}
+					paramName="filter"
+				/>
 			</div>
 
 			<LangTable langs={filteredLangs} publicCode={publicCode} />

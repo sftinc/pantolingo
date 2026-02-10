@@ -27,6 +27,9 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 
 			<WebsiteSettingsForm
 				websiteId={websiteId}
+				initialName={website.name}
+				hostname={website.hostname}
+				sourceLang={website.sourceLang}
 				initialSkipWords={website.skipWords}
 				initialSkipPath={website.skipPath}
 				initialSkipSelectors={website.skipSelectors}
