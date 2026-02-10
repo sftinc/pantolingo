@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { TagInput } from '@/components/ui/TagInput'
 import { Switch } from '@/components/ui/Switch'
 import { Button } from '@/components/ui/Modal'
 import { saveWebsiteSettings } from '@/actions/website'
-import { getFlag, getLanguageName } from '@pantolingo/lang'
+import { getFlag, getLanguageName, LANGUAGE_DATA } from '@pantolingo/lang'
 
 interface WebsiteSettingsFormProps {
 	websiteId: number
@@ -103,6 +103,66 @@ function validateSelector(selector: string): string | null {
 	return null
 }
 
+function SourceLanguageDropdown({ value, onChange, disabled }: { value: string; onChange: (code: string) => void; disabled: boolean }) {
+	const [isOpen, setIsOpen] = useState(false)
+	const containerRef = useRef<HTMLDivElement>(null)
+	const sortedLangs = [...LANGUAGE_DATA].sort((a, b) => a.englishName.localeCompare(b.englishName))
+	const selectedLang = LANGUAGE_DATA.find((l) => l.code === value)
+
+	useEffect(() => {
+		const handler = (e: MouseEvent) => {
+			if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+				setIsOpen(false)
+			}
+		}
+		document.addEventListener('mousedown', handler)
+		return () => document.removeEventListener('mousedown', handler)
+	}, [])
+
+	return (
+		<div>
+			<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
+				Source Language
+			</label>
+			<div ref={containerRef} className="relative">
+				<button
+					type="button"
+					onClick={() => !disabled && setIsOpen(!isOpen)}
+					className="w-full flex items-center gap-2 px-3 py-2 rounded-md bg-[var(--card-bg)] border border-[var(--border)] text-sm text-[var(--text-heading)] hover:border-[var(--border-hover)] transition-colors cursor-pointer disabled:opacity-50"
+					disabled={disabled}
+				>
+					<span>{selectedLang?.flag}</span>
+					<span className="flex-1 text-left">{selectedLang?.englishName ?? value}</span>
+					<svg className={`w-4 h-4 text-[var(--text-subtle)] transition-transform ${isOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+						<path d="m6 9 6 6 6-6" />
+					</svg>
+				</button>
+
+				{isOpen && (
+					<ul className="absolute left-0 top-full z-50 mt-1 w-full max-h-64 overflow-y-auto rounded-lg bg-[var(--card-bg)] border border-[var(--border)] shadow-lg [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
+						{sortedLangs.map((lang) => (
+							<li key={lang.code}>
+								<button
+									type="button"
+									onClick={() => { onChange(lang.code); setIsOpen(false) }}
+									className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-[var(--accent)] hover:text-white transition-colors cursor-pointer ${
+										lang.code === value
+											? 'bg-[var(--accent)]/10 text-[var(--accent)] font-medium'
+											: 'text-[var(--text-muted)]'
+									}`}
+								>
+									<span>{lang.flag}</span>
+									<span>{lang.englishName}</span>
+								</button>
+							</li>
+						))}
+					</ul>
+				)}
+			</div>
+		</div>
+	)
+}
+
 export function WebsiteSettingsForm({
 	websiteId,
 	initialName,
@@ -121,6 +181,7 @@ export function WebsiteSettingsForm({
 	const { contains: initialContains, regex: initialRegex } = parseSkipPath(initialSkipPath)
 
 	const [name, setName] = useState(initialName)
+	const [selectedSourceLang, setSelectedSourceLang] = useState(sourceLang)
 	const [skipWords, setSkipWords] = useState(initialSkipWords)
 	const [skipPathContains, setSkipPathContains] = useState(initialContains)
 	const [skipPathRegex, setSkipPathRegex] = useState(initialRegex)
@@ -134,6 +195,7 @@ export function WebsiteSettingsForm({
 		startTransition(async () => {
 			const result = await saveWebsiteSettings(websiteId, {
 				name: name.trim(),
+				sourceLang: selectedSourceLang,
 				skipWords,
 				skipPath: combineSkipPath(skipPathContains, skipPathRegex),
 				skipSelectors,
@@ -191,16 +253,12 @@ export function WebsiteSettingsForm({
 				/>
 			</div>
 
-			{/* Source Language (read-only) */}
-			<div>
-				<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
-					Source Language
-				</label>
-				<div className="flex items-center gap-2 px-3 py-2 text-sm rounded-md bg-[var(--border)]/30 border border-[var(--border)] text-[var(--text-muted)]">
-					<span>{getFlag(sourceLang)}</span>
-					<span>{getLanguageName(sourceLang).split(' (')[0]}</span>
-				</div>
-			</div>
+			{/* Source Language */}
+			<SourceLanguageDropdown
+				value={selectedSourceLang}
+				onChange={setSelectedSourceLang}
+				disabled={isPending}
+			/>
 
 			{/* Skip Words */}
 			<div>

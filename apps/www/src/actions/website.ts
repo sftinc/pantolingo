@@ -2,11 +2,13 @@
 
 import { requireAccountId } from '@/lib/auth'
 import { canAccessWebsite, updateWebsiteSettings as dbUpdateWebsiteSettings } from '@pantolingo/db'
+import { SUPPORTED_LANGUAGES } from '@pantolingo/lang'
 
 export async function saveWebsiteSettings(
 	websiteId: number,
 	settings: {
 		name: string
+		sourceLang: string
 		skipWords: string[]
 		skipPath: string[]
 		skipSelectors: string[]
@@ -19,6 +21,9 @@ export async function saveWebsiteSettings(
 		}
 		if (settings.name.length > 20) {
 			return { success: false, error: 'Name too long (max 20 characters)' }
+		}
+		if (!SUPPORTED_LANGUAGES.includes(settings.sourceLang)) {
+			return { success: false, error: 'Invalid source language' }
 		}
 		if (settings.skipWords.length > 50) {
 			return { success: false, error: 'Too many skip words (max 50)' }

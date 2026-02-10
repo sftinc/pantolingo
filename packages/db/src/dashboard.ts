@@ -732,6 +732,7 @@ export async function updateWebsiteSettings(
 	websiteId: number,
 	settings: {
 		name: string
+		sourceLang: string
 		skipWords: string[]
 		skipPath: string[]
 		skipSelectors: string[]
@@ -742,13 +743,14 @@ export async function updateWebsiteSettings(
 		await pool.query(
 			`UPDATE website
 			 SET name = $2,
-			     skip_words = $3,
-			     skip_path = $4,
-			     skip_selectors = $5,
-			     translate_path = $6,
+			     source_lang = $3,
+			     skip_words = $4,
+			     skip_path = $5,
+			     skip_selectors = $6,
+			     translate_path = $7,
 			     updated_at = NOW()
 			 WHERE id = $1`,
-			[websiteId, settings.name, settings.skipWords, settings.skipPath, settings.skipSelectors, settings.translatePath]
+			[websiteId, settings.name, settings.sourceLang, settings.skipWords, settings.skipPath, settings.skipSelectors, settings.translatePath]
 		)
 		return { success: true }
 	} catch (error) {
