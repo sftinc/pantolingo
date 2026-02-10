@@ -423,7 +423,7 @@ export async function getPathsForLang(
 		FROM website_path wp
 		LEFT JOIN translation_path tp ON tp.website_path_id = wp.id AND tp.lang = $2
 		${whereClause}
-		ORDER BY wp.id
+		ORDER BY wp.path ASC
 		LIMIT $3 OFFSET $4
 	`,
 		[websiteId, lang, limit, offset]
@@ -442,6 +442,68 @@ export async function getPathsForLang(
 		limit,
 		totalPages: Math.ceil(total / limit),
 	}
+}
+
+// =============================================================================
+// Activity Tracking
+// =============================================================================
+
+/**
+ * Update website activity for the current user.
+ * Always updates last_viewed_at. Optionally updates last_lang if langCd is provided.
+ * Called from each page (not layout) so pages can pass the resolved langCd.
+ */
+export async function updateWebsiteActivity(
+	accountId: number,
+	websiteId: number,
+	langCd?: string
+): Promise<void> {
+	if (langCd) {
+		await pool.query(
+			`UPDATE account_website
+			 SET last_viewed_at = NOW(), last_lang = $3
+			 WHERE account_id = $1 AND website_id = $2`,
+			[accountId, websiteId, langCd]
+		)
+	} else {
+		await pool.query(
+			`UPDATE account_website
+			 SET last_viewed_at = NOW()
+			 WHERE account_id = $1 AND website_id = $2`,
+			[accountId, websiteId]
+		)
+	}
+}
+
+/**
+ * Get the last_lang for an account's website.
+ * Used by segments/paths pages to default to last-used language.
+ * @returns language code or null
+ */
+export async function getLastLang(accountId: number, websiteId: number): Promise<string | null> {
+	const result = await pool.query<{ last_lang: string | null }>(
+		`SELECT last_lang FROM account_website WHERE account_id = $1 AND website_id = $2`,
+		[accountId, websiteId]
+	)
+	return result.rows[0]?.last_lang ?? null
+}
+
+/**
+ * Get the most recently viewed website's publicCode for an account.
+ * Used by the smart /account router to redirect to the last-used website.
+ * @returns publicCode or null if no websites
+ */
+export async function getMostRecentWebsite(accountId: number): Promise<string | null> {
+	const result = await pool.query<{ public_code: string }>(
+		`SELECT w.public_code
+		 FROM account_website aw
+		 JOIN website w ON w.id = aw.website_id
+		 WHERE aw.account_id = $1
+		 ORDER BY aw.last_viewed_at DESC NULLS LAST, w.hostname ASC
+		 LIMIT 1`,
+		[accountId]
+	)
+	return result.rows[0]?.public_code ?? null
 }
 
 // =============================================================================

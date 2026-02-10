@@ -11,9 +11,12 @@ Next.js 16 app with Tailwind CSS v4 and React 19.
 -   `/auth/enter-code` - Manual 8-character code entry page
 -   `/auth/magic` - Magic link verification (redirects to `/api/auth/callback/smtp`)
 -   `/onboarding` - Name setup for new users
--   `/account` - Websites overview with segment/path counts
--   `/account/website/[publicCode]` - Language list for a website
--   `/account/website/[publicCode]/lang/[langCd]` - Translation editor for segments and paths
+-   `/account` - Smart router (redirects to last website or add-website placeholder)
+-   `/account/[publicCode]/languages` - Languages list with pill links
+-   `/account/[publicCode]/segments?lang=es` - Segments editor (language via query param)
+-   `/account/[publicCode]/paths?lang=es` - Paths editor (language via query param)
+-   `/account/[publicCode]/stats` - Stats dashboard (mock data)
+-   `/account/[publicCode]/settings` - Website settings
 
 ## Auth Flow
 
@@ -53,12 +56,16 @@ src/
 │   │   │   └── error/          # /login/error - auth errors
 │   │   ├── signup/             # /signup - email input
 │   │   └── onboarding/         # /onboarding - name setup
-│   ├── (account)/              # Customer account
+│   ├── (account)/              # Customer account (sidebar layout)
 │   │   └── account/
-│   │       ├── page.tsx                        # /account - websites overview
-│   │       └── website/[publicCode]/
-│   │           ├── page.tsx                    # /account/website/:publicCode - language list
-│   │           └── lang/[langCd]/page.tsx      # /account/website/:publicCode/lang/:langCd - translations
+│   │       ├── page.tsx                        # /account - smart router
+│   │       └── [publicCode]/
+│   │           ├── layout.tsx                  # Sidebar layout (auth gate + data)
+│   │           ├── languages/page.tsx          # /account/:publicCode/languages
+│   │           ├── segments/page.tsx           # /account/:publicCode/segments?lang=
+│   │           ├── paths/page.tsx              # /account/:publicCode/paths?lang=
+│   │           ├── stats/page.tsx              # /account/:publicCode/stats (mock)
+│   │           └── settings/page.tsx           # /account/:publicCode/settings
 │   ├── api/
 │   │   └── auth/[...nextauth]/ # NextAuth API routes
 │   └── healthz/                # Health check endpoint
@@ -73,6 +80,8 @@ src/
 
 ## Key Components
 
+-   `SidebarLayout` - Sidebar navigation with website switcher (client component)
+-   `LanguageDropdown` - Language selector dropdown for segments/paths pages
 -   `SegmentEditModal`, `PathEditModal` - Modals for editing translations
 -   `LangTable`, `SegmentTable`, `PathTable` - Data tables with pagination
 -   `PlaceholderEditor` - ContentEditable editor with placeholder validation

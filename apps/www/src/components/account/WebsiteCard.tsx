@@ -16,11 +16,11 @@ export function WebsiteCard({ website }: WebsiteCardProps) {
 	const handleSettingsClick = (e: React.MouseEvent) => {
 		e.preventDefault()
 		e.stopPropagation()
-		router.push(`/account/website/${website.publicCode}/settings`)
+		router.push(`/account/${website.publicCode}/settings`)
 	}
 
 	return (
-		<Card href={`/account/website/${website.publicCode}`}>
+		<Card href={`/account/${website.publicCode}`}>
 			<CardHeader className="flex flex-row items-start justify-between">
 				<div>
 					<CardTitle>{website.hostname}</CardTitle>
