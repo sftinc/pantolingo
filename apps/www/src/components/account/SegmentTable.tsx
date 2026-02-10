@@ -26,9 +26,9 @@ export function SegmentTable({ segments, targetLang, websiteId, onUpdate }: Segm
 			<Table>
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[45%]">Original Text</TableHead>
-						<TableHead className="w-[45%]">Translation</TableHead>
-						<TableHead className="w-[10%]">Status</TableHead>
+						<TableHead className="w-[40%]">Original Text</TableHead>
+						<TableHead className="w-[40%]">Translation</TableHead>
+						<TableHead className="w-[20%]">Status</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
@@ -38,18 +38,18 @@ export function SegmentTable({ segments, targetLang, websiteId, onUpdate }: Segm
 							clickable
 							onClick={() => setEditingSegment(segment)}
 						>
-							<TableCell>
+							<TableCell className="max-w-0">
 								<span
-									className="block max-w-[400px] overflow-hidden text-ellipsis whitespace-nowrap text-[var(--text-muted)]"
+									className="block truncate text-[var(--text-muted)]"
 									title={segment.text}
 								>
 									<PlaceholderText text={segment.text} />
 								</span>
 							</TableCell>
-							<TableCell>
+							<TableCell className="max-w-0">
 								{segment.translatedText ? (
 									<span
-										className="block max-w-[400px] overflow-hidden text-ellipsis whitespace-nowrap"
+										className="block truncate"
 										title={segment.translatedText}
 									>
 										<PlaceholderText text={segment.translatedText} />

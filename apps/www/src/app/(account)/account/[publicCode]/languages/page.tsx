@@ -56,7 +56,7 @@ export default async function LanguagesPage({ params, searchParams }: LanguagesP
 				/>
 			</div>
 
-			<LangTable langs={filteredLangs} publicCode={publicCode} />
+			<LangTable langs={filteredLangs} publicCode={publicCode} filter={validFilter} />
 		</div>
 	)
 }

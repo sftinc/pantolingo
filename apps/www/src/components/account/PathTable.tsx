@@ -26,9 +26,9 @@ export function PathTable({ paths, targetLang, websiteId, onUpdate }: PathTableP
 			<Table>
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[45%]">Original Path</TableHead>
-						<TableHead className="w-[45%]">Translated Path</TableHead>
-						<TableHead className="w-[10%]">Status</TableHead>
+						<TableHead className="w-[40%]">Original Path</TableHead>
+						<TableHead className="w-[40%]">Translated Path</TableHead>
+						<TableHead className="w-[20%]">Status</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
@@ -38,18 +38,18 @@ export function PathTable({ paths, targetLang, websiteId, onUpdate }: PathTableP
 							clickable
 							onClick={() => setEditingPath(path)}
 						>
-							<TableCell>
+							<TableCell className="max-w-0">
 								<code
-									className="block max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap text-sm text-[var(--text-muted)]"
+									className="block truncate text-sm text-[var(--text-muted)]"
 									title={path.path}
 								>
 									<PlaceholderText text={path.path} />
 								</code>
 							</TableCell>
-							<TableCell>
+							<TableCell className="max-w-0">
 								{path.translatedPath ? (
 									<code
-										className="block max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap text-sm"
+										className="block truncate text-sm"
 										title={path.translatedPath}
 									>
 										<PlaceholderText text={path.translatedPath} />

@@ -8,7 +8,7 @@ interface TableProps {
 export function Table({ children, className }: TableProps) {
 	return (
 		<div className="overflow-x-auto rounded-lg border border-[var(--border)]">
-			<table className={cn('w-full text-left text-sm', className)}>{children}</table>
+			<table className={cn('w-full table-fixed text-left text-sm', className)}>{children}</table>
 		</div>
 	)
 }

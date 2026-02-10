@@ -11,9 +11,10 @@ import type { LangWithStats } from '@pantolingo/db'
 interface LangTableProps {
 	langs: LangWithStats[]
 	publicCode: string
+	filter?: 'all' | 'unreviewed'
 }
 
-export function LangTable({ langs, publicCode }: LangTableProps) {
+export function LangTable({ langs, publicCode, filter = 'all' }: LangTableProps) {
 	const router = useRouter()
 
 	if (langs.length === 0) {
@@ -31,38 +32,44 @@ export function LangTable({ langs, publicCode }: LangTableProps) {
 				</TableRow>
 			</TableHeader>
 			<TableBody>
-				{langs.map((lang) => (
+				{langs.map((lang) => {
+					const segmentCount = filter === 'unreviewed' ? lang.unreviewedSegmentCount : lang.translatedSegmentCount
+					const pathCount = filter === 'unreviewed' ? lang.unreviewedPathCount : lang.translatedPathCount
+					const filterParam = filter === 'unreviewed' ? '&filter=unreviewed' : ''
+
+					return (
 					<TableRow
 						key={lang.targetLang}
 						clickable
-						onClick={() => router.push(`/account/${publicCode}/segments?lang=${lang.targetLang}`)}
+						onClick={() => router.push(`/account/${publicCode}/segments?lang=${lang.targetLang}${filterParam}`)}
 					>
 						<TableCell className="font-medium">
 							{getFlag(lang.targetLang)} {getLanguageName(lang.targetLang).split(' (')[0]}
 						</TableCell>
 						<TableCell className="text-right tabular-nums">
 							<Link
-								href={`/account/${publicCode}/segments?lang=${lang.targetLang}`}
+								href={`/account/${publicCode}/segments?lang=${lang.targetLang}${filterParam}`}
 								onClick={(e) => e.stopPropagation()}
 								className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
 							>
-								{formatNumber(lang.translatedSegmentCount)}
+								{formatNumber(segmentCount)}
 							</Link>
 						</TableCell>
 						<TableCell className="text-right tabular-nums">
 							<Link
-								href={`/account/${publicCode}/paths?lang=${lang.targetLang}`}
+								href={`/account/${publicCode}/paths?lang=${lang.targetLang}${filterParam}`}
 								onClick={(e) => e.stopPropagation()}
 								className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
 							>
-								{formatNumber(lang.translatedPathCount)}
+								{formatNumber(pathCount)}
 							</Link>
 						</TableCell>
 						<TableCell className="text-right">
 							<ActionsMenu langCd={lang.targetLang} />
 						</TableCell>
 					</TableRow>
-				))}
+					)
+				})}
 			</TableBody>
 		</Table>
 	)
