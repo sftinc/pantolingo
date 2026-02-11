@@ -84,7 +84,7 @@ const authConfig = {
 		error: '/login/error',
 	},
 	callbacks: {
-		async jwt({ token, user }: { token: JWT; user?: { accountId?: number } }) {
+		async jwt({ token, user }: { token: JWT; user?: { accountId?: number; name?: string | null } }) {
 			// On sign-in, user is available - persist accountId to token
 			if (user?.accountId) {
 				token.accountId = user.accountId
@@ -92,6 +92,13 @@ const authConfig = {
 				pool.query(`UPDATE account SET last_login_at = NOW() WHERE id = $1`, [user.accountId]).catch(
 					(err) => console.error('Failed to update last_login_at:', err)
 				)
+			}
+			// If name is missing from token (e.g. after setup), fetch from DB
+			if (!token.name && token.accountId) {
+				const result = await pool.query(`SELECT name FROM account WHERE id = $1`, [token.accountId])
+				if (result.rows[0]?.name) {
+					token.name = result.rows[0].name
+				}
 			}
 			return token
 		},

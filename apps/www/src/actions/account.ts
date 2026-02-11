@@ -1,12 +1,19 @@
 'use server'
 
-import { auth } from '@/lib/auth'
+import { auth, signOut } from '@/lib/auth'
 import { pool } from '@pantolingo/db/pool'
 import { validatePassword, hashPassword } from '@/lib/password'
 
 const MAX_NAME_LENGTH = 50
 
 export type AccountActionState = { error?: string; redirectUrl?: string } | null
+
+/**
+ * Sign out and redirect to login page
+ */
+export async function signOutToLogin() {
+	await signOut({ redirectTo: '/login' })
+}
 
 /**
  * Complete onboarding by setting name and password

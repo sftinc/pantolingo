@@ -2,7 +2,7 @@
 
 import { useState, useActionState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { completeOnboarding, type AccountActionState } from '@/actions/account'
+import { completeOnboarding, signOutToLogin, type AccountActionState } from '@/actions/account'
 import { getPasswordRules, type PasswordRules } from '@/lib/password'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
@@ -35,7 +35,7 @@ function PasswordRulesList({ rules, password }: { rules: PasswordRules; password
 	)
 }
 
-export default function OnboardingPage() {
+export default function SetupPage() {
 	const router = useRouter()
 	const [password, setPassword] = useState('')
 	const rules = getPasswordRules(password)
@@ -54,7 +54,12 @@ export default function OnboardingPage() {
 
 	return (
 		<main className="flex min-h-screen flex-col">
-			<div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8 flex justify-end">
+			<div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+				<form action={signOutToLogin}>
+					<button type="submit" className="text-sm text-[var(--accent)] hover:underline cursor-pointer">
+						&larr; Back to Login
+					</button>
+				</form>
 				<ThemeToggle />
 			</div>
 			<div className="flex flex-1 flex-col items-center justify-center p-6">

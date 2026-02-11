@@ -26,9 +26,9 @@ export function SegmentTable({ segments, targetLang, websiteId, onUpdate }: Segm
 			<Table>
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[40%]">Original Text</TableHead>
-						<TableHead className="w-[40%]">Translation</TableHead>
-						<TableHead className="w-[20%]">Status</TableHead>
+						<TableHead className="w-1/2">Original Text</TableHead>
+						<TableHead className="w-1/2">Translation</TableHead>
+						<TableHead className="w-28">Status</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>

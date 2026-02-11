@@ -19,15 +19,16 @@ import { isValidEmail, getSafeCallbackUrl } from '@/lib/validation'
 export type AuthActionState = { error?: string; redirectUrl?: string } | null
 
 /**
- * Check if an email exists in the database
- * Used by login flow to verify account exists before showing password field
+ * Check if an email exists in the database and whether onboarding is complete
+ * Used by login flow to determine whether to show password field or magic link flow
  */
-export async function checkEmailExists(email: string): Promise<boolean> {
+export async function checkEmailExists(email: string): Promise<{ exists: boolean; hasName: boolean }> {
 	const trimmed = email.trim()
-	if (!trimmed) return false
+	if (!trimmed) return { exists: false, hasName: false }
 
-	const result = await pool.query(`SELECT 1 FROM account WHERE email = $1 LIMIT 1`, [trimmed])
-	return result.rows.length > 0
+	const result = await pool.query(`SELECT name FROM account WHERE email = $1 LIMIT 1`, [trimmed])
+	if (result.rows.length === 0) return { exists: false, hasName: false }
+	return { exists: true, hasName: !!result.rows[0].name }
 }
 
 /**

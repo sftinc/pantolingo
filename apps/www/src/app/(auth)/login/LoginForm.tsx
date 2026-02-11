@@ -62,9 +62,17 @@ export function LoginForm() {
 		}
 
 		startTransition(async () => {
-			const exists = await checkEmailExists(trimmedEmail)
+			const { exists, hasName } = await checkEmailExists(trimmedEmail)
 			if (!exists) {
 				setEmailError('No account found with this email')
+			} else if (!hasName) {
+				// User hasn't completed onboarding (no name/password) — skip to magic link flow
+				const result = await prepareVerification(trimmedEmail, 'login')
+				if (result.error) {
+					setEmailError(result.error)
+				} else {
+					router.push('/auth/verify')
+				}
 			} else {
 				setStep('password')
 			}

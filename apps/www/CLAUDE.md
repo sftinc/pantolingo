@@ -10,8 +10,8 @@ Next.js 16 app with Tailwind CSS v4 and React 19.
 -   `/auth/check-email` - "Check your email" confirmation page
 -   `/auth/enter-code` - Manual 8-character code entry page
 -   `/auth/magic` - Magic link verification (redirects to `/api/auth/callback/smtp`)
--   `/onboarding` - Name setup for new users
 -   `/account` - Smart router (redirects to last website or add-website placeholder)
+-   `/account/setup` - Account setup (name + password) for new users
 -   `/account/[publicCode]/languages` - Languages list with pill links
 -   `/account/[publicCode]/segments?lang=es` - Segments editor (language via query param)
 -   `/account/[publicCode]/paths?lang=es` - Paths editor (language via query param)
@@ -54,11 +54,11 @@ src/
 │   │   │   └── magic/          # /auth/magic - redirects to NextAuth callback
 │   │   ├── login/              # /login - email input
 │   │   │   └── error/          # /login/error - auth errors
-│   │   ├── signup/             # /signup - email input
-│   │   └── onboarding/         # /onboarding - name setup
+│   │   └── signup/             # /signup - email input
 │   ├── (account)/              # Customer account (sidebar layout)
 │   │   └── account/
 │   │       ├── page.tsx                        # /account - smart router
+│   │       ├── setup/page.tsx                  # /account/setup - name + password
 │   │       └── [publicCode]/
 │   │           ├── layout.tsx                  # Sidebar layout (auth gate + data)
 │   │           ├── languages/page.tsx          # /account/:publicCode/languages

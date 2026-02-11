@@ -26,9 +26,9 @@ export function PathTable({ paths, targetLang, websiteId, onUpdate }: PathTableP
 			<Table>
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[40%]">Original Path</TableHead>
-						<TableHead className="w-[40%]">Translated Path</TableHead>
-						<TableHead className="w-[20%]">Status</TableHead>
+						<TableHead className="w-1/2">Original Path</TableHead>
+						<TableHead className="w-1/2">Translated Path</TableHead>
+						<TableHead className="w-28">Status</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>

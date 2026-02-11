@@ -24,8 +24,13 @@ export default auth((req) => {
 		return NextResponse.next()
 	}
 
-	// Onboarding - require session but allow null name
+	// Legacy /onboarding - redirect to new path
 	if (pathname === '/onboarding') {
+		return NextResponse.redirect(new URL('/account/setup', req.url))
+	}
+
+	// Account setup - require session but allow null name
+	if (pathname === '/account/setup') {
 		if (!isLoggedIn) {
 			return NextResponse.redirect(new URL('/login', req.url))
 		}
@@ -42,9 +47,9 @@ export default auth((req) => {
 			const callbackUrl = encodeURIComponent(pathname + req.nextUrl.search)
 			return NextResponse.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, req.url))
 		}
-		// Redirect to onboarding if no name
+		// Redirect to setup if no name
 		if (!userName) {
-			return NextResponse.redirect(new URL('/onboarding', req.url))
+			return NextResponse.redirect(new URL('/account/setup', req.url))
 		}
 		// Clear auth cookie on authenticated account access (cleanup after auth flow)
 		const response = NextResponse.next()
