@@ -23,10 +23,11 @@ export default async function WebsiteLayout({ params, children }: WebsiteLayoutP
 	}
 
 	// Check authorization
-	const websiteId = await canAccessWebsiteByPublicCode(session.user.accountId, publicCode)
-	if (!websiteId) {
+	const access = await canAccessWebsiteByPublicCode(session.user.accountId, publicCode)
+	if (!access) {
 		redirect('/account')
 	}
+	const { role } = access
 
 	const website = await getWebsiteByPublicCode(publicCode)
 	if (!website) {
@@ -49,7 +50,7 @@ export default async function WebsiteLayout({ params, children }: WebsiteLayoutP
 
 	return (
 		<SidebarLayout
-			currentWebsite={{ publicCode: website.publicCode, hostname: website.hostname, name: website.name, sourceLang: website.sourceLang }}
+			currentWebsite={{ publicCode: website.publicCode, hostname: website.hostname, name: website.name, sourceLang: website.sourceLang, role }}
 			websites={allWebsites.map((w) => ({ publicCode: w.publicCode, hostname: w.hostname, name: w.name }))}
 			userName={userName}
 			signOutAction={handleSignOut}

@@ -19,8 +19,9 @@ export default async function LanguagesPage({ params, searchParams }: LanguagesP
 	const { filter = 'all' } = await searchParams
 	const validFilter = filter === 'unreviewed' ? 'unreviewed' : 'all'
 
-	const websiteId = await canAccessWebsiteByPublicCode(session.user.accountId, publicCode)
-	if (!websiteId) redirect('/account')
+	const access = await canAccessWebsiteByPublicCode(session.user.accountId, publicCode)
+	if (!access) redirect('/account')
+	const websiteId = access.websiteId
 
 	await updateWebsiteActivity(session.user.accountId, websiteId)
 
@@ -44,17 +45,19 @@ export default async function LanguagesPage({ params, searchParams }: LanguagesP
 				</button>
 			</div>
 
-			<div className="mb-6 flex flex-wrap items-center gap-4">
-				<Toggle
-					options={[
-						{ value: 'all', label: 'All' },
-						{ value: 'unreviewed', label: 'Unreviewed' },
-					]}
-					value={validFilter}
-					baseUrl={`/account/${publicCode}/languages`}
-					paramName="filter"
-				/>
-			</div>
+			{langs.length > 0 && (
+				<div className="mb-6 flex flex-wrap items-center gap-4">
+					<Toggle
+						options={[
+							{ value: 'all', label: 'All' },
+							{ value: 'unreviewed', label: 'Unreviewed' },
+						]}
+						value={validFilter}
+						baseUrl={`/account/${publicCode}/languages`}
+						paramName="filter"
+					/>
+				</div>
+			)}
 
 			<LangTable langs={filteredLangs} publicCode={publicCode} filter={validFilter} />
 		</div>

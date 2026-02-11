@@ -30,8 +30,9 @@ export default async function SegmentsPage({ params, searchParams }: SegmentsPag
 	const { publicCode } = await params
 	const { lang, filter = 'all', page = '1', path } = await searchParams
 
-	const websiteId = await canAccessWebsiteByPublicCode(session.user.accountId, publicCode)
-	if (!websiteId) redirect('/account')
+	const access = await canAccessWebsiteByPublicCode(session.user.accountId, publicCode)
+	if (!access) redirect('/account')
+	const websiteId = access.websiteId
 
 	const langs = await getLangsForWebsite(websiteId)
 
@@ -40,7 +41,10 @@ export default async function SegmentsPage({ params, searchParams }: SegmentsPag
 			<div>
 				<h1 className="mb-6 text-2xl font-semibold text-[var(--text-heading)]">Segments</h1>
 				<div className="text-center py-12 bg-[var(--card-bg)] rounded-lg">
-					<p className="text-[var(--text-muted)]">No languages configured for this website</p>
+					<p className="text-[var(--text-muted)] mb-2">No segments yet</p>
+					<p className="text-sm text-[var(--text-muted)]">
+						<a href={`/account/${publicCode}/languages`} className="text-[var(--accent)] hover:underline">Add a language</a> to start translating your website.
+					</p>
 				</div>
 			</div>
 		)

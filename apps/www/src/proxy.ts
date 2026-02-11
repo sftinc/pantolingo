@@ -30,13 +30,10 @@ export default auth((req) => {
 	}
 
 	// Account setup - require session but allow null name
+	// Page handles step detection (profile vs website) and "done" redirect
 	if (pathname === '/account/setup') {
 		if (!isLoggedIn) {
 			return NextResponse.redirect(new URL('/login', req.url))
-		}
-		// If they already have a name, send to account
-		if (userName) {
-			return NextResponse.redirect(new URL('/account', req.url))
 		}
 		return NextResponse.next()
 	}

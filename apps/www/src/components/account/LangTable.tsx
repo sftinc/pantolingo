@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, EmptyState } from '@/components/ui/Table'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table'
 import { formatNumber } from '@/lib/utils'
 import { getFlag, getLanguageName } from '@pantolingo/lang'
 import type { LangWithStats } from '@pantolingo/db'
@@ -18,7 +18,11 @@ export function LangTable({ langs, publicCode, filter = 'all' }: LangTableProps)
 	const router = useRouter()
 
 	if (langs.length === 0) {
-		return <EmptyState message="No languages configured for this website" />
+		return (
+			<div className="text-center py-12 bg-[var(--card-bg)] rounded-lg">
+				<p className="text-[var(--text-muted)]">No languages yet. Add a language to start translating your website.</p>
+			</div>
+		)
 	}
 
 	return (

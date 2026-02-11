@@ -3,6 +3,7 @@
  * Provides aggregated stats and CRUD operations for websites, languages, segments, and paths
  */
 
+import crypto from 'crypto'
 import { pool } from './pool.js'
 
 // =============================================================================
@@ -191,18 +192,19 @@ export async function getWebsiteByPublicCode(publicCode: string): Promise<Websit
  * Check if an account can access a website by public_code
  * @param accountId - Account ID
  * @param publicCode - 16-character hex public code
- * @returns websiteId if the account has access, null otherwise
+ * @returns { websiteId, role } if the account has access, null otherwise
  */
-export async function canAccessWebsiteByPublicCode(accountId: number, publicCode: string): Promise<number | null> {
-	const result = await pool.query<{ website_id: number }>(
-		`SELECT aw.website_id
+export async function canAccessWebsiteByPublicCode(accountId: number, publicCode: string): Promise<{ websiteId: number; role: string } | null> {
+	const result = await pool.query<{ website_id: number; role: string }>(
+		`SELECT aw.website_id, aw.role
 		 FROM account_website aw
 		 JOIN website w ON w.id = aw.website_id
 		 WHERE w.public_code = $1 AND aw.account_id = $2
 		 LIMIT 1`,
 		[publicCode, accountId]
 	)
-	return result.rows[0]?.website_id ?? null
+	if (!result.rows[0]) return null
+	return { websiteId: result.rows[0].website_id, role: result.rows[0].role }
 }
 
 /**
@@ -756,5 +758,44 @@ export async function updateWebsiteSettings(
 	} catch (error) {
 		console.error('Failed to update website settings:', error)
 		return { success: false, error: 'Failed to update settings' }
+	}
+}
+
+/**
+ * Create a new website and link it to an account as owner
+ * @param accountId - Account ID of the owner
+ * @param name - Display name for the website
+ * @param hostname - Hostname (e.g., "example.com")
+ * @param sourceLang - Source language code
+ * @returns The generated public_code for the new website
+ */
+export async function createWebsite(
+	accountId: number,
+	name: string,
+	hostname: string,
+	sourceLang: string
+): Promise<string> {
+	const publicCode = crypto.randomBytes(8).toString('hex')
+
+	const client = await pool.connect()
+	try {
+		await client.query('BEGIN')
+		const result = await client.query<{ id: number }>(
+			`INSERT INTO website (name, hostname, source_lang, public_code)
+			 VALUES ($1, $2, $3, $4) RETURNING id`,
+			[name, hostname, sourceLang, publicCode]
+		)
+		await client.query(
+			`INSERT INTO account_website (account_id, website_id, role)
+			 VALUES ($1, $2, 'owner')`,
+			[accountId, result.rows[0].id]
+		)
+		await client.query('COMMIT')
+		return publicCode
+	} catch (err) {
+		await client.query('ROLLBACK')
+		throw err
+	} finally {
+		client.release()
 	}
 }

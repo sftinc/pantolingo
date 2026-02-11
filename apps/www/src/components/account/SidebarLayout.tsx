@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 interface SidebarLayoutProps {
-	currentWebsite: { publicCode: string; hostname: string; name: string; sourceLang: string }
+	currentWebsite: { publicCode: string; hostname: string; name: string; sourceLang: string; role: string }
 	websites: { publicCode: string; hostname: string; name: string }[]
 	userName: string
 	signOutAction: () => Promise<void>
@@ -133,7 +133,7 @@ export function SidebarLayout({ currentWebsite, websites, userName, signOutActio
 						}}
 						className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-active-bg)] transition-colors cursor-pointer"
 					>
-						<span className="w-6 h-6 rounded bg-[var(--border)] text-[var(--text-muted)] flex items-center justify-center text-xs font-semibold">
+						<span className="w-5 h-5 rounded bg-[var(--border)] text-[var(--text-muted)] flex items-center justify-center text-[10px] font-semibold">
 							{site.name[0].toUpperCase()}
 						</span>
 						{site.name}
@@ -242,10 +242,11 @@ export function SidebarLayout({ currentWebsite, websites, userName, signOutActio
 							{/* Desktop switcher dropdown */}
 							{switcherDropdownOpen && (
 								<div className="hidden md:block absolute left-0 top-full mt-1 w-64 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg shadow-lg overflow-hidden z-50">
-									{/* Header: name bold + hostname subtitle */}
+									{/* Header: name bold + hostname subtitle + role */}
 									<div className="flex flex-col items-center py-4 my-2">
 										<span className="text-sm font-semibold text-[var(--text-heading)]">{currentWebsite.name}</span>
 										<span className="mt-0.5 text-xs text-[var(--text-muted)]">{currentWebsite.hostname}</span>
+										<span className="mt-1.5 inline-flex px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-medium bg-gray-100 text-gray-500">{currentWebsite.role}</span>
 									</div>
 
 									{renderSwitcherItems(() => setSwitcherDropdownOpen(false))}
@@ -270,13 +271,14 @@ export function SidebarLayout({ currentWebsite, websites, userName, signOutActio
 					</button>
 
 					<div className="flex-1 overflow-y-auto">
-						{/* Header: large avatar + name + hostname */}
+						{/* Header: large avatar + name + hostname + role */}
 						<div className="flex flex-col items-center pt-[4.5rem] pb-4 mb-2">
 							<span className="w-10 h-10 rounded-md bg-[var(--border)] text-[var(--text-muted)] flex items-center justify-center text-base font-bold">
 								{letterAvatar}
 							</span>
 							<span className="mt-2 text-sm font-semibold text-[var(--text-heading)]">{currentWebsite.name}</span>
 							<span className="mt-0.5 text-xs text-[var(--text-muted)]">{currentWebsite.hostname}</span>
+							<span className="mt-1.5 inline-flex px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-medium bg-gray-100 text-gray-500">{currentWebsite.role}</span>
 						</div>
 
 						{renderSwitcherItems(closeMobile)}

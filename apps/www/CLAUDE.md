@@ -10,8 +10,8 @@ Next.js 16 app with Tailwind CSS v4 and React 19.
 -   `/auth/check-email` - "Check your email" confirmation page
 -   `/auth/enter-code` - Manual 8-character code entry page
 -   `/auth/magic` - Magic link verification (redirects to `/api/auth/callback/smtp`)
--   `/account` - Smart router (redirects to last website or add-website placeholder)
--   `/account/setup` - Account setup (name + password) for new users
+-   `/account` - Smart router (redirects to last website or `/account/setup`)
+-   `/account/setup` - Two-step onboarding: step 1 (name + password), step 2 (add first website). Auto-detects step from account state.
 -   `/account/[publicCode]/languages` - Languages list with pill links
 -   `/account/[publicCode]/segments?lang=es` - Segments editor (language via query param)
 -   `/account/[publicCode]/paths?lang=es` - Paths editor (language via query param)
@@ -58,7 +58,7 @@ src/
 │   ├── (account)/              # Customer account (sidebar layout)
 │   │   └── account/
 │   │       ├── page.tsx                        # /account - smart router
-│   │       ├── setup/page.tsx                  # /account/setup - name + password
+│   │       ├── setup/                           # /account/setup - two-step onboarding
 │   │       └── [publicCode]/
 │   │           ├── layout.tsx                  # Sidebar layout (auth gate + data)
 │   │           ├── languages/page.tsx          # /account/:publicCode/languages
@@ -85,6 +85,10 @@ src/
 -   `SegmentEditModal`, `PathEditModal` - Modals for editing translations
 -   `LangTable`, `SegmentTable`, `PathTable` - Data tables with pagination
 -   `PlaceholderEditor` - ContentEditable editor with placeholder validation
+
+## Language Dropdowns
+
+Use the custom dropdown pattern (button + absolute `<ul>`) instead of native `<select>` for language pickers. This matches the `LanguageDropdown` component style: flag emoji + language name, click-outside-to-close, accent highlight on selected item, custom scrollbar. When used inside a form, pair with a hidden `<input>` to submit the selected value.
 
 ## Placeholder System
 

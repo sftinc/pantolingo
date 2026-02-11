@@ -15,8 +15,8 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 
 	const { publicCode } = await params
 
-	const websiteId = await canAccessWebsiteByPublicCode(session.user.accountId, publicCode)
-	if (!websiteId) redirect('/account')
+	const access = await canAccessWebsiteByPublicCode(session.user.accountId, publicCode)
+	if (!access) redirect('/account')
 
 	const website = await getWebsiteByPublicCode(publicCode)
 	if (!website) redirect('/account')
@@ -26,7 +26,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 			<h1 className="mb-6 text-2xl font-semibold text-[var(--text-heading)]">Settings</h1>
 
 			<WebsiteSettingsForm
-				websiteId={websiteId}
+				websiteId={access.websiteId}
 				initialName={website.name}
 				hostname={website.hostname}
 				sourceLang={website.sourceLang}
