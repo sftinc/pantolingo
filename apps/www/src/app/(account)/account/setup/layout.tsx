@@ -5,9 +5,9 @@ import { signOutToLogin } from '@/actions/account'
 export default function SetupLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<>
-			<header className="border-b border-[var(--border)] bg-[var(--card-bg)]">
+			<header className="border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-neutral-900">
 				<div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 flex items-center justify-between">
-					<Link href="/" className="text-xl font-semibold text-[var(--text-heading)]">
+					<Link href="/" className="text-xl font-semibold text-gray-900 dark:text-gray-100">
 						Pantolingo
 					</Link>
 					<div className="flex items-center gap-4">
@@ -15,7 +15,7 @@ export default function SetupLayout({ children }: { children: React.ReactNode })
 						<form action={signOutToLogin}>
 							<button
 								type="submit"
-								className="text-sm text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors cursor-pointer"
+								className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors cursor-pointer"
 							>
 								Sign out
 							</button>

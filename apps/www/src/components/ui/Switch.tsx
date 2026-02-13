@@ -38,8 +38,8 @@ export function Switch({ checked, onChange, label, disabled }: SwitchProps) {
 				onKeyDown={handleKeyDown}
 				disabled={disabled}
 				className={cn(
-					'relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-2 focus:ring-offset-[var(--page-bg)]',
-					checked ? 'bg-[var(--accent)]' : 'bg-[var(--border)]'
+					'relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-neutral-50 dark:focus:ring-offset-neutral-950',
+					checked ? 'bg-blue-600 dark:bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'
 				)}
 			>
 				<span
@@ -50,7 +50,7 @@ export function Switch({ checked, onChange, label, disabled }: SwitchProps) {
 				/>
 			</button>
 			{label && (
-				<span className="text-sm text-[var(--text-heading)]">{label}</span>
+				<span className="text-sm text-gray-900 dark:text-gray-100">{label}</span>
 			)}
 		</label>
 	)

@@ -36,7 +36,7 @@ export default async function LanguagesPage({ params, searchParams }: LanguagesP
 	return (
 		<div>
 			<div className="mb-6">
-				<h1 className="text-2xl font-semibold text-[var(--text-heading)]">Languages</h1>
+				<h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Languages</h1>
 			</div>
 
 			{langs.length > 0 && (

@@ -58,19 +58,19 @@ export function Modal({ isOpen, onClose, title, children, className, badge }: Mo
 		<dialog
 			ref={dialogRef}
 			className={cn(
-				'fixed inset-y-0 inset-x-4 m-auto max-h-[85vh] w-full max-w-[min(calc(100%-2rem),56rem)] rounded-lg bg-[var(--card-bg)] text-[var(--page-fg)] p-0 shadow-[0_4px_24px_var(--shadow-color)] backdrop:bg-black/50',
+				'fixed inset-y-0 inset-x-4 m-auto max-h-[85vh] w-full max-w-[min(calc(100%-2rem),56rem)] rounded-lg bg-white dark:bg-neutral-900 text-gray-800 dark:text-gray-200 p-0 shadow-xl shadow-black/10 dark:shadow-black/30 backdrop:bg-black/50',
 				className
 			)}
 			onClick={handleBackdropClick}
 		>
 			<div className="flex flex-col max-h-[85vh]">
-				<div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
-					<h2 className="text-lg font-semibold text-[var(--text-heading)]">{title}</h2>
+				<div className="flex items-center justify-between border-b border-gray-300 dark:border-gray-700 px-6 py-4">
+					<h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
 					<div className="flex items-center gap-3">
 						{badge}
 						<button
 							onClick={onClose}
-							className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--border)] transition-colors focus:outline-none"
+							className="p-1 rounded-md text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors focus:outline-none"
 							aria-label="Close"
 						>
 							<svg
@@ -103,7 +103,7 @@ interface ModalFooterProps {
 
 export function ModalFooter({ children, className }: ModalFooterProps) {
 	return (
-		<div className={cn('flex justify-end gap-3 border-t border-[var(--border)] pt-4 mt-4', className)}>
+		<div className={cn('flex justify-end gap-3 border-t border-gray-300 dark:border-gray-700 pt-4 mt-4', className)}>
 			{children}
 		</div>
 	)
@@ -121,9 +121,9 @@ interface ButtonProps {
 
 export function Button({ children, variant = 'secondary', onClick, disabled, loading, type = 'button', className }: ButtonProps) {
 	const variantStyles = {
-		primary: 'bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]',
-		secondary: 'bg-[var(--border)] text-[var(--text-heading)] hover:bg-[var(--border-hover)]',
-		success: 'bg-[var(--success)] text-white hover:opacity-90',
+		primary: 'bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-400',
+		secondary: 'bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-400 dark:hover:bg-gray-600',
+		success: 'bg-green-600 dark:bg-green-500 text-white hover:opacity-90',
 	}
 
 	return (

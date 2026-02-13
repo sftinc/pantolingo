@@ -10,12 +10,11 @@ interface MessageDisplayProps {
 	className?: string
 }
 
-// Use CSS variables with inline styles for consistent theming
-const typeColors: Record<string, string> = {
-	error: 'var(--error)',
-	success: 'var(--success)',
-	warning: 'var(--warning)',
-	info: 'var(--accent)',
+const typeStyles: Record<string, string> = {
+	error: 'bg-red-600/10 dark:bg-red-500/10 border-red-600 dark:border-red-500 text-red-600 dark:text-red-500',
+	success: 'bg-green-600/10 dark:bg-green-500/10 border-green-600 dark:border-green-500 text-green-600 dark:text-green-500',
+	warning: 'bg-yellow-600/10 dark:bg-yellow-500/10 border-yellow-600 dark:border-yellow-500 text-yellow-600 dark:text-yellow-500',
+	info: 'bg-blue-600/10 dark:bg-blue-500/10 border-blue-600 dark:border-blue-500 text-blue-600 dark:text-blue-500',
 }
 
 export function MessageDisplay({ hidden, className = '' }: MessageDisplayProps) {
@@ -57,16 +56,11 @@ export function MessageDisplay({ hidden, className = '' }: MessageDisplayProps) 
 		return null
 	}
 
-	const color = typeColors[message.type] || typeColors.info
+	const styles = typeStyles[message.type] || typeStyles.info
 
 	return (
 		<div
-			className={`mb-4 p-3 rounded-md border ${className}`}
-			style={{
-				backgroundColor: `color-mix(in srgb, ${color} 10%, transparent)`,
-				borderColor: color,
-				color: color,
-			}}
+			className={`mb-4 p-3 rounded-md border ${styles} ${className}`}
 			role="alert"
 		>
 			<div className="flex items-start justify-between gap-2">

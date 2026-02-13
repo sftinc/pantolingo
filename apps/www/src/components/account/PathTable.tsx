@@ -40,7 +40,7 @@ export function PathTable({ paths, targetLang, websiteId, onUpdate }: PathTableP
 						>
 							<TableCell className="max-w-0">
 								<code
-									className="block truncate text-sm text-[var(--text-muted)]"
+									className="block truncate text-sm text-gray-600 dark:text-gray-400"
 									title={path.path}
 								>
 									<PlaceholderText text={path.path} />
@@ -55,7 +55,7 @@ export function PathTable({ paths, targetLang, websiteId, onUpdate }: PathTableP
 										<PlaceholderText text={path.translatedPath} />
 									</code>
 								) : (
-									<span className="text-[var(--text-subtle)] italic">Not translated</span>
+									<span className="text-gray-400 dark:text-gray-500 italic">Not translated</span>
 								)}
 							</TableCell>
 							<TableCell>

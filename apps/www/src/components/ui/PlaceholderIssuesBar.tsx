@@ -41,7 +41,7 @@ function Chip({ token, onClick, action }: ChipProps) {
 			color = PAIRED_COLORS[parsed.kind as PairedKind]
 		} else {
 			label = token
-			color = 'var(--text-muted)'
+			color = '#6b7280'
 		}
 	} else if (isStandaloneKind(parsed.kind)) {
 		label = STANDALONE_LABELS[parsed.kind as StandaloneKind]
@@ -51,7 +51,7 @@ function Chip({ token, onClick, action }: ChipProps) {
 		color = PAIRED_COLORS[parsed.kind as PairedKind]
 	} else {
 		label = token
-		color = 'var(--text-muted)'
+		color = '#6b7280'
 	}
 
 	const prefix = action === 'insert' ? '+' : '×'
@@ -106,7 +106,7 @@ export function PlaceholderIssuesBar({
 
 		content = missingToShow.length > 0 ? (
 			<div className="flex items-center gap-2 flex-wrap">
-				<span className="text-xs font-medium text-[var(--warning)]">Missing:</span>
+				<span className="text-xs font-medium text-yellow-600 dark:text-yellow-500">Missing:</span>
 				{missingToShow.map((token) => (
 					<Chip
 						key={token}
@@ -120,7 +120,7 @@ export function PlaceholderIssuesBar({
 	} else if (extra.length > 0) {
 		content = (
 			<div className="flex items-center gap-2 flex-wrap">
-				<span className="text-xs font-medium text-[var(--warning)]">Extra:</span>
+				<span className="text-xs font-medium text-yellow-600 dark:text-yellow-500">Extra:</span>
 				{extra.map((token) => (
 					<Chip
 						key={token}
@@ -134,21 +134,21 @@ export function PlaceholderIssuesBar({
 	} else if (nestingErrors.length > 0) {
 		content = (
 			<div className="flex items-center gap-2 flex-wrap">
-				<span className="text-xs font-medium text-[var(--warning)]">Nesting error:</span>
-				<span className="text-xs text-[var(--warning)]">{nestingErrors[0]}</span>
+				<span className="text-xs font-medium text-yellow-600 dark:text-yellow-500">Nesting error:</span>
+				<span className="text-xs text-yellow-600 dark:text-yellow-500">{nestingErrors[0]}</span>
 			</div>
 		)
 	} else if (unclosedErrors.length > 0) {
 		content = (
 			<div className="flex items-center gap-2 flex-wrap">
-				<span className="text-xs font-medium text-[var(--warning)]">Unclosed:</span>
-				<span className="text-xs text-[var(--warning)]">{unclosedErrors[0]}</span>
+				<span className="text-xs font-medium text-yellow-600 dark:text-yellow-500">Unclosed:</span>
+				<span className="text-xs text-yellow-600 dark:text-yellow-500">{unclosedErrors[0]}</span>
 			</div>
 		)
 	}
 
 	return (
-		<div className="mt-2 p-2 rounded-lg bg-[var(--warning)]/10 border border-[var(--warning)]/30">
+		<div className="mt-2 p-2 rounded-lg bg-yellow-600/10 dark:bg-yellow-500/10 border border-yellow-600/30 dark:border-yellow-500/30">
 			{content}
 		</div>
 	)

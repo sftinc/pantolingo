@@ -157,16 +157,16 @@ export default function StatsPage() {
 		<div>
 			{/* Header + Period Selector */}
 			<div className="mb-6 flex items-center justify-between flex-wrap gap-3">
-				<h1 className="text-2xl font-semibold text-[var(--text-heading)]">Stats</h1>
-				<div className="flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg p-1">
+				<h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Stats</h1>
+				<div className="flex items-center gap-1 bg-white dark:bg-neutral-900 border border-gray-300 dark:border-gray-700 rounded-lg p-1">
 					{(['7d', '30d', '90d'] as Period[]).map((p) => (
 						<button
 							key={p}
 							onClick={() => setPeriod(p)}
 							className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${
 								period === p
-									? 'bg-[var(--accent)] text-white'
-									: 'text-[var(--text-muted)] hover:bg-[var(--border)]'
+									? 'bg-blue-600 dark:bg-blue-500 text-white'
+									: 'text-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700'
 							}`}
 						>
 							{p.toUpperCase()}
@@ -177,38 +177,38 @@ export default function StatsPage() {
 
 			{/* Summary Cards */}
 			<div className="grid grid-cols-2 gap-4 mb-6">
-				<div className="bg-[var(--card-bg)] rounded-lg border border-[var(--border)] p-4">
+				<div className="bg-white dark:bg-neutral-900 rounded-lg border border-gray-300 dark:border-gray-700 p-4">
 					<div className="flex items-center gap-2 mb-1">
 						<EyeIcon />
-						<span className="text-xs font-medium text-[var(--text-subtle)]">Page Views</span>
+						<span className="text-xs font-medium text-gray-400 dark:text-gray-500">Page Views</span>
 					</div>
-					<div className="text-2xl font-bold text-[var(--text-heading)]">{data.views}</div>
+					<div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{data.views}</div>
 					<div className="flex items-center gap-1 mt-1">
 						<ArrowUpIcon />
-						<span className="text-xs text-[var(--success)] font-medium">{data.viewsDelta}</span>
-						<span className="text-xs text-[var(--text-subtle)]">vs prior</span>
+						<span className="text-xs text-green-600 dark:text-green-500 font-medium">{data.viewsDelta}</span>
+						<span className="text-xs text-gray-400 dark:text-gray-500">vs prior</span>
 					</div>
 				</div>
-				<div className="bg-[var(--card-bg)] rounded-lg border border-[var(--border)] p-4">
+				<div className="bg-white dark:bg-neutral-900 rounded-lg border border-gray-300 dark:border-gray-700 p-4">
 					<div className="flex items-center gap-2 mb-1">
 						<TranslateIcon />
-						<span className="text-xs font-medium text-[var(--text-subtle)]">Words Translated</span>
+						<span className="text-xs font-medium text-gray-400 dark:text-gray-500">Words Translated</span>
 					</div>
-					<div className="text-2xl font-bold text-[var(--text-heading)]">{data.words}</div>
+					<div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{data.words}</div>
 					<div className="flex items-center gap-1 mt-1">
 						<ArrowUpIcon />
-						<span className="text-xs text-[var(--success)] font-medium">{data.wordsDelta}</span>
-						<span className="text-xs text-[var(--text-subtle)]">vs prior</span>
+						<span className="text-xs text-green-600 dark:text-green-500 font-medium">{data.wordsDelta}</span>
+						<span className="text-xs text-gray-400 dark:text-gray-500">vs prior</span>
 					</div>
 				</div>
 			</div>
 
 			{/* Charts: Page Views + Words by Language */}
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-				<div className="lg:col-span-2 bg-[var(--card-bg)] rounded-lg border border-[var(--border)] p-5">
+				<div className="lg:col-span-2 bg-white dark:bg-neutral-900 rounded-lg border border-gray-300 dark:border-gray-700 p-5">
 					<div className="flex items-center justify-between mb-4">
-						<h2 className="text-sm font-semibold text-[var(--text-heading)]">Page Views</h2>
-						<div className="flex items-center gap-4 text-xs text-[var(--text-subtle)]">
+						<h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Page Views</h2>
+						<div className="flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
 							<span className="flex items-center gap-1.5">
 								<span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block" />
 								Spanish
@@ -223,8 +223,8 @@ export default function StatsPage() {
 						<canvas ref={pageviewsRef} />
 					</div>
 				</div>
-				<div className="bg-[var(--card-bg)] rounded-lg border border-[var(--border)] p-5">
-					<h2 className="text-sm font-semibold text-[var(--text-heading)] mb-4">Words by Language</h2>
+				<div className="bg-white dark:bg-neutral-900 rounded-lg border border-gray-300 dark:border-gray-700 p-5">
+					<h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Words by Language</h2>
 					<div className="h-56">
 						<canvas ref={wordsLangRef} />
 					</div>
@@ -234,16 +234,16 @@ export default function StatsPage() {
 			{/* Top Pages + Translation Coverage */}
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
 				{/* Top Pages */}
-				<div className="bg-[var(--card-bg)] rounded-lg border border-[var(--border)] p-5">
-					<h2 className="text-sm font-semibold text-[var(--text-heading)] mb-4">Top Pages</h2>
+				<div className="bg-white dark:bg-neutral-900 rounded-lg border border-gray-300 dark:border-gray-700 p-5">
+					<h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Top Pages</h2>
 					<div className="space-y-3">
 						{TOP_PAGES.map((page) => (
 							<div key={page.path}>
 								<div className="flex items-center justify-between mb-1">
-									<span className="text-xs text-[var(--text-muted)] font-mono truncate max-w-[70%]">{page.path}</span>
-									<span className="text-xs font-semibold text-[var(--text-heading)]">{page.views.toLocaleString()}</span>
+									<span className="text-xs text-gray-600 dark:text-gray-400 font-mono truncate max-w-[70%]">{page.path}</span>
+									<span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{page.views.toLocaleString()}</span>
 								</div>
-								<div className="w-full h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
+								<div className="w-full h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden">
 									<div
 										className="h-full bg-blue-500 rounded-full"
 										style={{ width: `${(page.views / maxViews) * 100}%` }}
@@ -255,65 +255,65 @@ export default function StatsPage() {
 				</div>
 
 				{/* Translation Coverage */}
-				<div className="bg-[var(--card-bg)] rounded-lg border border-[var(--border)] p-5">
-					<h2 className="text-sm font-semibold text-[var(--text-heading)] mb-4">Translation Coverage</h2>
+				<div className="bg-white dark:bg-neutral-900 rounded-lg border border-gray-300 dark:border-gray-700 p-5">
+					<h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Translation Coverage</h2>
 					<div className="space-y-4">
 						{COVERAGE.map((lang) => {
 							const pct = Math.round((lang.translated / lang.total) * 100)
 							return (
 								<div key={lang.name}>
 									<div className="flex items-center justify-between mb-1.5">
-										<span className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+										<span className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
 											<span className="text-base">{lang.flag}</span> {lang.name}
 										</span>
-										<span className="text-xs font-semibold text-[var(--text-heading)]">
+										<span className="text-xs font-semibold text-gray-900 dark:text-gray-100">
 											{lang.translated} / {lang.total} segments
 										</span>
 									</div>
-									<div className="w-full h-2 bg-[var(--border)] rounded-full overflow-hidden">
+									<div className="w-full h-2 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden">
 										<div
 											className="h-full rounded-full bg-gradient-to-r from-green-400 to-emerald-500"
 											style={{ width: `${pct}%` }}
 										/>
 									</div>
 									<div className="flex items-center justify-between mt-1">
-										<span className="text-xs text-[var(--text-subtle)]">{pct}% translated</span>
-										<span className="text-xs text-[var(--warning)] font-medium">{lang.unreviewed} unreviewed</span>
+										<span className="text-xs text-gray-400 dark:text-gray-500">{pct}% translated</span>
+										<span className="text-xs text-yellow-600 dark:text-yellow-500 font-medium">{lang.unreviewed} unreviewed</span>
 									</div>
 								</div>
 							)
 						})}
 
 						{/* Path coverage */}
-						<div className="pt-3 border-t border-[var(--border)]">
+						<div className="pt-3 border-t border-gray-300 dark:border-gray-700">
 							<div className="flex items-center justify-between mb-1.5">
-								<span className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+								<span className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
 									<PathMiniIcon />
 									Path Translation
 								</span>
-								<span className="text-xs font-semibold text-[var(--text-heading)]">8 / 9 paths</span>
+								<span className="text-xs font-semibold text-gray-900 dark:text-gray-100">8 / 9 paths</span>
 							</div>
-							<div className="w-full h-2 bg-[var(--border)] rounded-full overflow-hidden">
+							<div className="w-full h-2 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden">
 								<div
 									className="h-full rounded-full bg-gradient-to-r from-violet-400 to-purple-500"
 									style={{ width: '89%' }}
 								/>
 							</div>
-							<span className="text-xs text-[var(--text-subtle)] mt-1 inline-block">89% paths translated (both languages)</span>
+							<span className="text-xs text-gray-400 dark:text-gray-500 mt-1 inline-block">89% paths translated (both languages)</span>
 						</div>
 					</div>
 				</div>
 			</div>
 
 			{/* Activity Heatmap */}
-			<div className="bg-[var(--card-bg)] rounded-lg border border-[var(--border)] p-5">
-				<h2 className="text-sm font-semibold text-[var(--text-heading)] mb-4">Translation Activity</h2>
+			<div className="bg-white dark:bg-neutral-900 rounded-lg border border-gray-300 dark:border-gray-700 p-5">
+				<h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Translation Activity</h2>
 				<div className="overflow-x-auto">
 					<div className="flex items-end gap-1 min-w-[400px]">
 						{/* Day labels */}
 						<div className="flex flex-col gap-1 mr-2">
 							{['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
-								<span key={i} className="text-[10px] text-[var(--text-subtle)] h-3 leading-3">{d}</span>
+								<span key={i} className="text-[10px] text-gray-400 dark:text-gray-500 h-3 leading-3">{d}</span>
 							))}
 						</div>
 						{/* Weeks */}
@@ -329,11 +329,11 @@ export default function StatsPage() {
 							</div>
 						))}
 					</div>
-					<div className="flex items-center justify-between mt-3 text-xs text-[var(--text-subtle)]">
+					<div className="flex items-center justify-between mt-3 text-xs text-gray-400 dark:text-gray-500">
 						<span>4 weeks ago</span>
 						<div className="flex items-center gap-1.5">
 							<span>Less</span>
-							<span className="w-3 h-3 rounded-sm bg-[var(--border)]" />
+							<span className="w-3 h-3 rounded-sm bg-gray-300 dark:bg-gray-700" />
 							<span className="w-3 h-3 rounded-sm bg-blue-200" />
 							<span className="w-3 h-3 rounded-sm bg-blue-400" />
 							<span className="w-3 h-3 rounded-sm bg-blue-600" />
@@ -348,7 +348,7 @@ export default function StatsPage() {
 }
 
 function heatColor(val: number): string {
-	if (val === 0) return 'bg-[var(--border)]'
+	if (val === 0) return 'bg-gray-300 dark:bg-gray-700'
 	if (val <= 5) return 'bg-blue-200'
 	if (val <= 15) return 'bg-blue-400'
 	return 'bg-blue-600'
@@ -373,7 +373,7 @@ function TranslateIcon() {
 
 function ArrowUpIcon() {
 	return (
-		<svg className="w-3 h-3 text-[var(--success)]" fill="currentColor" viewBox="0 0 20 20">
+		<svg className="w-3 h-3 text-green-600 dark:text-green-500" fill="currentColor" viewBox="0 0 20 20">
 			<path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
 		</svg>
 	)
@@ -381,7 +381,7 @@ function ArrowUpIcon() {
 
 function PathMiniIcon() {
 	return (
-		<svg className="w-4 h-4 text-[var(--text-subtle)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		<svg className="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M22 2 11 13m11-11-7 20-4-9-9-4Z" />
 		</svg>
 	)

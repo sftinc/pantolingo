@@ -78,14 +78,14 @@ export function TagInput({
 			<div
 				onClick={handleContainerClick}
 				className={cn(
-					'flex flex-wrap gap-2 p-3 rounded-lg border border-[var(--border)] bg-[var(--page-bg)] min-h-[44px] cursor-text',
+					'flex flex-wrap gap-2 p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-neutral-50 dark:bg-neutral-950 min-h-[44px] cursor-text',
 					disabled && 'opacity-50 cursor-not-allowed'
 				)}
 			>
 				{value.map((tag, index) => (
 					<span
 						key={index}
-						className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[var(--accent)]/10 text-[var(--accent)] text-sm"
+						className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-600/10 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500 text-sm"
 					>
 						{tag}
 						{!disabled && (
@@ -95,7 +95,7 @@ export function TagInput({
 									e.stopPropagation()
 									handleRemove(index)
 								}}
-								className="p-0.5 hover:bg-[var(--accent)]/20 rounded"
+								className="p-0.5 hover:bg-blue-600/20 dark:hover:bg-blue-500/20 rounded"
 								aria-label={`Remove ${tag}`}
 							>
 								<svg
@@ -128,14 +128,14 @@ export function TagInput({
 					onBlur={handleAdd}
 					placeholder={value.length === 0 ? placeholder : ''}
 					disabled={disabled}
-					className="flex-1 min-w-[120px] bg-transparent outline-none text-sm text-[var(--text-heading)] placeholder:text-[var(--text-muted)]"
+					className="flex-1 min-w-[120px] bg-transparent outline-none text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-600 dark:placeholder:text-gray-400"
 				/>
 			</div>
 			{hint && !error && (
-				<p className="mt-1 text-xs text-[var(--text-muted)]">{hint}</p>
+				<p className="mt-1 text-xs text-gray-600 dark:text-gray-400">{hint}</p>
 			)}
 			{error && (
-				<p className="mt-1 text-xs text-[var(--error)]">{error}</p>
+				<p className="mt-1 text-xs text-red-600 dark:text-red-500">{error}</p>
 			)}
 		</div>
 	)

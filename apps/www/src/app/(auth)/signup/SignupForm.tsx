@@ -52,16 +52,16 @@ export function SignupForm() {
 				<ThemeToggle />
 			</div>
 			<div className="flex flex-1 flex-col items-center justify-center p-6">
-				<div className="w-full max-w-md bg-[var(--card-bg)] p-10 rounded-lg shadow-[0_2px_8px_var(--shadow-color)]">
-					<h1 className="text-3xl font-semibold mb-2 text-[var(--text-heading)] text-center">
+				<div className="w-full max-w-md bg-white dark:bg-neutral-900 p-10 rounded-lg shadow-md shadow-black/10 dark:shadow-black/30">
+					<h1 className="text-3xl font-semibold mb-2 text-gray-900 dark:text-gray-100 text-center">
 						Create your account
 					</h1>
-					<p className="text-base text-[var(--text-muted)] mb-6 text-center">
+					<p className="text-base text-gray-600 dark:text-gray-400 mb-6 text-center">
 						Enter your email to get started
 					</p>
 
 					{error && (
-						<div className="mb-4 p-3 bg-[var(--error)]/10 text-[var(--error)] rounded-md text-sm">{error}</div>
+						<div className="mb-4 p-3 bg-red-600/10 dark:bg-red-500/10 text-red-600 dark:text-red-500 rounded-md text-sm">{error}</div>
 					)}
 
 					<form onSubmit={handleSubmit}>
@@ -80,15 +80,15 @@ export function SignupForm() {
 						<button
 							type="submit"
 							disabled={isPending}
-							className="w-full py-3 bg-[var(--accent)] text-white rounded-md font-medium hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+							className="w-full py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-md font-medium hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
 						>
 							{isPending ? <Spinner size="sm" /> : 'Continue'}
 						</button>
 					</form>
 
-					<p className="mt-6 text-center text-sm text-[var(--text-muted)]">
+					<p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
 						Already have an account?{' '}
-						<Link href="/login" className="text-[var(--accent)] hover:underline">
+						<Link href="/login" className="text-blue-600 dark:text-blue-500 hover:underline">
 							Sign in
 						</Link>
 					</p>

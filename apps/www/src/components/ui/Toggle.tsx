@@ -17,7 +17,7 @@ interface ToggleProps {
 
 export function Toggle({ options, value, baseUrl, paramName, className }: ToggleProps) {
 	return (
-		<div className={cn('inline-flex rounded-lg bg-[var(--card-bg)] p-1', className)}>
+		<div className={cn('inline-flex rounded-lg bg-white dark:bg-neutral-900 p-1', className)}>
 			{options.map((option) => {
 				const isActive = option.value === value
 				const url = new URL(baseUrl, 'http://localhost')
@@ -31,13 +31,13 @@ export function Toggle({ options, value, baseUrl, paramName, className }: Toggle
 						className={cn(
 							'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
 							isActive
-								? 'bg-[var(--accent)] text-white'
-								: 'text-[var(--text-muted)] hover:text-[var(--text-heading)]'
+								? 'bg-blue-600 dark:bg-blue-500 text-white'
+								: 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
 						)}
 					>
 						{option.label}
 						{option.count !== undefined && (
-							<span className={cn('ml-1.5', isActive ? 'text-white/80' : 'text-[var(--text-subtle)]')}>
+							<span className={cn('ml-1.5', isActive ? 'text-white/80' : 'text-gray-400 dark:text-gray-500')}>
 								({option.count.toLocaleString()})
 							</span>
 						)}

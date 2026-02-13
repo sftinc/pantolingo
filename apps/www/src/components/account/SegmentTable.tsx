@@ -40,7 +40,7 @@ export function SegmentTable({ segments, targetLang, websiteId, onUpdate }: Segm
 						>
 							<TableCell className="max-w-0">
 								<span
-									className="block truncate text-[var(--text-muted)]"
+									className="block truncate text-gray-600 dark:text-gray-400"
 									title={segment.text}
 								>
 									<PlaceholderText text={segment.text} />
@@ -55,7 +55,7 @@ export function SegmentTable({ segments, targetLang, websiteId, onUpdate }: Segm
 										<PlaceholderText text={segment.translatedText} />
 									</span>
 								) : (
-									<span className="text-[var(--text-subtle)] italic">Not translated</span>
+									<span className="text-gray-400 dark:text-gray-500 italic">Not translated</span>
 								)}
 							</TableCell>
 							<TableCell>

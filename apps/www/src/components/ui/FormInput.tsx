@@ -13,7 +13,7 @@ export function FormInput({ label, id, className, ...props }: FormInputProps) {
 	return (
 		<>
 			{label && (
-				<label htmlFor={id} className="block text-sm font-medium text-[var(--text-body)] mb-2">
+				<label htmlFor={id} className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
 					{label}
 				</label>
 			)}
@@ -21,7 +21,7 @@ export function FormInput({ label, id, className, ...props }: FormInputProps) {
 				id={id}
 				disabled={pending}
 				className={cn(
-					'w-full px-4 py-3 rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text-body)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed',
+					'w-full px-4 py-3 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-neutral-900 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed',
 					className
 				)}
 				{...props}

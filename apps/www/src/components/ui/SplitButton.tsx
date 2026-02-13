@@ -44,10 +44,10 @@ export function SplitButton({
 
 	const variantStyles = {
 		primary: {
-			button: 'bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]',
+			button: 'bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-400',
 		},
 		success: {
-			button: 'bg-[var(--success)] text-white hover:opacity-90',
+			button: 'bg-green-600 dark:bg-green-500 text-white hover:opacity-90',
 		},
 	}
 

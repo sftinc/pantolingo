@@ -23,16 +23,16 @@ export default async function AuthCheckEmailPage() {
 				<ThemeToggle />
 			</div>
 			<div className="flex flex-1 flex-col items-center justify-center p-6">
-				<div className="text-center max-w-md bg-[var(--card-bg)] p-10 rounded-lg shadow-[0_2px_8px_var(--shadow-color)]">
+				<div className="text-center max-w-md bg-white dark:bg-neutral-900 p-10 rounded-lg shadow-md shadow-black/10 dark:shadow-black/30">
 					<div className="mb-4 text-5xl">📧</div>
-					<h1 className="text-2xl font-semibold mb-4 text-[var(--text-heading)]">
+					<h1 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
 						Check your email
 					</h1>
-					<p className="text-base leading-relaxed text-[var(--text-muted)]">
+					<p className="text-base leading-relaxed text-gray-600 dark:text-gray-400">
 						A sign-in link has been sent to{' '}
-						<strong className="text-[var(--text-body)]">{authData.email}</strong>
+						<strong className="text-gray-800 dark:text-gray-200">{authData.email}</strong>
 					</p>
-					<p className="mt-2 text-sm text-[var(--text-muted)]">
+					<p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
 						Click the link in the email to sign in, or enter the code manually. The link and
 						code expire in 10 minutes.
 					</p>
@@ -41,14 +41,14 @@ export default async function AuthCheckEmailPage() {
 						<Link
 							href="/auth/enter-code"
 							prefetch={false}
-							className="block w-full py-3 bg-[var(--accent)] text-white rounded-md font-medium hover:opacity-90 transition text-center"
+							className="block w-full py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-md font-medium hover:opacity-90 transition text-center"
 						>
 							Enter code manually
 						</Link>
 
 						<Link
 							href={backHref}
-							className="block w-full py-3 text-[var(--text-muted)] hover:text-[var(--text-body)] transition text-center text-sm"
+							className="block w-full py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 transition text-center text-sm"
 						>
 							{backText}
 						</Link>
