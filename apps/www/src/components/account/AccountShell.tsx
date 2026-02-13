@@ -104,23 +104,15 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 		<div className="min-h-screen bg-[var(--content-bg)]">
 			{/* Top header bar */}
 			<header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-6 md:ml-60 h-14 bg-white dark:bg-[var(--sidebar-bg)] border-b border-[var(--sidebar-border)] md:bg-transparent md:dark:bg-transparent md:border-b-0">
-				{/* Mobile left: hamburger + logo */}
-				<div className="flex items-center gap-3 md:hidden">
+				{/* Left: hamburger (mobile) + website switcher */}
+				<div className="flex items-center gap-3">
 					<button
 						onClick={() => setMobileOpen(true)}
-						className="p-1 text-[var(--text-muted)] cursor-pointer"
+						className="p-1 text-[var(--text-muted)] cursor-pointer md:hidden"
 						aria-label="Open menu"
 					>
 						<HamburgerIcon className="w-6 h-6" />
 					</button>
-					<span className="text-base font-bold text-[var(--text-heading)]">Pantolingo</span>
-				</div>
-
-				{/* Desktop: spacer on left */}
-				<div className="hidden md:block" />
-
-				{/* Right: switcher + profile */}
-				<div className="flex items-center gap-1">
 					{/* Website switcher */}
 					<div ref={switcherRef} className="relative">
 						<button
@@ -138,7 +130,7 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 						</button>
 
 						{switcherOpen && (
-							<div className="absolute right-0 top-full mt-1 w-64 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg shadow-lg overflow-hidden z-50">
+							<div className="absolute left-0 top-full mt-1 w-64 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg shadow-lg overflow-hidden z-50">
 								{/* Add website */}
 								<button
 									disabled
@@ -174,7 +166,10 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 							</div>
 						)}
 					</div>
+				</div>
 
+				{/* Right: profile */}
+				<div className="flex items-center">
 					{/* Profile */}
 					<div ref={profileRef} className="relative">
 						<button
