@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Color palette from message-page (light/dark mode support) */
 :root {
   color-scheme: light dark;
@@ -27,7 +29,8 @@
   --sidebar-bg: #ffffff;
   --sidebar-border: #e5e7eb;
   --content-bg: #f5f5f5;
-  --nav-active-bg: #e8f0fe;
+  --nav-active-bg: #e5e7eb;
+  --nav-hover-bg: #f3f4f6;
 
   /* Placeholder colors */
   --ph-number: #7c3aed;   /* violet-600 */
@@ -68,7 +71,8 @@
     --sidebar-bg: #1a1a1a;
     --sidebar-border: #374151;
     --content-bg: #111111;
-    --nav-active-bg: #2a2a3a;
+    --nav-active-bg: #374151;
+    --nav-hover-bg: #2a3040;
   }
 }
 
@@ -96,7 +100,8 @@
   --sidebar-bg: #1a1a1a;
   --sidebar-border: #374151;
   --content-bg: #111111;
-  --nav-active-bg: #2a2a3a;
+  --nav-active-bg: #374151;
+  --nav-hover-bg: #2a3040;
 }
 
 /* Apply theme colors to body */

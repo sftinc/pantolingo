@@ -80,7 +80,7 @@ src/
 
 ## Key Components
 
--   `SidebarLayout` - Sidebar navigation with website switcher (client component)
+-   `AccountShell` - Top bar + sidebar navigation layout (client component)
 -   `LanguageDropdown` - Language selector dropdown for segments/paths pages
 -   `SegmentEditModal`, `PathEditModal` - Modals for editing translations
 -   `LangTable`, `SegmentTable`, `PathTable` - Data tables with pagination

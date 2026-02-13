@@ -20,12 +20,15 @@ export default function RootLayout({
               (function() {
                 try {
                   var theme = localStorage.getItem('theme');
-                  if (theme === 'dark' || theme === 'light') {
-                    document.documentElement.classList.add(theme);
-                  } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                  if (theme === 'dark') {
                     document.documentElement.classList.add('dark');
-                  } else {
+                  } else if (theme === 'light') {
                     document.documentElement.classList.add('light');
+                  } else {
+                    // system: resolve OS preference to a class
+                    document.documentElement.classList.add(
+                      window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+                    );
                   }
                 } catch (e) {}
               })();

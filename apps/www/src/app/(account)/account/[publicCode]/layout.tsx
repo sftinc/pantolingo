@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { auth, signOut } from '@/lib/auth'
 import { canAccessWebsiteByPublicCode, getWebsiteByPublicCode, getWebsitesWithStats } from '@pantolingo/db'
-import { SidebarLayout } from '@/components/account/SidebarLayout'
+import { AccountShell } from '@/components/account/AccountShell'
 
 interface WebsiteLayoutProps {
 	params: Promise<{ publicCode: string }>
@@ -49,13 +49,13 @@ export default async function WebsiteLayout({ params, children }: WebsiteLayoutP
 	})()
 
 	return (
-		<SidebarLayout
+		<AccountShell
 			currentWebsite={{ publicCode: website.publicCode, hostname: website.hostname, name: website.name, sourceLang: website.sourceLang, role }}
 			websites={allWebsites.map((w) => ({ publicCode: w.publicCode, hostname: w.hostname, name: w.name }))}
 			userName={userName}
 			signOutAction={handleSignOut}
 		>
 			{children}
-		</SidebarLayout>
+		</AccountShell>
 	)
 }

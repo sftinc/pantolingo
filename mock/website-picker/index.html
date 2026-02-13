@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Website Picker Color Options</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script>
+			tailwind.config = { darkMode: 'class' }
+		</script>
+		<style>
+			body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+		</style>
+		<script>
+			;(function () {
+				var t = localStorage.getItem('theme') || 'system'
+				if (t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+					document.documentElement.classList.add('dark')
+				}
+			})()
+		</script>
+	</head>
+	<body class="min-h-screen bg-[#f5f5f5] dark:bg-[#111111] text-gray-900 dark:text-gray-100">
+		<!-- Tailwind CDN safelist: ensures all dynamic classes are generated -->
+		<div class="hidden">
+			<span class="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 bg-red-700/20 dark:bg-red-300/20"></span>
+			<span class="bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-300 bg-rose-700/20 dark:bg-rose-300/20"></span>
+			<span class="bg-pink-100 dark:bg-pink-900 text-pink-700 dark:text-pink-300 bg-pink-700/20 dark:bg-pink-300/20"></span>
+			<span class="bg-fuchsia-100 dark:bg-fuchsia-900 text-fuchsia-700 dark:text-fuchsia-300 bg-fuchsia-700/20 dark:bg-fuchsia-300/20"></span>
+			<span class="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 bg-purple-700/20 dark:bg-purple-300/20"></span>
+			<span class="bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300 bg-violet-700/20 dark:bg-violet-300/20"></span>
+			<span class="bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 bg-indigo-700/20 dark:bg-indigo-300/20"></span>
+			<span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 bg-blue-700/20 dark:bg-blue-300/20"></span>
+			<span class="bg-sky-100 dark:bg-sky-900 text-sky-700 dark:text-sky-300 bg-sky-700/20 dark:bg-sky-300/20"></span>
+			<span class="bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-300 bg-cyan-700/20 dark:bg-cyan-300/20"></span>
+			<span class="bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 bg-teal-700/20 dark:bg-teal-300/20"></span>
+			<span class="bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 bg-emerald-700/20 dark:bg-emerald-300/20"></span>
+			<span class="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 bg-green-700/20 dark:bg-green-300/20"></span>
+			<span class="bg-lime-100 dark:bg-lime-900 text-lime-700 dark:text-lime-300 bg-lime-700/20 dark:bg-lime-300/20"></span>
+			<span class="bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 bg-yellow-700/20 dark:bg-yellow-300/20"></span>
+			<span class="bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 bg-amber-700/20 dark:bg-amber-300/20"></span>
+			<span class="bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 bg-orange-700/20 dark:bg-orange-300/20"></span>
+			<span class="bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 bg-slate-700/20 dark:bg-slate-300/20"></span>
+		</div>
+
+		<!-- Theme toggle -->
+		<div class="fixed top-4 right-4 z-50">
+			<button id="theme-btn" class="px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+				Toggle dark mode
+			</button>
+		</div>
+
+		<div class="max-w-5xl mx-auto px-6 py-12">
+			<h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Website Picker Button Colors</h1>
+			<p class="text-sm text-gray-500 dark:text-gray-400 mb-10">Each button uses standard Tailwind shades: bg -100/-900, text -700/-300, avatar bg -700/20 / -300/20.</p>
+
+			<!-- Color options grid -->
+			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="color-grid"></div>
+
+			<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mt-16 mb-2">In context (top bar simulation)</h2>
+			<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">How each option looks next to a neutral profile button.</p>
+
+			<div class="space-y-3" id="topbar-grid"></div>
+		</div>
+
+		<script>
+			const colors = [
+				'red', 'rose', 'pink', 'fuchsia', 'purple', 'violet',
+				'indigo', 'blue', 'sky', 'cyan', 'teal', 'emerald',
+				'green', 'lime', 'yellow', 'amber', 'orange', 'slate',
+			]
+
+			function cls(color) {
+				return {
+					btn: `bg-${color}-100 dark:bg-${color}-900 text-${color}-700 dark:text-${color}-300`,
+					avatar: `bg-${color}-700/20 dark:bg-${color}-300/20 text-${color}-700 dark:text-${color}-300`,
+					label: `bg-${color}-100 / text-${color}-700`,
+				}
+			}
+
+			const chevronSvg = `<svg class="w-4 h-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>`
+
+			function renderAll() {
+				const grid = document.getElementById('color-grid')
+				const topbar = document.getElementById('topbar-grid')
+				grid.innerHTML = ''
+				topbar.innerHTML = ''
+
+				colors.forEach(color => {
+					const c = cls(color)
+					const name = color.charAt(0).toUpperCase() + color.slice(1)
+
+					// Card
+					const card = document.createElement('div')
+					card.className = 'bg-white dark:bg-[#222] rounded-lg border border-gray-200 dark:border-gray-700 p-5'
+					card.innerHTML = `
+						<div class="flex items-center justify-between mb-3">
+							<span class="text-sm font-semibold text-gray-800 dark:text-gray-200">${name}</span>
+							<span class="text-[10px] font-mono text-gray-400 dark:text-gray-500">${c.label}</span>
+						</div>
+						<button class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors w-full ${c.btn}">
+							<span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-semibold shrink-0 ${c.avatar}">E</span>
+							<span class="font-semibold">eSnipe</span>
+							<span class="ml-auto">${chevronSvg}</span>
+						</button>
+						<div class="mt-2 flex gap-2">
+							<button class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium ${c.btn}">
+								<span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-semibold shrink-0 ${c.avatar}">A</span>
+								<span class="font-semibold">Acme</span>
+							</button>
+							<button class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium ${c.btn}">
+								<span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-semibold shrink-0 ${c.avatar}">M</span>
+								<span class="font-semibold">MyShop</span>
+							</button>
+						</div>
+					`
+					grid.appendChild(card)
+
+					// Top bar row
+					const row = document.createElement('div')
+					row.className = 'flex items-center justify-end gap-1 px-4 h-14 bg-white dark:bg-[#1a1a1a] rounded-lg border border-gray-200 dark:border-gray-700'
+					row.innerHTML = `
+						<span class="mr-auto text-xs font-mono text-gray-400 dark:text-gray-500">${name}</span>
+						<button class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium ${c.btn}">
+							<span class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-semibold shrink-0 ${c.avatar}">E</span>
+							<span class="font-semibold">eSnipe</span>
+							${chevronSvg}
+						</button>
+						<button class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<circle cx="12" cy="8" r="4" stroke-width="1.5" />
+								<path stroke-width="1.5" d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+							</svg>
+							<span class="text-sm">W. Williams</span>
+							<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+							</svg>
+						</button>
+					`
+					topbar.appendChild(row)
+				})
+			}
+
+			document.getElementById('theme-btn').addEventListener('click', () => {
+				document.documentElement.classList.toggle('dark')
+				localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light')
+				renderAll()
+			})
+
+			renderAll()
+		</script>
+	</body>
+</html>

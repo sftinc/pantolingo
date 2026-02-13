@@ -1,48 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
-type Theme = 'light' | 'dark'
-
-function applyTheme(theme: Theme) {
-	const root = document.documentElement
-	root.classList.remove('light', 'dark')
-	root.classList.add(theme)
-}
-
-function getInitialTheme(): Theme {
-	// Check localStorage first
-	const stored = localStorage.getItem('theme')
-	if (stored === 'light' || stored === 'dark') {
-		return stored
-	}
-	// Fall back to browser preference
-	if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-		return 'dark'
-	}
-	return 'light'
-}
+import { useTheme } from '@/hooks/useTheme'
 
 export function ThemeToggle() {
-	const [theme, setTheme] = useState<Theme>('light')
-	const [mounted, setMounted] = useState(false)
+	const { theme, cycleTheme, mounted } = useTheme()
 
-	// Read theme from localStorage or browser preference and apply on mount
-	useEffect(() => {
-		const initialTheme = getInitialTheme()
-		setTheme(initialTheme)
-		applyTheme(initialTheme)
-		setMounted(true)
-	}, [])
-
-	const toggleTheme = () => {
-		const next: Theme = theme === 'light' ? 'dark' : 'light'
-		setTheme(next)
-		localStorage.setItem('theme', next)
-		applyTheme(next)
-	}
-
-	// Prevent hydration mismatch
 	if (!mounted) {
 		return (
 			<button
@@ -54,14 +16,18 @@ export function ThemeToggle() {
 		)
 	}
 
+	const label = theme === 'light' ? 'Light mode' : theme === 'dark' ? 'Dark mode' : 'System'
+
 	return (
 		<button
-			onClick={toggleTheme}
+			onClick={cycleTheme}
 			className="p-2 rounded-md text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--border)] transition-colors"
-			aria-label={`Current theme: ${theme}. Click to toggle.`}
-			title={`Theme: ${theme}`}
+			aria-label={`Current theme: ${label}. Click to cycle.`}
+			title={`Theme: ${label}`}
 		>
-			{theme === 'light' ? <SunIcon /> : <MoonIcon />}
+			{theme === 'light' && <SunIcon />}
+			{theme === 'dark' && <MoonIcon />}
+			{theme === 'system' && <MonitorIcon />}
 		</button>
 	)
 }
@@ -110,3 +76,22 @@ function MoonIcon() {
 	)
 }
 
+function MonitorIcon() {
+	return (
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			width="20"
+			height="20"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="2"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+		>
+			<rect x="2" y="3" width="20" height="14" rx="2" />
+			<path d="M8 21h8" />
+			<path d="M12 17v4" />
+		</svg>
+	)
+}
