@@ -55,7 +55,7 @@ const NAV_ITEMS = [
 ]
 
 const SECONDARY_NAV = [
-	{ label: 'Setup', href: '/account/setup', icon: ClipboardCheckIcon },
+	{ label: 'Setup', path: 'setup', icon: ClipboardCheckIcon },
 ]
 
 export function AccountShell({ currentWebsite, websites, userName, signOutAction, children }: AccountShellProps) {
@@ -279,11 +279,11 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 							<span>Settings</span>
 						</Link>
 						{SECONDARY_NAV.map((item) => {
-							const active = pathname.startsWith(item.href)
+							const active = isActive(item.path)
 							return (
 								<Link
-									key={item.href}
-									href={item.href}
+									key={item.path}
+									href={`${basePath}/${item.path}`}
 									onClick={() => setMobileOpen(false)}
 									className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
 										active

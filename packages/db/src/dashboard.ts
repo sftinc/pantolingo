@@ -27,6 +27,8 @@ export interface LangWithStats {
 	translatedPathCount: number
 	unreviewedSegmentCount: number
 	unreviewedPathCount: number
+	totalWordCount: number
+	unreviewedWordCount: number
 }
 
 export interface SegmentWithTranslation {
@@ -218,12 +220,16 @@ export async function getLangsForWebsite(websiteId: number): Promise<LangWithSta
 		translated_path_count: string
 		unreviewed_segment_count: string
 		unreviewed_path_count: string
+		total_word_count: string
+		unreviewed_word_count: string
 	}>(
 		`
 		WITH segment_stats AS (
 			SELECT ts.lang,
 				COUNT(*) as total,
-				COUNT(*) FILTER (WHERE ts.reviewed_at IS NULL) as unreviewed
+				COUNT(*) FILTER (WHERE ts.reviewed_at IS NULL) as unreviewed,
+				COALESCE(SUM(ts.word_count), 0) as total_words,
+				COALESCE(SUM(ts.word_count) FILTER (WHERE ts.reviewed_at IS NULL), 0) as unreviewed_words
 			FROM translation_segment ts
 			JOIN website_segment ws ON ws.id = ts.website_segment_id
 			WHERE ws.website_id = $1
@@ -232,7 +238,9 @@ export async function getLangsForWebsite(websiteId: number): Promise<LangWithSta
 		path_stats AS (
 			SELECT tp.lang,
 				COUNT(*) as total,
-				COUNT(*) FILTER (WHERE tp.reviewed_at IS NULL) as unreviewed
+				COUNT(*) FILTER (WHERE tp.reviewed_at IS NULL) as unreviewed,
+				COALESCE(SUM(tp.word_count), 0) as total_words,
+				COALESCE(SUM(tp.word_count) FILTER (WHERE tp.reviewed_at IS NULL), 0) as unreviewed_words
 			FROM translation_path tp
 			JOIN website_path wp ON wp.id = tp.website_path_id
 			WHERE wp.website_id = $1 AND EXISTS (SELECT 1 FROM website_path_segment wps WHERE wps.website_path_id = wp.id)
@@ -243,7 +251,9 @@ export async function getLangsForWebsite(websiteId: number): Promise<LangWithSta
 			COALESCE(ss.total, 0) as translated_segment_count,
 			COALESCE(ps.total, 0) as translated_path_count,
 			COALESCE(ss.unreviewed, 0) as unreviewed_segment_count,
-			COALESCE(ps.unreviewed, 0) as unreviewed_path_count
+			COALESCE(ps.unreviewed, 0) as unreviewed_path_count,
+			COALESCE(ss.total_words, 0) + COALESCE(ps.total_words, 0) as total_word_count,
+			COALESCE(ss.unreviewed_words, 0) + COALESCE(ps.unreviewed_words, 0) as unreviewed_word_count
 		FROM translation t
 		LEFT JOIN segment_stats ss ON ss.lang = t.target_lang
 		LEFT JOIN path_stats ps ON ps.lang = t.target_lang
@@ -259,6 +269,8 @@ export async function getLangsForWebsite(websiteId: number): Promise<LangWithSta
 		translatedPathCount: parseInt(row.translated_path_count, 10),
 		unreviewedSegmentCount: parseInt(row.unreviewed_segment_count, 10),
 		unreviewedPathCount: parseInt(row.unreviewed_path_count, 10),
+		totalWordCount: parseInt(row.total_word_count, 10),
+		unreviewedWordCount: parseInt(row.unreviewed_word_count, 10),
 	}))
 }
 
