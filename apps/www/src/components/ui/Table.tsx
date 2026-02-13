@@ -7,7 +7,7 @@ interface TableProps {
 
 export function Table({ children, className }: TableProps) {
 	return (
-		<div className="overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700">
+		<div className="overflow-x-auto rounded-lg border border-[var(--border)]">
 			<table className={cn('w-full table-fixed text-left text-sm', className)}>{children}</table>
 		</div>
 	)
@@ -19,7 +19,7 @@ interface TableHeaderProps {
 }
 
 export function TableHeader({ children, className }: TableHeaderProps) {
-	return <thead className={cn('bg-white dark:bg-neutral-900 text-gray-600 dark:text-gray-400', className)}>{children}</thead>
+	return <thead className={cn('bg-[var(--card-bg)] text-[var(--text-muted)]', className)}>{children}</thead>
 }
 
 interface TableBodyProps {
@@ -28,7 +28,7 @@ interface TableBodyProps {
 }
 
 export function TableBody({ children, className }: TableBodyProps) {
-	return <tbody className={cn('divide-y divide-gray-300 dark:divide-gray-700', className)}>{children}</tbody>
+	return <tbody className={cn('divide-y divide-[var(--border)]', className)}>{children}</tbody>
 }
 
 interface TableRowProps {
@@ -42,8 +42,8 @@ export function TableRow({ children, className, onClick, clickable }: TableRowPr
 	return (
 		<tr
 			className={cn(
-				'bg-white dark:bg-neutral-900',
-				(clickable || onClick) && 'cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-950 transition-colors',
+				'bg-[var(--card-bg)]',
+				(clickable || onClick) && 'cursor-pointer hover:bg-[var(--page-bg)] transition-colors',
 				className
 			)}
 			onClick={onClick}
@@ -60,7 +60,7 @@ interface TableHeadProps {
 
 export function TableHead({ children, className }: TableHeadProps) {
 	return (
-		<th className={cn('px-4 py-3 font-medium text-gray-600 dark:text-gray-400', className)}>
+		<th className={cn('px-4 py-3 font-medium text-[var(--text-muted)]', className)}>
 			{children}
 		</th>
 	)
@@ -73,7 +73,7 @@ interface TableCellProps {
 
 export function TableCell({ children, className }: TableCellProps) {
 	return (
-		<td className={cn('px-4 py-3 text-gray-900 dark:text-gray-100', className)}>
+		<td className={cn('px-4 py-3 text-[var(--text-heading)]', className)}>
 			{children}
 		</td>
 	)
@@ -86,7 +86,7 @@ interface EmptyStateProps {
 
 export function EmptyState({ message, className }: EmptyStateProps) {
 	return (
-		<div className={cn('py-12 text-center text-gray-600 dark:text-gray-400', className)}>
+		<div className={cn('py-12 text-center text-[var(--text-muted)]', className)}>
 			{message}
 		</div>
 	)

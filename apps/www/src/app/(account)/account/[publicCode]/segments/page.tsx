@@ -39,11 +39,11 @@ export default async function SegmentsPage({ params, searchParams }: SegmentsPag
 	if (langs.length === 0) {
 		return (
 			<div>
-				<h1 className="mb-6 text-2xl font-semibold text-gray-900 dark:text-gray-100">Segments</h1>
-				<div className="text-center py-12 bg-white dark:bg-neutral-900 rounded-lg">
-					<p className="text-gray-600 dark:text-gray-400 mb-2">No segments yet</p>
-					<p className="text-sm text-gray-600 dark:text-gray-400">
-						<a href={`/account/${publicCode}/languages`} className="text-blue-600 dark:text-blue-500 hover:underline">Add a language</a> to start translating your website.
+				<h1 className="mb-6 text-2xl font-semibold text-[var(--text-heading)]">Segments</h1>
+				<div className="text-center py-12 bg-[var(--card-bg)] rounded-lg">
+					<p className="text-[var(--text-muted)] mb-2">No segments yet</p>
+					<p className="text-sm text-[var(--text-muted)]">
+						<a href={`/account/${publicCode}/languages`} className="text-[var(--accent)] hover:underline">Add a language</a> to start translating your website.
 					</p>
 				</div>
 			</div>
@@ -81,8 +81,8 @@ export default async function SegmentsPage({ params, searchParams }: SegmentsPag
 		<div>
 			<div className="mb-6 flex flex-wrap items-center justify-between gap-4">
 				<div className="flex items-center gap-3">
-					<h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Segments</h1>
-					<span className="text-sm text-gray-600 dark:text-gray-400">({formatNumber(data.total)})</span>
+					<h1 className="text-2xl font-semibold text-[var(--text-heading)]">Segments</h1>
+					<span className="text-sm text-[var(--text-muted)]">({formatNumber(data.total)})</span>
 				</div>
 				<LanguageDropdown
 					langs={langs.map((l) => ({ langCd: l.targetLang }))}
@@ -110,7 +110,7 @@ export default async function SegmentsPage({ params, searchParams }: SegmentsPag
 			</div>
 
 			{data.total === 0 && validFilter === 'unreviewed' && (
-				<div className="mb-6 rounded-lg bg-white dark:bg-neutral-900 border border-green-600 dark:border-green-500 p-4 text-green-600 dark:text-green-500">
+				<div className="mb-6 rounded-lg bg-[var(--card-bg)] border border-[var(--success)] p-4 text-[var(--success)]">
 					All translations have been reviewed. Switch to &quot;All&quot; to see all translations.
 				</div>
 			)}

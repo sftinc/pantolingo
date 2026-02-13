@@ -22,31 +22,31 @@ export function Pagination({ currentPage, totalPages, baseUrl, className }: Pagi
 
 	return (
 		<div className={cn('flex items-center justify-between', className)}>
-			<div className="text-sm text-gray-600 dark:text-gray-400">
+			<div className="text-sm text-[var(--text-muted)]">
 				Page {currentPage} of {totalPages}
 			</div>
 			<div className="flex gap-2">
 				{hasPrev ? (
 					<Link
 						href={getPageUrl(currentPage - 1)}
-						className="px-3 py-1.5 text-sm font-medium rounded-md bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+						className="px-3 py-1.5 text-sm font-medium rounded-md bg-[var(--card-bg)] text-[var(--text-heading)] hover:bg-[var(--border)] transition-colors"
 					>
 						Previous
 					</Link>
 				) : (
-					<span className="px-3 py-1.5 text-sm font-medium rounded-md bg-white dark:bg-neutral-900 text-gray-400 dark:text-gray-500 cursor-not-allowed">
+					<span className="px-3 py-1.5 text-sm font-medium rounded-md bg-[var(--card-bg)] text-[var(--text-subtle)] cursor-not-allowed">
 						Previous
 					</span>
 				)}
 				{hasNext ? (
 					<Link
 						href={getPageUrl(currentPage + 1)}
-						className="px-3 py-1.5 text-sm font-medium rounded-md bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+						className="px-3 py-1.5 text-sm font-medium rounded-md bg-[var(--card-bg)] text-[var(--text-heading)] hover:bg-[var(--border)] transition-colors"
 					>
 						Next
 					</Link>
 				) : (
-					<span className="px-3 py-1.5 text-sm font-medium rounded-md bg-white dark:bg-neutral-900 text-gray-400 dark:text-gray-500 cursor-not-allowed">
+					<span className="px-3 py-1.5 text-sm font-medium rounded-md bg-[var(--card-bg)] text-[var(--text-subtle)] cursor-not-allowed">
 						Next
 					</span>
 				)}

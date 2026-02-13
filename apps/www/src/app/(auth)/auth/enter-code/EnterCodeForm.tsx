@@ -35,7 +35,7 @@ export function EnterCodeForm() {
 	return (
 		<>
 			{state?.error && (
-				<div className="mb-4 p-3 bg-red-600/10 dark:bg-red-500/10 text-red-600 dark:text-red-500 rounded-md text-sm">
+				<div className="mb-4 p-3 bg-[var(--error)]/10 text-[var(--error)] rounded-md text-sm">
 					{state.error}
 				</div>
 			)}
@@ -49,7 +49,7 @@ export function EnterCodeForm() {
 					autoFocus
 					autoComplete="one-time-code"
 					placeholder="XXXXXXXX"
-					className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-neutral-900 text-gray-800 dark:text-gray-200 placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500 mb-4"
+					className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text-body)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] mb-4"
 					maxLength={8}
 				/>
 
@@ -57,7 +57,7 @@ export function EnterCodeForm() {
 					<button
 						type="button"
 						disabled
-						className="w-full py-3 rounded-md font-medium bg-blue-600 dark:bg-blue-500 text-white opacity-50 cursor-not-allowed"
+						className="w-full py-3 rounded-md font-medium bg-[var(--accent)] text-white opacity-50 cursor-not-allowed"
 					>
 						<Spinner size="sm" className="mx-auto" />
 					</button>
@@ -68,7 +68,7 @@ export function EnterCodeForm() {
 
 			<Link
 				href="/auth/check-email"
-				className="mt-4 inline-block text-sm text-blue-600 dark:text-blue-500 hover:underline"
+				className="mt-4 inline-block text-sm text-[var(--accent)] hover:underline"
 			>
 				Back to check email
 			</Link>

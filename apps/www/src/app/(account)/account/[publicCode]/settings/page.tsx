@@ -23,7 +23,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 
 	return (
 		<div>
-			<h1 className="mb-6 text-2xl font-semibold text-gray-900 dark:text-gray-100">Settings</h1>
+			<h1 className="mb-6 text-2xl font-semibold text-[var(--text-heading)]">Settings</h1>
 
 			<WebsiteSettingsForm
 				websiteId={access.websiteId}

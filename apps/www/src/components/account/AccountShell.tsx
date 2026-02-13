@@ -101,14 +101,14 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 	const ThemeIcon = theme === 'light' ? SunIcon : theme === 'dark' ? MoonIcon : MonitorIcon
 
 	return (
-		<div className="min-h-screen bg-neutral-100 dark:bg-neutral-950">
+		<div className="min-h-screen bg-[var(--content-bg)]">
 			{/* Top header bar */}
-			<header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-6 md:ml-60 h-14 bg-white dark:bg-neutral-900 border-b border-gray-200 dark:border-gray-700 md:bg-transparent md:dark:bg-transparent md:border-b-0">
+			<header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-6 md:ml-60 h-14 bg-white dark:bg-[var(--sidebar-bg)] border-b border-[var(--sidebar-border)] md:bg-transparent md:dark:bg-transparent md:border-b-0">
 				{/* Left: hamburger (mobile) + website switcher */}
 				<div className="flex items-center gap-3">
 					<button
 						onClick={() => setMobileOpen(true)}
-						className="p-1 text-gray-600 dark:text-gray-400 cursor-pointer md:hidden"
+						className="p-1 text-[var(--text-muted)] cursor-pointer md:hidden"
 						aria-label="Open menu"
 					>
 						<HamburgerIcon className="w-6 h-6" />
@@ -130,19 +130,19 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 						</button>
 
 						{switcherOpen && (
-							<div className="absolute left-0 top-full mt-1 w-64 bg-white dark:bg-neutral-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden z-50">
+							<div className="absolute left-0 top-full mt-1 w-64 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg shadow-lg overflow-hidden z-50">
 								{/* Add website */}
 								<button
 									disabled
-									className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 opacity-50 cursor-not-allowed"
+									className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] opacity-50 cursor-not-allowed"
 								>
-									<PlusIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+									<PlusIcon className="w-5 h-5 text-[var(--text-subtle)]" />
 									Add website
 								</button>
 
 								{otherWebsites.length > 0 && (
 									<>
-										<div className="border-t border-gray-300 dark:border-gray-700 my-1" />
+										<div className="border-t border-[var(--border)] my-1" />
 										{otherWebsites.map((site) => {
 											const siteColor = COLOR_CLASSES[getWebsiteColor(site.name)]
 											return (
@@ -152,7 +152,7 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 														setSwitcherOpen(false)
 														router.push(`/account/${site.publicCode}/languages`)
 													}}
-													className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+													className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
 												>
 													<span className={`w-6 h-6 rounded flex items-center justify-center text-xs font-semibold ${siteColor.btn}`}>
 														{site.name[0].toUpperCase()}
@@ -177,26 +177,26 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 								setProfileOpen(!profileOpen)
 								setSwitcherOpen(false)
 							}}
-							className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+							className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
 						>
 							<UserIcon className="w-5 h-5" />
 							<span className="hidden sm:inline">{userName}</span>
-							<ChevronIcon className={`w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+							<ChevronIcon className={`w-4 h-4 text-[var(--text-subtle)] transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
 						</button>
 
 						{profileOpen && (
-							<div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-neutral-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg py-1 z-50">
+							<div className="absolute right-0 top-full mt-1 w-48 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg shadow-lg py-1 z-50">
 								{/* Profile link */}
 								<Link
 									href="/account/setup"
 									onClick={() => setProfileOpen(false)}
-									className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+									className="flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors"
 								>
-									<UserIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+									<UserIcon className="w-5 h-5 text-[var(--text-subtle)]" />
 									Profile
 								</Link>
 
-								<div className="border-t border-gray-300 dark:border-gray-700 my-1" />
+								<div className="border-t border-[var(--border)] my-1" />
 
 								{/* Theme cycle */}
 								<button
@@ -204,9 +204,9 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 										e.stopPropagation()
 										cycleTheme()
 									}}
-									className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+									className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
 								>
-									{mounted && <ThemeIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />}
+									{mounted && <ThemeIcon className="w-5 h-5 text-[var(--text-subtle)]" />}
 									{!mounted && <span className="w-5 h-5" />}
 									{mounted ? themeLabel : ''}
 								</button>
@@ -215,9 +215,9 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 								<form action={signOutAction}>
 									<button
 										type="submit"
-										className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+										className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
 									>
-										<SignOutIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+										<SignOutIcon className="w-5 h-5 text-[var(--text-subtle)]" />
 										Sign out
 									</button>
 								</form>
@@ -234,13 +234,13 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 
 			{/* Sidebar */}
 			<aside
-				className={`fixed top-0 left-0 z-50 h-full w-60 bg-white dark:bg-neutral-900 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-transform duration-200 ${
+				className={`fixed top-0 left-0 z-50 h-full w-60 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col transition-transform duration-200 ${
 					mobileOpen ? 'translate-x-0' : '-translate-x-full'
 				} md:translate-x-0`}
 			>
 				{/* Logo row */}
 				<div className="h-14 flex items-center px-5 shrink-0">
-					<span className="text-base font-bold text-gray-900 dark:text-gray-100">Pantolingo</span>
+					<span className="text-base font-bold text-[var(--text-heading)]">Pantolingo</span>
 				</div>
 
 				{/* Primary nav */}
@@ -254,8 +254,8 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 								onClick={() => setMobileOpen(false)}
 								className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
 									active
-										? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-										: 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
+										? 'bg-[var(--nav-active-bg)] text-[var(--text-heading)]'
+										: 'text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] hover:text-[var(--text-heading)]'
 								}`}
 							>
 								<item.icon className="w-5 h-5 shrink-0" />
@@ -271,11 +271,11 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 							onClick={() => setMobileOpen(false)}
 							className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
 								pathname.startsWith(`${basePath}/settings`)
-									? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-									: 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
+									? 'bg-[var(--nav-active-bg)] text-[var(--text-heading)]'
+									: 'text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] hover:text-[var(--text-heading)]'
 							}`}
 						>
-							<SettingsIcon className="w-5 h-5 shrink-0 text-gray-400 dark:text-gray-500" />
+							<SettingsIcon className="w-5 h-5 shrink-0 text-[var(--text-subtle)]" />
 							<span>Settings</span>
 						</Link>
 						{SECONDARY_NAV.map((item) => {
@@ -287,11 +287,11 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 									onClick={() => setMobileOpen(false)}
 									className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
 										active
-											? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-											: 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
+											? 'bg-[var(--nav-active-bg)] text-[var(--text-heading)]'
+											: 'text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] hover:text-[var(--text-heading)]'
 									}`}
 								>
-									<item.icon className="w-5 h-5 shrink-0 text-gray-400 dark:text-gray-500" />
+									<item.icon className="w-5 h-5 shrink-0 text-[var(--text-subtle)]" />
 									<span>{item.label}</span>
 								</Link>
 							)

@@ -65,13 +65,13 @@ export function VerifyHumanForm({ turnstileSiteKey, flow }: VerifyHumanFormProps
 				<ThemeToggle />
 			</div>
 			<div className="flex flex-1 flex-col items-center justify-center p-6">
-				<div className="w-full max-w-md bg-white dark:bg-neutral-900 p-10 rounded-lg shadow-md shadow-black/10 dark:shadow-black/30">
-					<h1 className="text-3xl font-semibold mb-6 text-gray-900 dark:text-gray-100 text-center">
+				<div className="w-full max-w-md bg-[var(--card-bg)] p-10 rounded-lg shadow-[0_2px_8px_var(--shadow-color)]">
+					<h1 className="text-3xl font-semibold mb-6 text-[var(--text-heading)] text-center">
 						Verifying it&apos;s you
 					</h1>
 
 					{error && (
-						<div className="mb-4 p-3 bg-red-600/10 dark:bg-red-500/10 text-red-600 dark:text-red-500 rounded-md text-sm text-center">
+						<div className="mb-4 p-3 bg-[var(--error)]/10 text-[var(--error)] rounded-md text-sm text-center">
 							{error}
 						</div>
 					)}
@@ -95,8 +95,8 @@ export function VerifyHumanForm({ turnstileSiteKey, flow }: VerifyHumanFormProps
 						<input type="hidden" name="turnstileToken" value="" />
 					</form>
 
-					<p className="text-center text-sm text-gray-600 dark:text-gray-400">
-						<Link href={backHref} className="text-blue-600 dark:text-blue-500 hover:underline">
+					<p className="text-center text-sm text-[var(--text-muted)]">
+						<Link href={backHref} className="text-[var(--accent)] hover:underline">
 							{backText}
 						</Link>
 					</p>

@@ -28,7 +28,7 @@ export function WebsiteCard({ website }: WebsiteCardProps) {
 				</div>
 				<button
 					onClick={handleSettingsClick}
-					className="p-1.5 rounded-md text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors focus:outline-none cursor-pointer"
+					className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--border)] transition-colors focus:outline-none cursor-pointer"
 					aria-label="Website settings"
 				>
 					<svg
@@ -50,24 +50,24 @@ export function WebsiteCard({ website }: WebsiteCardProps) {
 			<CardContent>
 				<div className="grid grid-cols-3 gap-4 text-center">
 					<div>
-						<div className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+						<div className="text-2xl font-semibold text-[var(--text-heading)]">
 							{formatNumber(website.langCount)}
 						</div>
-						<div className="text-xs text-gray-600 dark:text-gray-400">
+						<div className="text-xs text-[var(--text-muted)]">
 							{website.langCount === 1 ? 'Language' : 'Languages'}
 						</div>
 					</div>
 					<div>
-						<div className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+						<div className="text-2xl font-semibold text-[var(--text-heading)]">
 							{formatNumber(website.segmentCount)}
 						</div>
-						<div className="text-xs text-gray-600 dark:text-gray-400">Segments</div>
+						<div className="text-xs text-[var(--text-muted)]">Segments</div>
 					</div>
 					<div>
-						<div className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+						<div className="text-2xl font-semibold text-[var(--text-heading)]">
 							{formatNumber(website.pathCount)}
 						</div>
-						<div className="text-xs text-gray-600 dark:text-gray-400">Paths</div>
+						<div className="text-xs text-[var(--text-muted)]">Paths</div>
 					</div>
 				</div>
 			</CardContent>

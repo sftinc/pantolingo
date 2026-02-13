@@ -8,5 +8,5 @@ export default async function AccountLayout({ children }: { children: React.Reac
 		redirect('/login')
 	}
 
-	return <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">{children}</div>
+	return <div className="min-h-screen bg-[var(--page-bg)]">{children}</div>
 }

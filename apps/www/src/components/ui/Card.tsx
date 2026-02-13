@@ -9,8 +9,8 @@ interface CardProps {
 
 export function Card({ children, className, href }: CardProps) {
 	const baseStyles = cn(
-		'rounded-lg bg-white dark:bg-neutral-900 p-6 shadow-md shadow-black/10 dark:shadow-black/30',
-		href && 'transition-shadow hover:shadow-lg hover:shadow-black/10 dark:hover:shadow-black/30 cursor-pointer',
+		'rounded-lg bg-[var(--card-bg)] p-6 shadow-[0_2px_8px_var(--shadow-color)]',
+		href && 'transition-shadow hover:shadow-[0_4px_12px_var(--shadow-color)] cursor-pointer',
 		className
 	)
 
@@ -40,7 +40,7 @@ interface CardTitleProps {
 }
 
 export function CardTitle({ children, className }: CardTitleProps) {
-	return <h3 className={cn('text-lg font-semibold text-gray-900 dark:text-gray-100', className)}>{children}</h3>
+	return <h3 className={cn('text-lg font-semibold text-[var(--text-heading)]', className)}>{children}</h3>
 }
 
 interface CardDescriptionProps {
@@ -49,7 +49,7 @@ interface CardDescriptionProps {
 }
 
 export function CardDescription({ children, className }: CardDescriptionProps) {
-	return <p className={cn('text-sm text-gray-600 dark:text-gray-400', className)}>{children}</p>
+	return <p className={cn('text-sm text-[var(--text-muted)]', className)}>{children}</p>
 }
 
 interface CardContentProps {

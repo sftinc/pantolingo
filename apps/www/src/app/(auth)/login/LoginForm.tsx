@@ -124,18 +124,18 @@ export function LoginForm() {
 				<ThemeToggle />
 			</div>
 			<div className="flex flex-1 flex-col items-center justify-center p-6">
-				<div className="w-full max-w-md bg-white dark:bg-neutral-900 p-10 rounded-lg shadow-md shadow-black/10 dark:shadow-black/30">
-					<h1 className="text-3xl font-semibold mb-2 text-gray-900 dark:text-gray-100 text-center">
+				<div className="w-full max-w-md bg-[var(--card-bg)] p-10 rounded-lg shadow-[0_2px_8px_var(--shadow-color)]">
+					<h1 className="text-3xl font-semibold mb-2 text-[var(--text-heading)] text-center">
 						Login to Pantolingo
 					</h1>
-					<p className="text-base text-gray-600 dark:text-gray-400 mb-6 text-center">
+					<p className="text-base text-[var(--text-muted)] mb-6 text-center">
 						{step === 'email' ? 'Enter your email to continue' : 'Enter your password'}
 					</p>
 
 					<MessageDisplay hidden={hasSubmitted} />
 
 					{inlineError && (
-						<div className="mb-4 p-3 bg-red-600/10 dark:bg-red-500/10 text-red-600 dark:text-red-500 rounded-md text-sm">
+						<div className="mb-4 p-3 bg-[var(--error)]/10 text-[var(--error)] rounded-md text-sm">
 							{getErrorMessage(inlineError)}
 						</div>
 					)}
@@ -160,7 +160,7 @@ export function LoginForm() {
 							<button
 								type="submit"
 								disabled={isPending}
-								className="w-full py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-md font-medium hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+								className="w-full py-3 bg-[var(--accent)] text-white rounded-md font-medium hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
 							>
 								{isPending ? <Spinner size="sm" /> : 'Continue'}
 							</button>
@@ -172,11 +172,11 @@ export function LoginForm() {
 
 							{/* Show email styled as readonly input */}
 							<div className="mb-4">
-								<label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
+								<label className="block text-sm font-medium text-[var(--text-body)] mb-2">
 									Email address
 								</label>
-								<div className="flex items-center justify-between px-4 py-3 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-neutral-900">
-									<span className="text-gray-600 dark:text-gray-400">{email.trim()}</span>
+								<div className="flex items-center justify-between px-4 py-3 rounded-md border border-[var(--border)] bg-[var(--input-bg)]">
+									<span className="text-[var(--text-muted)]">{email.trim()}</span>
 									<button
 										type="button"
 										onClick={() => {
@@ -185,7 +185,7 @@ export function LoginForm() {
 											setPasswordError(null)
 											setForgotPasswordError(null)
 										}}
-										className="text-sm text-blue-600 dark:text-blue-500 hover:underline"
+										className="text-sm text-[var(--accent)] hover:underline"
 									>
 										Change
 									</button>
@@ -213,7 +213,7 @@ export function LoginForm() {
 									type="button"
 									onClick={handleForgotPassword}
 									disabled={isForgotPending}
-									className="text-sm text-blue-600 dark:text-blue-500 hover:underline disabled:opacity-50"
+									className="text-sm text-[var(--accent)] hover:underline disabled:opacity-50"
 								>
 									{isForgotPending ? 'Loading...' : 'Forgot password?'}
 								</button>
@@ -223,9 +223,9 @@ export function LoginForm() {
 						</form>
 					)}
 
-					<p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+					<p className="mt-6 text-center text-sm text-[var(--text-muted)]">
 						Don&apos;t have an account?{' '}
-						<Link href="/signup" className="text-blue-600 dark:text-blue-500 hover:underline">
+						<Link href="/signup" className="text-[var(--accent)] hover:underline">
 							Sign up
 						</Link>
 					</p>

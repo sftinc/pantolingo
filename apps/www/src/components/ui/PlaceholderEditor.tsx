@@ -408,14 +408,14 @@ export const PlaceholderEditor = forwardRef<PlaceholderEditorRef, PlaceholderEdi
 					onPaste={handlePaste}
 					onCopy={handleCopy}
 					onCut={handleCut}
-					className={`w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-neutral-900 p-4 min-h-[200px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500 focus:border-transparent whitespace-pre-wrap ${
+					className={`w-full rounded-lg border border-[var(--border)] bg-[var(--input-bg)] p-4 min-h-[200px] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent whitespace-pre-wrap ${
 						disabled ? 'opacity-50 cursor-not-allowed' : ''
 					} ${className || ''}`}
 					aria-placeholder={placeholder || ''}
 					suppressContentEditableWarning
 				/>
 				{showPlaceholder && placeholder && (
-					<div className="absolute top-4 left-4 text-gray-400 dark:text-gray-500 pointer-events-none text-sm">
+					<div className="absolute top-4 left-4 text-[var(--text-subtle)] pointer-events-none text-sm">
 						{placeholder}
 					</div>
 				)}

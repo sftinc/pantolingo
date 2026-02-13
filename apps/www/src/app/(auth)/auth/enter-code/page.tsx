@@ -19,11 +19,11 @@ export default async function AuthEnterCodePage() {
 				<ThemeToggle />
 			</div>
 			<div className="flex flex-1 flex-col items-center justify-center p-6">
-				<div className="text-center max-w-md bg-white dark:bg-neutral-900 p-10 rounded-lg shadow-md shadow-black/10 dark:shadow-black/30">
-					<h1 className="text-2xl font-semibold mb-2 text-gray-900 dark:text-gray-100">
+				<div className="text-center max-w-md bg-[var(--card-bg)] p-10 rounded-lg shadow-[0_2px_8px_var(--shadow-color)]">
+					<h1 className="text-2xl font-semibold mb-2 text-[var(--text-heading)]">
 						Enter your code
 					</h1>
-					<p className="text-base text-gray-600 dark:text-gray-400 mb-6">
+					<p className="text-base text-[var(--text-muted)] mb-6">
 						Enter the 8-character code from your email
 					</p>
 

@@ -22,7 +22,7 @@ function PasswordRulesList({ rules, password }: { rules: PasswordRules; password
 				return (
 					<li
 						key={key}
-						className={showPassed ? 'text-green-600' : 'text-gray-600 dark:text-gray-400'}
+						className={showPassed ? 'text-green-600' : 'text-[var(--text-muted)]'}
 					>
 						{showPassed ? '✓' : '○'} {label}
 					</li>
@@ -45,17 +45,17 @@ export default function SetupProfileForm() {
 	return (
 		<main className="flex flex-1 flex-col items-center px-4 py-12 sm:px-6">
 			<div className="text-center mb-8">
-				<h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+				<h1 className="text-3xl font-bold text-[var(--text-heading)] mb-3">
 					Welcome
 				</h1>
-				<p className="text-base text-gray-600 dark:text-gray-400 max-w-md">
+				<p className="text-base text-[var(--text-muted)] max-w-md">
 					Let&apos;s finish setting up your account. Enter your name and password to secure your account.
 				</p>
 			</div>
 
-			<div className="w-full max-w-md bg-white dark:bg-neutral-900 p-8 sm:p-10 rounded-lg shadow-md shadow-black/10 dark:shadow-black/30">
+			<div className="w-full max-w-md bg-[var(--card-bg)] p-8 sm:p-10 rounded-lg shadow-[0_2px_8px_var(--shadow-color)]">
 				{state?.error && (
-					<div className="mb-4 p-3 bg-red-600/10 dark:bg-red-500/10 text-red-600 dark:text-red-500 rounded-md text-sm">
+					<div className="mb-4 p-3 bg-[var(--error)]/10 text-[var(--error)] rounded-md text-sm">
 						{state.error}
 					</div>
 				)}
@@ -63,7 +63,7 @@ export default function SetupProfileForm() {
 				<form action={formAction}>
 					<label
 						htmlFor="name"
-						className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2"
+						className="block text-sm font-medium text-[var(--text-body)] mb-2"
 					>
 						Your name
 					</label>
@@ -78,12 +78,12 @@ export default function SetupProfileForm() {
 						placeholder="Jane Smith"
 						value={name}
 						onChange={(e) => setName(e.target.value)}
-						className="w-full px-4 py-3 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-neutral-900 text-gray-800 dark:text-gray-200 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+						className="w-full px-4 py-3 rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text-body)] mb-4 focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent disabled:opacity-50"
 					/>
 
 					<label
 						htmlFor="password"
-						className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2"
+						className="block text-sm font-medium text-[var(--text-body)] mb-2"
 					>
 						Password
 					</label>
@@ -97,13 +97,13 @@ export default function SetupProfileForm() {
 						placeholder="Create a password"
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
-						className="w-full px-4 py-3 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-neutral-900 text-gray-800 dark:text-gray-200 mb-2 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+						className="w-full px-4 py-3 rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text-body)] mb-2 focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent disabled:opacity-50"
 					/>
 					<PasswordRulesList rules={rules} password={password} />
 
 					<label
 						htmlFor="confirmPassword"
-						className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2"
+						className="block text-sm font-medium text-[var(--text-body)] mb-2"
 					>
 						Confirm password
 					</label>
@@ -115,14 +115,14 @@ export default function SetupProfileForm() {
 						maxLength={50}
 						disabled={isPending}
 						placeholder="Confirm your password"
-						className="w-full px-4 py-3 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-neutral-900 text-gray-800 dark:text-gray-200 mb-6 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+						className="w-full px-4 py-3 rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text-body)] mb-6 focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent disabled:opacity-50"
 					/>
 
 					<button
 						type="submit"
 						tabIndex={0}
 						disabled={isPending}
-						className="w-full py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-md font-medium hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+						className="w-full py-3 bg-[var(--accent)] text-white rounded-md font-medium hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{isPending ? 'Saving...' : 'Continue'}
 					</button>

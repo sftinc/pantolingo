@@ -128,9 +128,9 @@ export function SegmentEditModal({
 				{/* Original text */}
 				<div>
 					<div className="mb-2 flex items-center gap-2">
-						<span className="text-sm font-medium text-gray-600 dark:text-gray-400">Original</span>
+						<span className="text-sm font-medium text-[var(--text-muted)]">Original</span>
 					</div>
-					<div className="rounded-lg border border-gray-300 dark:border-gray-700 bg-neutral-50 dark:bg-neutral-950 p-4 min-h-[200px]">
+					<div className="rounded-lg border border-[var(--border)] bg-[var(--page-bg)] p-4 min-h-[200px]">
 						<p className="text-sm whitespace-pre-wrap">
 							<PlaceholderText text={originalText} />
 						</p>
@@ -140,7 +140,7 @@ export function SegmentEditModal({
 				{/* Translation */}
 				<div>
 					<div className="mb-2 flex items-center justify-between">
-						<span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+						<span className="text-sm font-medium text-[var(--text-muted)]">
 							{getLanguageName(targetLang)} Translation
 						</span>
 					</div>
@@ -168,7 +168,7 @@ export function SegmentEditModal({
 
 			{/* Server error */}
 			{error && (
-				<div className="mt-4 p-3 rounded-lg bg-red-600/10 dark:bg-red-500/10 text-red-600 dark:text-red-500 text-sm">
+				<div className="mt-4 p-3 rounded-lg bg-[var(--error)]/10 text-[var(--error)] text-sm">
 					{error}
 				</div>
 			)}

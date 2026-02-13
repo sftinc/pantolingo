@@ -46,7 +46,7 @@ function PlaceholderButton({ token, onClick }: PlaceholderButtonProps) {
 			color = PAIRED_COLORS[parsed.kind as PairedKind]
 		} else {
 			label = token
-			color = '#6b7280'
+			color = 'var(--text-muted)'
 		}
 	} else if (isStandaloneKind(parsed.kind)) {
 		label = STANDALONE_LABELS[parsed.kind as StandaloneKind]
@@ -56,7 +56,7 @@ function PlaceholderButton({ token, onClick }: PlaceholderButtonProps) {
 		color = PAIRED_COLORS[parsed.kind as PairedKind]
 	} else {
 		label = token
-		color = '#6b7280'
+		color = 'var(--text-muted)'
 	}
 
 	return (
@@ -92,9 +92,9 @@ export function MissingPlaceholderToolbar({ missing, onInsert }: MissingPlacehol
 	if (openTagsOnly.length === 0) return null
 
 	return (
-		<div className="mb-2 p-2 rounded-lg bg-yellow-600/10 dark:bg-yellow-500/10 border border-yellow-600/30 dark:border-yellow-500/30">
+		<div className="mb-2 p-2 rounded-lg bg-[var(--warning)]/10 border border-[var(--warning)]/30">
 			<div className="flex items-center gap-2 flex-wrap">
-				<span className="text-xs font-medium text-yellow-600 dark:text-yellow-500">
+				<span className="text-xs font-medium text-[var(--warning)]">
 					Missing placeholders:
 				</span>
 				{openTagsOnly.map((token) => (

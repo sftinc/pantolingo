@@ -19,8 +19,8 @@ export function LangTable({ langs, publicCode, filter = 'all' }: LangTableProps)
 
 	if (langs.length === 0) {
 		return (
-			<div className="text-center py-12 bg-white dark:bg-neutral-900 rounded-lg">
-				<p className="text-gray-600 dark:text-gray-400">No languages yet. Add a language to start translating your website.</p>
+			<div className="text-center py-12 bg-[var(--card-bg)] rounded-lg">
+				<p className="text-[var(--text-muted)]">No languages yet. Add a language to start translating your website.</p>
 			</div>
 		)
 	}
@@ -54,7 +54,7 @@ export function LangTable({ langs, publicCode, filter = 'all' }: LangTableProps)
 							<Link
 								href={`/account/${publicCode}/segments?lang=${lang.targetLang}${filterParam}`}
 								onClick={(e) => e.stopPropagation()}
-								className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-blue-600 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-500 transition-colors"
+								className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
 							>
 								{formatNumber(segmentCount)}
 							</Link>
@@ -63,7 +63,7 @@ export function LangTable({ langs, publicCode, filter = 'all' }: LangTableProps)
 							<Link
 								href={`/account/${publicCode}/paths?lang=${lang.targetLang}${filterParam}`}
 								onClick={(e) => e.stopPropagation()}
-								className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-blue-600 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-500 transition-colors"
+								className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
 							>
 								{formatNumber(pathCount)}
 							</Link>
@@ -120,7 +120,7 @@ function ActionsMenu({ langCd }: { langCd: string }) {
 			<button
 				ref={btnRef}
 				onClick={handleToggle}
-				className="p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+				className="p-1.5 rounded-md text-[var(--text-subtle)] hover:text-[var(--text-heading)] hover:bg-[var(--border)] transition-colors cursor-pointer"
 				aria-label={`Actions for ${langCd}`}
 			>
 				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
@@ -133,7 +133,7 @@ function ActionsMenu({ langCd }: { langCd: string }) {
 			{isOpen && (
 				<div
 					ref={menuRef}
-					className="fixed z-50 w-36 rounded-lg bg-white dark:bg-neutral-900 border border-gray-300 dark:border-gray-700 shadow-lg py-1 overflow-hidden"
+					className="fixed z-50 w-36 rounded-lg bg-[var(--card-bg)] border border-[var(--border)] shadow-lg py-1 overflow-hidden"
 					style={{ top: pos.top, right: pos.right }}
 				>
 					<button
@@ -141,7 +141,7 @@ function ActionsMenu({ langCd }: { langCd: string }) {
 							e.stopPropagation()
 							setIsOpen(false)
 						}}
-						className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-colors cursor-pointer"
+						className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-active-bg)] hover:text-[var(--text-heading)] transition-colors cursor-pointer"
 					>
 						<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
 						Edit
@@ -151,7 +151,7 @@ function ActionsMenu({ langCd }: { langCd: string }) {
 							e.stopPropagation()
 							setIsOpen(false)
 						}}
-						className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+						className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[var(--error)] hover:bg-[var(--nav-active-bg)] transition-colors cursor-pointer"
 					>
 						<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
 						Delete

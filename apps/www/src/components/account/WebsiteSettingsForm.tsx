@@ -121,34 +121,34 @@ function SourceLanguageDropdown({ value, onChange, disabled }: { value: string; 
 
 	return (
 		<div>
-			<label className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+			<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
 				Source Language
 			</label>
 			<div ref={containerRef} className="relative">
 				<button
 					type="button"
 					onClick={() => !disabled && setIsOpen(!isOpen)}
-					className="w-full flex items-center gap-2 px-3 py-2 rounded-md bg-white dark:bg-neutral-900 border border-gray-300 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100 hover:border-gray-400 dark:hover:border-gray-600 transition-colors cursor-pointer disabled:opacity-50"
+					className="w-full flex items-center gap-2 px-3 py-2 rounded-md bg-[var(--card-bg)] border border-[var(--border)] text-sm text-[var(--text-heading)] hover:border-[var(--border-hover)] transition-colors cursor-pointer disabled:opacity-50"
 					disabled={disabled}
 				>
 					<span>{selectedLang?.flag}</span>
 					<span className="flex-1 text-left">{selectedLang?.englishName ?? value}</span>
-					<svg className={`w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+					<svg className={`w-4 h-4 text-[var(--text-subtle)] transition-transform ${isOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 						<path d="m6 9 6 6 6-6" />
 					</svg>
 				</button>
 
 				{isOpen && (
-					<ul className="absolute left-0 top-full z-50 mt-1 w-full max-h-64 overflow-y-auto rounded-lg bg-white dark:bg-neutral-900 border border-gray-300 dark:border-gray-700 shadow-lg [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
+					<ul className="absolute left-0 top-full z-50 mt-1 w-full max-h-64 overflow-y-auto rounded-lg bg-[var(--card-bg)] border border-[var(--border)] shadow-lg [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
 						{sortedLangs.map((lang) => (
 							<li key={lang.code}>
 								<button
 									type="button"
 									onClick={() => { onChange(lang.code); setIsOpen(false) }}
-									className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white transition-colors cursor-pointer ${
+									className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-[var(--accent)] hover:text-white transition-colors cursor-pointer ${
 										lang.code === value
-											? 'bg-blue-600/10 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500 font-medium'
-											: 'text-gray-600 dark:text-gray-400'
+											? 'bg-[var(--accent)]/10 text-[var(--accent)] font-medium'
+											: 'text-[var(--text-muted)]'
 									}`}
 								>
 									<span>{lang.flag}</span>
@@ -214,20 +214,20 @@ export function WebsiteSettingsForm({
 	return (
 		<div className="space-y-8 max-w-2xl">
 			{success && (
-				<div className="p-3 rounded-lg bg-green-600/10 dark:bg-green-500/10 text-green-600 dark:text-green-500 text-sm">
+				<div className="p-3 rounded-lg bg-[var(--success)]/10 text-[var(--success)] text-sm">
 					Settings saved successfully
 				</div>
 			)}
 
 			{error && (
-				<div className="p-3 rounded-lg bg-red-600/10 dark:bg-red-500/10 text-red-600 dark:text-red-500 text-sm">
+				<div className="p-3 rounded-lg bg-[var(--error)]/10 text-[var(--error)] text-sm">
 					{error}
 				</div>
 			)}
 
 			{/* Name */}
 			<div>
-				<label className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+				<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
 					Name
 				</label>
 				<input
@@ -235,21 +235,21 @@ export function WebsiteSettingsForm({
 					value={name}
 					onChange={(e) => setName(e.target.value)}
 					disabled={isPending}
-					className="w-full px-3 py-2 text-sm rounded-md bg-white dark:bg-neutral-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:outline-none focus:border-blue-600 dark:focus:border-blue-500 disabled:opacity-50"
+					className="w-full px-3 py-2 text-sm rounded-md bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] disabled:opacity-50"
 					maxLength={20}
 				/>
 			</div>
 
 			{/* Hostname (read-only) */}
 			<div>
-				<label className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+				<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
 					Hostname
 				</label>
 				<input
 					type="text"
 					value={hostname}
 					readOnly
-					className="w-full px-3 py-2 text-sm rounded-md bg-gray-300/30 dark:bg-gray-700/30 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+					className="w-full px-3 py-2 text-sm rounded-md bg-[var(--border)]/30 border border-[var(--border)] text-[var(--text-muted)] cursor-not-allowed"
 				/>
 			</div>
 
@@ -262,10 +262,10 @@ export function WebsiteSettingsForm({
 
 			{/* Skip Words */}
 			<div>
-				<label className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+				<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
 					Skip Words
 				</label>
-				<p className="mb-2 text-xs text-gray-600 dark:text-gray-400">
+				<p className="mb-2 text-xs text-[var(--text-muted)]">
 					Words that should not be translated (e.g., brand names, product names)
 				</p>
 				<TagInput
@@ -279,10 +279,10 @@ export function WebsiteSettingsForm({
 
 			{/* Skip Paths (Contains) */}
 			<div>
-				<label className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+				<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
 					Skip Paths (Contains)
 				</label>
-				<p className="mb-2 text-xs text-gray-600 dark:text-gray-400">
+				<p className="mb-2 text-xs text-[var(--text-muted)]">
 					Paths containing these strings will not be translated (e.g., /api/, /admin)
 				</p>
 				<TagInput
@@ -295,10 +295,10 @@ export function WebsiteSettingsForm({
 
 			{/* Skip Paths (Regex) */}
 			<div>
-				<label className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+				<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
 					Skip Paths (Regex)
 				</label>
-				<p className="mb-2 text-xs text-gray-600 dark:text-gray-400">
+				<p className="mb-2 text-xs text-[var(--text-muted)]">
 					Paths matching these regular expressions will not be translated
 				</p>
 				<TagInput
@@ -312,10 +312,10 @@ export function WebsiteSettingsForm({
 
 			{/* Skip Selectors */}
 			<div>
-				<label className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+				<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
 					Skip Selectors
 				</label>
-				<p className="mb-2 text-xs text-gray-600 dark:text-gray-400">
+				<p className="mb-2 text-xs text-[var(--text-muted)]">
 					CSS selectors for elements that should not be translated (e.g., .brand-name, [data-no-translate])
 				</p>
 				<TagInput
@@ -330,10 +330,10 @@ export function WebsiteSettingsForm({
 			{/* Translate Path */}
 			<div className="flex items-start justify-between gap-4">
 				<div>
-					<label className="block mb-1 text-sm font-medium text-gray-900 dark:text-gray-100">
+					<label className="block mb-1 text-sm font-medium text-[var(--text-heading)]">
 						Translate URL Paths
 					</label>
-					<p className="text-xs text-gray-600 dark:text-gray-400">
+					<p className="text-xs text-[var(--text-muted)]">
 						When enabled, URL paths will be translated (e.g., /about becomes /acerca-de)
 					</p>
 				</div>
@@ -345,7 +345,7 @@ export function WebsiteSettingsForm({
 			</div>
 
 			{/* Save Button */}
-			<div className="pt-4 border-t border-gray-300 dark:border-gray-700">
+			<div className="pt-4 border-t border-[var(--border)]">
 				<Button
 					variant="primary"
 					onClick={handleSave}
