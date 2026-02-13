@@ -34,6 +34,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 				initialSkipPath={website.skipPath}
 				initialSkipSelectors={website.skipSelectors}
 				initialTranslatePath={website.translatePath}
+				cacheDisabledUntil={website.cacheDisabledUntil?.toISOString() ?? null}
 			/>
 		</div>
 	)

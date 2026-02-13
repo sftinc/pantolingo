@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useTheme } from '@/hooks/useTheme'
+import { ProfileModal } from './ProfileModal'
 
 interface AccountShellProps {
 	currentWebsite: { publicCode: string; hostname: string; name: string; sourceLang: string; role: string }
@@ -66,6 +67,7 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 	const [mobileOpen, setMobileOpen] = useState(false)
 	const [switcherOpen, setSwitcherOpen] = useState(false)
 	const [profileOpen, setProfileOpen] = useState(false)
+	const [profileModalOpen, setProfileModalOpen] = useState(false)
 
 	const switcherRef = useRef<HTMLDivElement>(null)
 	const profileRef = useRef<HTMLDivElement>(null)
@@ -103,7 +105,7 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 	return (
 		<div className="min-h-screen bg-[var(--content-bg)]">
 			{/* Top header bar */}
-			<header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-6 md:ml-60 h-14 bg-white dark:bg-[var(--sidebar-bg)] border-b border-[var(--sidebar-border)] md:bg-transparent md:dark:bg-transparent md:border-b-0">
+			<header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-6 md:ml-60 h-14 bg-white dark:bg-[var(--sidebar-bg)] border-b border-[var(--sidebar-border)] md:bg-[var(--content-bg)] md:border-b-0">
 				{/* Left: hamburger (mobile) + website switcher */}
 				<div className="flex items-center gap-3">
 					<button
@@ -187,14 +189,13 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 						{profileOpen && (
 							<div className="absolute right-0 top-full mt-1 w-48 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg shadow-lg py-1 z-50">
 								{/* Profile link */}
-								<Link
-									href="/account/setup"
-									onClick={() => setProfileOpen(false)}
-									className="flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors"
+								<button
+									onClick={() => { setProfileOpen(false); setProfileModalOpen(true) }}
+									className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
 								>
 									<UserIcon className="w-5 h-5 text-[var(--text-subtle)]" />
 									Profile
-								</Link>
+								</button>
 
 								<div className="border-t border-[var(--border)] my-1" />
 
@@ -304,6 +305,8 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 			<main className="md:ml-60 min-h-screen">
 				<div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">{children}</div>
 			</main>
+
+			<ProfileModal isOpen={profileModalOpen} onClose={() => setProfileModalOpen(false)} />
 		</div>
 	)
 }

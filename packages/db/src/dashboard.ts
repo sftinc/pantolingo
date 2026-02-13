@@ -68,6 +68,7 @@ export interface WebsiteWithSettings extends Website {
 	skipPath: string[]
 	skipSelectors: string[]
 	translatePath: boolean
+	cacheDisabledUntil: Date | null
 }
 
 export interface PathOption {
@@ -169,8 +170,9 @@ export async function getWebsiteByPublicCode(publicCode: string): Promise<Websit
 		skip_path: string[] | null
 		skip_selectors: string[] | null
 		translate_path: boolean | null
+		cache_disabled_until: Date | null
 	}>(
-		`SELECT id, public_code, hostname, name, source_lang, skip_words, skip_path, skip_selectors, translate_path FROM website WHERE public_code = $1`,
+		`SELECT id, public_code, hostname, name, source_lang, skip_words, skip_path, skip_selectors, translate_path, cache_disabled_until FROM website WHERE public_code = $1`,
 		[publicCode]
 	)
 
@@ -187,6 +189,7 @@ export async function getWebsiteByPublicCode(publicCode: string): Promise<Websit
 		skipPath: row.skip_path || [],
 		skipSelectors: row.skip_selectors || [],
 		translatePath: row.translate_path ?? true,
+		cacheDisabledUntil: row.cache_disabled_until,
 	}
 }
 
@@ -809,5 +812,31 @@ export async function createWebsite(
 		throw err
 	} finally {
 		client.release()
+	}
+}
+
+/**
+ * Enable dev mode for a website (disables static asset caching for 5 minutes)
+ * Sets cache_disabled_until to NOW() + 5 minutes
+ * @param websiteId - Website ID
+ * @returns The expiry timestamp
+ */
+export async function enableDevMode(websiteId: number): Promise<{ success: boolean; expiresAt?: string; error?: string }> {
+	try {
+		const result = await pool.query<{ cache_disabled_until: Date }>(
+			`UPDATE website
+			 SET cache_disabled_until = NOW() + INTERVAL '5 minutes',
+			     updated_at = NOW()
+			 WHERE id = $1
+			 RETURNING cache_disabled_until`,
+			[websiteId]
+		)
+		if (result.rows.length === 0) {
+			return { success: false, error: 'Website not found' }
+		}
+		return { success: true, expiresAt: result.rows[0].cache_disabled_until.toISOString() }
+	} catch (error) {
+		console.error('Failed to enable dev mode:', error)
+		return { success: false, error: 'Failed to enable dev mode' }
 	}
 }

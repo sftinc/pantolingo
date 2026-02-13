@@ -10,10 +10,11 @@ interface ModalProps {
 	title: string
 	children: React.ReactNode
 	className?: string
+	contentClassName?: string
 	badge?: React.ReactNode
 }
 
-export function Modal({ isOpen, onClose, title, children, className, badge }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, className, contentClassName, badge }: ModalProps) {
 	const dialogRef = useRef<HTMLDialogElement>(null)
 
 	useEffect(() => {
@@ -90,7 +91,7 @@ export function Modal({ isOpen, onClose, title, children, className, badge }: Mo
 						</button>
 					</div>
 				</div>
-				<div className="flex-1 overflow-auto p-6">{children}</div>
+				<div className={cn('flex-1 overflow-auto p-6', contentClassName)}>{children}</div>
 			</div>
 		</dialog>
 	)

@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useTransition, useRef, useEffect } from 'react'
+import { useState, useTransition, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { TagInput } from '@/components/ui/TagInput'
 import { Switch } from '@/components/ui/Switch'
 import { Button } from '@/components/ui/Modal'
-import { saveWebsiteSettings } from '@/actions/website'
-import { getFlag, getLanguageName, LANGUAGE_DATA } from '@pantolingo/lang'
+import { saveWebsiteSettings, enableDevMode } from '@/actions/website'
+import { LANGUAGE_DATA } from '@pantolingo/lang'
 
 interface WebsiteSettingsFormProps {
 	websiteId: number
@@ -17,6 +17,7 @@ interface WebsiteSettingsFormProps {
 	initialSkipPath: string[]
 	initialSkipSelectors: string[]
 	initialTranslatePath: boolean
+	cacheDisabledUntil: string | null
 }
 
 function parseSkipPath(skipPath: string[]): { contains: string[]; regex: string[] } {
@@ -121,7 +122,7 @@ function SourceLanguageDropdown({ value, onChange, disabled }: { value: string; 
 
 	return (
 		<div>
-			<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
+			<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">
 				Source Language
 			</label>
 			<div ref={containerRef} className="relative">
@@ -163,6 +164,74 @@ function SourceLanguageDropdown({ value, onChange, disabled }: { value: string; 
 	)
 }
 
+function DevModeControl({ websiteId, cacheDisabledUntil }: { websiteId: number; cacheDisabledUntil: string | null }) {
+	const [expiresAt, setExpiresAt] = useState<number | null>(() => {
+		if (!cacheDisabledUntil) return null
+		const ts = new Date(cacheDisabledUntil).getTime()
+		return ts > Date.now() ? ts : null
+	})
+	const [timeLeft, setTimeLeft] = useState('')
+	const [isEnabling, startTransition] = useTransition()
+
+	const updateTimeLeft = useCallback(() => {
+		if (!expiresAt) return
+		const remaining = Math.max(0, expiresAt - Date.now())
+		if (remaining === 0) {
+			setExpiresAt(null)
+			setTimeLeft('')
+			return
+		}
+		const mins = Math.floor(remaining / 60000)
+		const secs = Math.floor((remaining % 60000) / 1000)
+		setTimeLeft(`${mins}:${String(secs).padStart(2, '0')} remaining`)
+	}, [expiresAt])
+
+	useEffect(() => {
+		if (!expiresAt) return
+		updateTimeLeft()
+		const interval = setInterval(updateTimeLeft, 1000)
+		return () => clearInterval(interval)
+	}, [expiresAt, updateTimeLeft])
+
+	const handleEnable = () => {
+		startTransition(async () => {
+			const result = await enableDevMode(websiteId)
+			if (result.success && result.expiresAt) {
+				setExpiresAt(new Date(result.expiresAt).getTime())
+			}
+		})
+	}
+
+	const isActive = expiresAt !== null
+
+	return (
+		<div className="flex items-center justify-between gap-4">
+			<div>
+				<label className="block text-sm font-medium text-[var(--text-muted)]">
+					Dev Mode: <span className={isActive ? 'text-orange-600 dark:text-orange-400' : ''}>{isActive ? 'Enabled' : 'Disabled'}</span>
+				</label>
+				<p className="text-xs text-[var(--text-muted)] mt-0.5">
+					Bypass static asset caching for development and testing
+				</p>
+			</div>
+			<div>
+				{isActive ? (
+					<span className="text-xs font-medium text-orange-600 dark:text-orange-400">{timeLeft}</span>
+				) : (
+					<button
+						type="button"
+						onClick={handleEnable}
+						disabled={isEnabling}
+						className="px-3 py-1.5 text-xs font-medium rounded-md border border-[var(--border)] text-[var(--text-heading)] bg-[var(--card-bg)] hover:bg-[var(--page-bg)] transition-colors cursor-pointer disabled:opacity-50"
+					>
+						{isEnabling ? 'Enabling...' : 'Enable for 5 mins'}
+					</button>
+				)}
+			</div>
+		</div>
+	)
+}
+
 export function WebsiteSettingsForm({
 	websiteId,
 	initialName,
@@ -172,6 +241,7 @@ export function WebsiteSettingsForm({
 	initialSkipPath,
 	initialSkipSelectors,
 	initialTranslatePath,
+	cacheDisabledUntil,
 }: WebsiteSettingsFormProps) {
 	const router = useRouter()
 	const [isPending, startTransition] = useTransition()
@@ -211,8 +281,10 @@ export function WebsiteSettingsForm({
 		})
 	}
 
+	const cardClass = 'bg-[var(--card-bg)] rounded-lg border border-[var(--border)] p-6'
+
 	return (
-		<div className="space-y-8 max-w-2xl">
+		<div className="space-y-5">
 			{success && (
 				<div className="p-3 rounded-lg bg-[var(--success)]/10 text-[var(--success)] text-sm">
 					Settings saved successfully
@@ -225,47 +297,131 @@ export function WebsiteSettingsForm({
 				</div>
 			)}
 
-			{/* Name */}
-			<div>
-				<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
-					Name
-				</label>
-				<input
-					type="text"
-					value={name}
-					onChange={(e) => setName(e.target.value)}
+			{/* General */}
+			<div className={cardClass}>
+				<h2 className="text-sm font-semibold text-[var(--text-heading)] mb-5">General</h2>
+				<div className="space-y-5">
+					{/* Name */}
+					<div>
+						<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">
+							Name
+						</label>
+						<input
+							type="text"
+							value={name}
+							onChange={(e) => setName(e.target.value)}
+							disabled={isPending}
+							className="w-full px-3 py-2 text-sm rounded-md bg-[var(--page-bg)] border border-[var(--border)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] disabled:opacity-50"
+							maxLength={20}
+						/>
+					</div>
+
+					{/* Hostname (read-only) */}
+					<div>
+						<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">
+							Hostname
+						</label>
+						<input
+							type="text"
+							value={hostname}
+							readOnly
+							className="w-full px-3 py-2 text-sm rounded-md bg-[var(--border)]/30 border border-[var(--border)] text-[var(--text-muted)] cursor-not-allowed"
+						/>
+					</div>
+
+					{/* Source Language */}
+					<SourceLanguageDropdown
+						value={selectedSourceLang}
+						onChange={setSelectedSourceLang}
+						disabled={isPending}
+					/>
+				</div>
+			</div>
+
+			{/* Options */}
+			<div className={cardClass}>
+				<h2 className="text-sm font-semibold text-[var(--text-heading)] mb-5">Options</h2>
+				<div className="space-y-5">
+					{/* Translate URL Paths */}
+					<div className="flex items-center justify-between gap-4">
+						<div>
+							<label className="block text-sm font-medium text-[var(--text-muted)]">
+								Translate URL Paths
+							</label>
+							<p className="text-xs text-[var(--text-muted)] mt-0.5">
+								When enabled, URL paths will be translated (e.g., /about becomes /acerca-de)
+							</p>
+						</div>
+						<Switch
+							checked={translatePath}
+							onChange={setTranslatePath}
+							disabled={isPending}
+						/>
+					</div>
+
+					{/* Dev Mode */}
+					<DevModeControl websiteId={websiteId} cacheDisabledUntil={cacheDisabledUntil} />
+				</div>
+			</div>
+
+			{/* Skip Selectors */}
+			<div className={cardClass}>
+				<h2 className="text-sm font-semibold text-[var(--text-heading)] mb-1">Skip Selectors</h2>
+				<p className="text-xs text-[var(--text-muted)] mb-4">
+					CSS selectors for elements that should not be translated
+				</p>
+				<TagInput
+					value={skipSelectors}
+					onChange={setSkipSelectors}
+					placeholder="Add CSS selectors..."
 					disabled={isPending}
-					className="w-full px-3 py-2 text-sm rounded-md bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] disabled:opacity-50"
-					maxLength={20}
+					validate={validateSelector}
 				/>
 			</div>
 
-			{/* Hostname (read-only) */}
-			<div>
-				<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
-					Hostname
-				</label>
-				<input
-					type="text"
-					value={hostname}
-					readOnly
-					className="w-full px-3 py-2 text-sm rounded-md bg-[var(--border)]/30 border border-[var(--border)] text-[var(--text-muted)] cursor-not-allowed"
-				/>
-			</div>
+			{/* Skip Paths */}
+			<div className={cardClass}>
+				<h2 className="text-sm font-semibold text-[var(--text-heading)] mb-5">Skip Paths</h2>
+				<div className="space-y-5">
+					{/* Contains */}
+					<div>
+						<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">
+							Contains
+						</label>
+						<p className="text-xs text-[var(--text-muted)] mb-2">
+							Paths containing these strings will not be translated
+						</p>
+						<TagInput
+							value={skipPathContains}
+							onChange={setSkipPathContains}
+							placeholder="Add path patterns..."
+							disabled={isPending}
+						/>
+					</div>
 
-			{/* Source Language */}
-			<SourceLanguageDropdown
-				value={selectedSourceLang}
-				onChange={setSelectedSourceLang}
-				disabled={isPending}
-			/>
+					{/* Regex */}
+					<div>
+						<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">
+							Regex
+						</label>
+						<p className="text-xs text-[var(--text-muted)] mb-2">
+							Paths matching these regular expressions will not be translated
+						</p>
+						<TagInput
+							value={skipPathRegex}
+							onChange={setSkipPathRegex}
+							placeholder="Add regex patterns..."
+							disabled={isPending}
+							validate={validateRegex}
+						/>
+					</div>
+				</div>
+			</div>
 
 			{/* Skip Words */}
-			<div>
-				<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
-					Skip Words
-				</label>
-				<p className="mb-2 text-xs text-[var(--text-muted)]">
+			<div className={cardClass}>
+				<h2 className="text-sm font-semibold text-[var(--text-heading)] mb-1">Skip Words</h2>
+				<p className="text-xs text-[var(--text-muted)] mb-4">
 					Words that should not be translated (e.g., brand names, product names)
 				</p>
 				<TagInput
@@ -277,75 +433,8 @@ export function WebsiteSettingsForm({
 				/>
 			</div>
 
-			{/* Skip Paths (Contains) */}
-			<div>
-				<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
-					Skip Paths (Contains)
-				</label>
-				<p className="mb-2 text-xs text-[var(--text-muted)]">
-					Paths containing these strings will not be translated (e.g., /api/, /admin)
-				</p>
-				<TagInput
-					value={skipPathContains}
-					onChange={setSkipPathContains}
-					placeholder="Add path patterns..."
-					disabled={isPending}
-				/>
-			</div>
-
-			{/* Skip Paths (Regex) */}
-			<div>
-				<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
-					Skip Paths (Regex)
-				</label>
-				<p className="mb-2 text-xs text-[var(--text-muted)]">
-					Paths matching these regular expressions will not be translated
-				</p>
-				<TagInput
-					value={skipPathRegex}
-					onChange={setSkipPathRegex}
-					placeholder="Add regex patterns..."
-					disabled={isPending}
-					validate={validateRegex}
-				/>
-			</div>
-
-			{/* Skip Selectors */}
-			<div>
-				<label className="block mb-2 text-sm font-medium text-[var(--text-heading)]">
-					Skip Selectors
-				</label>
-				<p className="mb-2 text-xs text-[var(--text-muted)]">
-					CSS selectors for elements that should not be translated (e.g., .brand-name, [data-no-translate])
-				</p>
-				<TagInput
-					value={skipSelectors}
-					onChange={setSkipSelectors}
-					placeholder="Add CSS selectors..."
-					disabled={isPending}
-					validate={validateSelector}
-				/>
-			</div>
-
-			{/* Translate Path */}
-			<div className="flex items-start justify-between gap-4">
-				<div>
-					<label className="block mb-1 text-sm font-medium text-[var(--text-heading)]">
-						Translate URL Paths
-					</label>
-					<p className="text-xs text-[var(--text-muted)]">
-						When enabled, URL paths will be translated (e.g., /about becomes /acerca-de)
-					</p>
-				</div>
-				<Switch
-					checked={translatePath}
-					onChange={setTranslatePath}
-					disabled={isPending}
-				/>
-			</div>
-
 			{/* Save Button */}
-			<div className="pt-4 border-t border-[var(--border)]">
+			<div className="flex justify-end">
 				<Button
 					variant="primary"
 					onClick={handleSave}

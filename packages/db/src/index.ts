@@ -41,6 +41,7 @@ export {
 	updatePathTranslation,
 	updateWebsiteSettings,
 	createWebsite,
+	enableDevMode,
 	type WebsiteWithStats,
 	type LangWithStats,
 	type SegmentWithTranslation,

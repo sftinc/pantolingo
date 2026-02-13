@@ -1,7 +1,7 @@
 'use server'
 
 import { requireAccountId } from '@/lib/auth'
-import { canAccessWebsite, updateWebsiteSettings as dbUpdateWebsiteSettings } from '@pantolingo/db'
+import { canAccessWebsite, updateWebsiteSettings as dbUpdateWebsiteSettings, enableDevMode as dbEnableDevMode } from '@pantolingo/db'
 import { SUPPORTED_LANGUAGES } from '@pantolingo/lang'
 
 export async function saveWebsiteSettings(
@@ -45,6 +45,22 @@ export async function saveWebsiteSettings(
 		}
 
 		return dbUpdateWebsiteSettings(websiteId, settings)
+	} catch {
+		return { success: false, error: 'An error occurred' }
+	}
+}
+
+export async function enableDevMode(
+	websiteId: number
+): Promise<{ success: boolean; expiresAt?: string; error?: string }> {
+	try {
+		const accountId = await requireAccountId()
+
+		if (!(await canAccessWebsite(accountId, websiteId))) {
+			return { success: true } // Silent success - don't leak existence
+		}
+
+		return dbEnableDevMode(websiteId)
 	} catch {
 		return { success: false, error: 'An error occurred' }
 	}
