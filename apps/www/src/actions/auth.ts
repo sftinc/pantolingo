@@ -23,7 +23,7 @@ export type AuthActionState = { error?: string; redirectUrl?: string } | null
  * Used by login flow to determine whether to show password field or magic link flow
  */
 export async function checkEmailExists(email: string): Promise<{ exists: boolean; hasName: boolean }> {
-	const trimmed = email.trim()
+	const trimmed = email.trim().toLowerCase()
 	if (!trimmed) return { exists: false, hasName: false }
 
 	const result = await pool.query(`SELECT first_name FROM account WHERE email = $1 LIMIT 1`, [trimmed])
@@ -40,7 +40,7 @@ export async function checkEmailExists(email: string): Promise<{ exists: boolean
  * @returns Object with optional error message (absence of error = success)
  */
 export async function prepareVerification(email: string, flow: AuthFlow): Promise<{ error?: string }> {
-	const trimmed = email.trim()
+	const trimmed = email.trim().toLowerCase()
 	if (!trimmed || !isValidEmail(trimmed)) {
 		return { error: 'Please enter a valid email address' }
 	}
@@ -163,14 +163,15 @@ export async function signInWithPassword(
 	_prevState: AuthActionState,
 	formData: FormData
 ): Promise<AuthActionState> {
-	const email = formData.get('email')
+	const rawEmail = formData.get('email')
 	const password = formData.get('password')
-	if (typeof email !== 'string' || !email) {
+	if (typeof rawEmail !== 'string' || !rawEmail) {
 		return { error: 'Email is required' }
 	}
 	if (typeof password !== 'string' || !password) {
 		return { error: 'Password is required' }
 	}
+	const email = rawEmail.trim().toLowerCase()
 	const callbackUrl = getSafeCallbackUrl(formData.get('callbackUrl') as string | null)
 
 	try {

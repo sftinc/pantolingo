@@ -79,9 +79,15 @@ export function ProfileModal({ isOpen, onClose, userProfile }: ProfileModalProps
 	async function handleSaveProfile() {
 		setInfoError('')
 		setInfoSuccess('')
+		const trimmedFirst = firstName.trim()
+		const trimmedLast = lastName.trim()
+		const normalizedEmail = email.trim().toLowerCase()
+		setFirstName(trimmedFirst)
+		setLastName(trimmedLast)
+		setEmail(normalizedEmail)
 		setInfoSaving(true)
 		try {
-			const result = await updateProfile(firstName, lastName, email)
+			const result = await updateProfile(trimmedFirst, trimmedLast, normalizedEmail)
 			if (!result.success) {
 				setInfoError(result.error || 'Failed to update profile')
 			} else {

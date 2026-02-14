@@ -70,6 +70,9 @@ export function PathEditModal({
 	const handleSave = async (reviewed: boolean | null) => {
 		setError(null)
 
+		const trimmedValue = value.trim()
+		setValue(trimmedValue)
+
 		// Final validation before save
 		if (validationResult && !validationResult.valid) {
 			setError(validationResult.errors.join('. '))
@@ -81,7 +84,7 @@ export function PathEditModal({
 				websiteId,
 				websitePathId,
 				targetLang,
-				value,
+				trimmedValue,
 				reviewed
 			)
 

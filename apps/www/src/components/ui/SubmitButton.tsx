@@ -23,6 +23,7 @@ export function SubmitButton({ children, variant = 'primary', className }: Submi
 		<button
 			type="submit"
 			disabled={pending}
+			tabIndex={0}
 			className={cn(
 				'w-full py-3 rounded-md font-medium transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
 				variantStyles[variant],

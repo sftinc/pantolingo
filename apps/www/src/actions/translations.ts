@@ -11,13 +11,18 @@ export async function saveSegmentTranslation(
 	reviewed?: boolean | null
 ): Promise<{ success: boolean; error?: string }> {
 	try {
+		const trimmedText = text.trim()
+		if (!trimmedText) {
+			return { success: false, error: 'Translation text is required' }
+		}
+
 		const accountId = await requireAccountId()
 
 		if (!(await canAccessWebsite(accountId, websiteId))) {
 			return { success: true } // Silent success - don't leak existence
 		}
 
-		return updateSegmentTranslation(websiteId, websiteSegmentId, lang, text, reviewed, accountId)
+		return updateSegmentTranslation(websiteId, websiteSegmentId, lang, trimmedText, reviewed, accountId)
 	} catch {
 		return { success: false, error: 'An error occurred' }
 	}
@@ -31,13 +36,18 @@ export async function savePathTranslation(
 	reviewed?: boolean | null
 ): Promise<{ success: boolean; error?: string }> {
 	try {
+		const trimmedText = text.trim()
+		if (!trimmedText) {
+			return { success: false, error: 'Translation text is required' }
+		}
+
 		const accountId = await requireAccountId()
 
 		if (!(await canAccessWebsite(accountId, websiteId))) {
 			return { success: true } // Silent success - don't leak existence
 		}
 
-		return updatePathTranslation(websiteId, websitePathId, lang, text, reviewed, accountId)
+		return updatePathTranslation(websiteId, websitePathId, lang, trimmedText, reviewed, accountId)
 	} catch {
 		return { success: false, error: 'An error occurred' }
 	}

@@ -16,25 +16,31 @@ export async function saveWebsiteSettings(
 	}
 ): Promise<{ success: boolean; error?: string }> {
 	try {
-		if (!settings.name.trim()) {
+		const name = settings.name.trim()
+		if (!name) {
 			return { success: false, error: 'Name is required' }
 		}
-		if (settings.name.length > 20) {
+		if (name.length > 20) {
 			return { success: false, error: 'Name too long (max 20 characters)' }
 		}
 		if (!SUPPORTED_LANGUAGES.includes(settings.sourceLang)) {
 			return { success: false, error: 'Invalid source language' }
 		}
-		if (settings.skipWords.length > 50) {
+
+		const skipWords = settings.skipWords.map(s => s.trim()).filter(Boolean)
+		const skipPath = settings.skipPath.map(s => s.trim()).filter(Boolean)
+		const skipSelectors = settings.skipSelectors.map(s => s.trim()).filter(Boolean)
+
+		if (skipWords.length > 50) {
 			return { success: false, error: 'Too many skip words (max 50)' }
 		}
-		if (settings.skipPath.length > 25) {
+		if (skipPath.length > 25) {
 			return { success: false, error: 'Too many skip paths (max 25)' }
 		}
-		if (settings.skipSelectors.length > 25) {
+		if (skipSelectors.length > 25) {
 			return { success: false, error: 'Too many skip selectors (max 25)' }
 		}
-		if (settings.skipSelectors.some(s => s.length > 200)) {
+		if (skipSelectors.some(s => s.length > 200)) {
 			return { success: false, error: 'Skip selector too long (max 200 characters)' }
 		}
 
@@ -44,7 +50,13 @@ export async function saveWebsiteSettings(
 			return { success: true } // Silent success - don't leak existence
 		}
 
-		return dbUpdateWebsiteSettings(websiteId, settings)
+		return dbUpdateWebsiteSettings(websiteId, {
+			...settings,
+			name,
+			skipWords,
+			skipPath,
+			skipSelectors,
+		})
 	} catch {
 		return { success: false, error: 'An error occurred' }
 	}

@@ -11,8 +11,18 @@ export default function SetupProfileForm() {
 	const [password, setPassword] = useState('')
 	const rules = getPasswordRules(password)
 
+	const handleAction = (prev: AccountActionState, formData: FormData) => {
+		const trimmedFirst = firstName.trim()
+		const trimmedLast = lastName.trim()
+		setFirstName(trimmedFirst)
+		setLastName(trimmedLast)
+		formData.set('firstName', trimmedFirst)
+		formData.set('lastName', trimmedLast)
+		return completeOnboarding(prev, formData)
+	}
+
 	const [state, formAction, isPending] = useActionState<AccountActionState, FormData>(
-		completeOnboarding,
+		handleAction,
 		null
 	)
 

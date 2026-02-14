@@ -118,7 +118,7 @@ export function PantolingoAdapter(): Adapter {
 		async createUser(user) {
 			const result = await pool.query<AccountRow>(
 				`INSERT INTO account (email) VALUES ($1) RETURNING id, email, first_name, last_name, verified_at`,
-				[user.email]
+				[user.email!.toLowerCase()]
 			)
 			return toAdapterUser(result.rows[0])
 		},
@@ -135,7 +135,7 @@ export function PantolingoAdapter(): Adapter {
 		async getUserByEmail(email) {
 			const result = await pool.query<AccountRow>(
 				`SELECT id, email, first_name, last_name, verified_at FROM account WHERE email = $1`,
-				[email]
+				[email.toLowerCase()]
 			)
 			if (!result.rows[0]) return null
 			return toAdapterUser(result.rows[0])
@@ -145,7 +145,7 @@ export function PantolingoAdapter(): Adapter {
 			const result = await pool.query<AccountRow>(
 				`UPDATE account SET first_name = COALESCE($1, first_name), last_name = COALESCE($2, last_name), email = COALESCE($3, email), updated_at = NOW()
 				 WHERE id = $4 RETURNING id, email, first_name, last_name, verified_at`,
-				[user.firstName, user.lastName, user.email, parseInt(user.id!, 10)]
+				[user.firstName, user.lastName, user.email?.toLowerCase(), parseInt(user.id!, 10)]
 			)
 			return toAdapterUser(result.rows[0])
 		},

@@ -24,7 +24,7 @@ export function SignupForm() {
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault()
-		const emailValue = email.trim()
+		const emailValue = email.trim().toLowerCase()
 		if (!emailValue) {
 			setEmailError('Email is required')
 			return
@@ -33,6 +33,7 @@ export function SignupForm() {
 			setEmailError('Please enter a valid email address')
 			return
 		}
+		setEmail(emailValue)
 
 		startTransition(async () => {
 			const result = await prepareVerification(emailValue, 'signup')

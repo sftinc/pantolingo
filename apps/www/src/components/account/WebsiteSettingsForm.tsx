@@ -262,13 +262,28 @@ export function WebsiteSettingsForm({
 		setError(null)
 		setSuccess(false)
 
+		const trimmedName = name.trim()
+		setName(trimmedName)
+
+		const trimmedSkipWords = skipWords.map(s => s.trim()).filter(Boolean)
+		setSkipWords(trimmedSkipWords)
+
+		const trimmedContains = skipPathContains.map(s => s.trim()).filter(Boolean)
+		setSkipPathContains(trimmedContains)
+
+		const trimmedRegex = skipPathRegex.map(s => s.trim()).filter(Boolean)
+		setSkipPathRegex(trimmedRegex)
+
+		const trimmedSelectors = skipSelectors.map(s => s.trim()).filter(Boolean)
+		setSkipSelectors(trimmedSelectors)
+
 		startTransition(async () => {
 			const result = await saveWebsiteSettings(websiteId, {
-				name: name.trim(),
+				name: trimmedName,
 				sourceLang: selectedSourceLang,
-				skipWords,
-				skipPath: combineSkipPath(skipPathContains, skipPathRegex),
-				skipSelectors,
+				skipWords: trimmedSkipWords,
+				skipPath: combineSkipPath(trimmedContains, trimmedRegex),
+				skipSelectors: trimmedSelectors,
 				translatePath,
 			})
 

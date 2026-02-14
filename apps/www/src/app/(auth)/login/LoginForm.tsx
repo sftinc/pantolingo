@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useActionState, useTransition, useEffect } from 'react'
+import { useState, useActionState, useTransition, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { FormInput } from '@/components/ui/FormInput'
@@ -26,6 +26,7 @@ export function LoginForm() {
 	const [step, setStep] = useState<LoginStep>('email')
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
+	const passwordRef = useRef<HTMLInputElement>(null)
 	const [emailError, setEmailError] = useState<string | null>(null)
 	const [passwordError, setPasswordError] = useState<string | null>(null)
 	const [forgotPasswordError, setForgotPasswordError] = useState<string | null>(null)
@@ -45,13 +46,22 @@ export function LoginForm() {
 		}
 	}, [passwordState, router])
 
+	// Focus password input when step changes (autoFocus unreliable in Safari)
+	useEffect(() => {
+		if (step === 'password') {
+			requestAnimationFrame(() => {
+				passwordRef.current?.focus()
+			})
+		}
+	}, [step])
+
 	// Handle email step submission
 	const handleEmailSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 		setHasSubmitted(true)
 		setEmailError(null)
 
-		const trimmedEmail = email.trim()
+		const trimmedEmail = email.trim().toLowerCase()
 		if (!trimmedEmail) {
 			setEmailError('Email is required')
 			return
@@ -60,6 +70,7 @@ export function LoginForm() {
 			setEmailError('Please enter a valid email address')
 			return
 		}
+		setEmail(trimmedEmail)
 
 		startTransition(async () => {
 			const { exists, hasName } = await checkEmailExists(trimmedEmail)
@@ -96,7 +107,7 @@ export function LoginForm() {
 	const handleForgotPassword = () => {
 		setForgotPasswordError(null)
 		startForgotTransition(async () => {
-			const result = await prepareVerification(email.trim(), 'login')
+			const result = await prepareVerification(email, 'login')
 			if (result.error) {
 				setForgotPasswordError(result.error)
 			} else {
@@ -160,6 +171,7 @@ export function LoginForm() {
 							<button
 								type="submit"
 								disabled={isPending}
+								tabIndex={0}
 								className="w-full py-3 bg-[var(--accent)] text-white rounded-md font-medium hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
 							>
 								{isPending ? <Spinner size="sm" /> : 'Continue'}
@@ -168,7 +180,7 @@ export function LoginForm() {
 					) : (
 						<form action={handlePasswordSubmit}>
 							<input type="hidden" name="callbackUrl" value={callbackUrl} />
-							<input type="hidden" name="email" value={email.trim()} />
+							<input type="hidden" name="email" value={email} />
 
 							{/* Show email styled as readonly input */}
 							<div className="mb-4">
@@ -176,7 +188,7 @@ export function LoginForm() {
 									Email address
 								</label>
 								<div className="flex items-center justify-between px-4 py-3 rounded-md border border-[var(--border)] bg-[var(--input-bg)]">
-									<span className="text-[var(--text-muted)]">{email.trim()}</span>
+									<span className="text-[var(--text-muted)]">{email}</span>
 									<button
 										type="button"
 										onClick={() => {
@@ -193,11 +205,11 @@ export function LoginForm() {
 							</div>
 
 							<FormInput
+								ref={passwordRef}
 								id="password"
 								name="password"
 								type="password"
 								required
-								autoFocus
 								placeholder="Enter your password"
 								label="Password"
 								value={password}
