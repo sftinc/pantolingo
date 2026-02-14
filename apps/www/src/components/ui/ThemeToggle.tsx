@@ -21,6 +21,7 @@ export function ThemeToggle() {
 	return (
 		<button
 			onClick={cycleTheme}
+			tabIndex={0}
 			className="p-2 rounded-md text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--border)] transition-colors"
 			aria-label={`Current theme: ${label}. Click to cycle.`}
 			title={`Theme: ${label}`}

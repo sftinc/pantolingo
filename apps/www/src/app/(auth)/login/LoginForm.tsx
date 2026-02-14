@@ -191,6 +191,7 @@ export function LoginForm() {
 									<span className="text-[var(--text-muted)]">{email}</span>
 									<button
 										type="button"
+										tabIndex={0}
 										onClick={() => {
 											setStep('email')
 											setPassword('')
@@ -223,6 +224,7 @@ export function LoginForm() {
 							<div className="mb-4 text-right">
 								<button
 									type="button"
+									tabIndex={0}
 									onClick={handleForgotPassword}
 									disabled={isForgotPending}
 									className="text-sm text-[var(--accent)] hover:underline disabled:opacity-50"

@@ -136,6 +136,7 @@ export function ProfileModal({ isOpen, onClose, userProfile }: ProfileModalProps
 					{tabs.map((tab) => (
 						<button
 							key={tab.key}
+							tabIndex={0}
 							onClick={() => handleTabSwitch(tab.key)}
 							className={`px-5 py-2.5 text-sm font-medium rounded-t-lg border transition-colors cursor-pointer ${
 								activeTab === tab.key

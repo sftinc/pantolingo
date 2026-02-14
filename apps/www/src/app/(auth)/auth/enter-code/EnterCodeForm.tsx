@@ -57,6 +57,7 @@ export function EnterCodeForm() {
 					<button
 						type="button"
 						disabled
+						tabIndex={0}
 						className="w-full py-3 rounded-md font-medium bg-[var(--accent)] text-white opacity-50 cursor-not-allowed"
 					>
 						<Spinner size="sm" className="mx-auto" />

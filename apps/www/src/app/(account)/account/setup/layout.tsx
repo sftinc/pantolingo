@@ -15,6 +15,7 @@ export default function SetupLayout({ children }: { children: React.ReactNode })
 						<form action={signOutToLogin}>
 							<button
 								type="submit"
+								tabIndex={0}
 								className="text-sm text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors cursor-pointer"
 							>
 								Sign out

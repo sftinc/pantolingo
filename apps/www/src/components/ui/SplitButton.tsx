@@ -81,6 +81,7 @@ export function SplitButton({
 				type="button"
 				onClick={handlePrimaryClick}
 				disabled={isDisabled}
+				tabIndex={0}
 				className={cn(
 					'px-4 py-2 text-sm font-medium rounded-l-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed border-r border-white/20',
 					styles.button
@@ -94,6 +95,7 @@ export function SplitButton({
 				type="button"
 				onClick={handleDropdownToggle}
 				disabled={isDisabled}
+				tabIndex={0}
 				className={cn(
 					'px-2 py-2 rounded-r-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
 					styles.button

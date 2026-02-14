@@ -224,7 +224,7 @@ function DevModeControl({ websiteId, cacheDisabledUntil }: { websiteId: number; 
 						disabled={isEnabling}
 						className="px-3 py-1.5 text-xs font-medium rounded-md border border-[var(--border)] text-[var(--text-heading)] bg-[var(--card-bg)] hover:bg-[var(--page-bg)] transition-colors cursor-pointer disabled:opacity-50"
 					>
-						{isEnabling ? 'Enabling...' : 'Enable for 5 mins'}
+						{isEnabling ? 'Enabling...' : 'Enable for 15 mins'}
 					</button>
 				)}
 			</div>

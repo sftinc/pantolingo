@@ -74,7 +74,7 @@ export interface WebsiteWithSettings extends Website {
 	skipPath: string[]
 	skipSelectors: string[]
 	translatePath: boolean
-	cacheDisabledUntil: Date | null
+	cacheDisabledRemaining: number | null
 }
 
 export interface PathOption {
@@ -831,7 +831,7 @@ export async function enableDevMode(websiteId: number): Promise<{ success: boole
 	try {
 		const result = await pool.query<{ cache_disabled_until: Date }>(
 			`UPDATE website
-			 SET cache_disabled_until = NOW() + INTERVAL '5 minutes',
+			 SET cache_disabled_until = NOW() + INTERVAL '15 minutes',
 			     updated_at = NOW()
 			 WHERE id = $1
 			 RETURNING cache_disabled_until`,

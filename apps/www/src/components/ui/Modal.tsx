@@ -71,6 +71,7 @@ export function Modal({ isOpen, onClose, title, children, className, contentClas
 						{badge}
 						<button
 							onClick={onClose}
+							tabIndex={0}
 							className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--border)] transition-colors focus:outline-none"
 							aria-label="Close"
 						>
@@ -132,6 +133,7 @@ export function Button({ children, variant = 'secondary', onClick, disabled, loa
 			type={type}
 			onClick={onClick}
 			disabled={disabled || loading}
+			tabIndex={0}
 			className={cn(
 				'px-4 py-2 text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
 				variantStyles[variant],

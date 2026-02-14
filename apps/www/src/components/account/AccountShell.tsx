@@ -224,6 +224,7 @@ export function AccountShell({ currentWebsite, websites, userName, userProfile, 
 								<form action={signOutAction}>
 									<button
 										type="submit"
+										tabIndex={0}
 										className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
 									>
 										<SignOutIcon className="w-5 h-5 text-[var(--text-subtle)]" />

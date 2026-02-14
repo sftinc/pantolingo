@@ -81,6 +81,7 @@ export function SignupForm() {
 						<button
 							type="submit"
 							disabled={isPending}
+							tabIndex={0}
 							className="w-full py-3 bg-[var(--accent)] text-white rounded-md font-medium hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
 						>
 							{isPending ? <Spinner size="sm" /> : 'Continue'}
