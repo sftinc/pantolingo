@@ -64,7 +64,7 @@ export async function saveWebsiteSettings(
 
 export async function enableDevMode(
 	websiteId: number
-): Promise<{ success: boolean; expiresAt?: string; error?: string }> {
+): Promise<{ success: boolean; remainingSeconds?: number; error?: string }> {
 	try {
 		const accountId = await requireAccountId()
 

@@ -40,7 +40,7 @@ export function ProfileModal({ isOpen, onClose, userProfile }: ProfileModalProps
 	const [infoSuccess, setInfoSuccess] = useState('')
 	const [infoSaving, setInfoSaving] = useState(false)
 
-	const [oldPassword, setOldPassword] = useState('')
+	const [currentPassword, setCurrentPassword] = useState('')
 	const [newPassword, setNewPassword] = useState('')
 	const [confirmPassword, setConfirmPassword] = useState('')
 	const [pwError, setPwError] = useState('')
@@ -61,7 +61,7 @@ export function ProfileModal({ isOpen, onClose, userProfile }: ProfileModalProps
 		setInfoSuccess('')
 		setPwError('')
 		setPwSuccess('')
-		setOldPassword('')
+		setCurrentPassword('')
 		setNewPassword('')
 		setConfirmPassword('')
 	}
@@ -112,12 +112,12 @@ export function ProfileModal({ isOpen, onClose, userProfile }: ProfileModalProps
 
 		setPwSaving(true)
 		try {
-			const result = await changePassword(oldPassword, newPassword)
+			const result = await changePassword(currentPassword, newPassword)
 			if (!result.success) {
 				setPwError(result.error || 'Failed to change password')
 			} else {
 				setPwSuccess('Password updated')
-				setOldPassword('')
+				setCurrentPassword('')
 				setNewPassword('')
 				setConfirmPassword('')
 			}
@@ -213,12 +213,12 @@ export function ProfileModal({ isOpen, onClose, userProfile }: ProfileModalProps
 								)}
 								<div>
 									<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">
-										Old Password
+										Current Password
 									</label>
 									<input
 										type="password"
-										value={oldPassword}
-										onChange={(e) => setOldPassword(e.target.value)}
+										value={currentPassword}
+										onChange={(e) => setCurrentPassword(e.target.value)}
 										disabled={pwSaving}
 										className={inputClass}
 									/>

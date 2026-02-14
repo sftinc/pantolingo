@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition, useRef, useEffect, useCallback } from 'react'
+import { useState, useTransition, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { TagInput } from '@/components/ui/TagInput'
 import { Switch } from '@/components/ui/Switch'
@@ -17,7 +17,7 @@ interface WebsiteSettingsFormProps {
 	initialSkipPath: string[]
 	initialSkipSelectors: string[]
 	initialTranslatePath: boolean
-	cacheDisabledUntil: string | null
+	devModeRemaining: number | null
 }
 
 function parseSkipPath(skipPath: string[]): { contains: string[]; regex: string[] } {
@@ -164,45 +164,36 @@ function SourceLanguageDropdown({ value, onChange, disabled }: { value: string; 
 	)
 }
 
-function DevModeControl({ websiteId, cacheDisabledUntil }: { websiteId: number; cacheDisabledUntil: string | null }) {
-	const [expiresAt, setExpiresAt] = useState<number | null>(() => {
-		if (!cacheDisabledUntil) return null
-		const ts = new Date(cacheDisabledUntil).getTime()
-		return ts > Date.now() ? ts : null
-	})
-	const [timeLeft, setTimeLeft] = useState('')
+function DevModeControl({ websiteId, initialRemaining }: { websiteId: number; initialRemaining: number | null }) {
+	const [remaining, setRemaining] = useState<number | null>(
+		initialRemaining && initialRemaining > 0 ? initialRemaining : null
+	)
 	const [isEnabling, startTransition] = useTransition()
 
-	const updateTimeLeft = useCallback(() => {
-		if (!expiresAt) return
-		const remaining = Math.max(0, expiresAt - Date.now())
-		if (remaining === 0) {
-			setExpiresAt(null)
-			setTimeLeft('')
-			return
-		}
-		const mins = Math.floor(remaining / 60000)
-		const secs = Math.floor((remaining % 60000) / 1000)
-		setTimeLeft(`${mins}:${String(secs).padStart(2, '0')} remaining`)
-	}, [expiresAt])
-
 	useEffect(() => {
-		if (!expiresAt) return
-		updateTimeLeft()
-		const interval = setInterval(updateTimeLeft, 1000)
+		if (remaining === null || remaining <= 0) return
+		const interval = setInterval(() => {
+			setRemaining((prev) => {
+				if (prev === null || prev <= 1) return null
+				return prev - 1
+			})
+		}, 1000)
 		return () => clearInterval(interval)
-	}, [expiresAt, updateTimeLeft])
+	}, [remaining !== null]) // eslint-disable-line react-hooks/exhaustive-deps
 
 	const handleEnable = () => {
 		startTransition(async () => {
 			const result = await enableDevMode(websiteId)
-			if (result.success && result.expiresAt) {
-				setExpiresAt(new Date(result.expiresAt).getTime())
+			if (result.success && result.remainingSeconds) {
+				setRemaining(result.remainingSeconds)
 			}
 		})
 	}
 
-	const isActive = expiresAt !== null
+	const isActive = remaining !== null && remaining > 0
+	const timeLeft = isActive
+		? `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, '0')} remaining`
+		: ''
 
 	return (
 		<div className="flex items-center justify-between gap-4">
@@ -241,7 +232,7 @@ export function WebsiteSettingsForm({
 	initialSkipPath,
 	initialSkipSelectors,
 	initialTranslatePath,
-	cacheDisabledUntil,
+	devModeRemaining,
 }: WebsiteSettingsFormProps) {
 	const router = useRouter()
 	const [isPending, startTransition] = useTransition()
@@ -375,7 +366,7 @@ export function WebsiteSettingsForm({
 					</div>
 
 					{/* Dev Mode */}
-					<DevModeControl websiteId={websiteId} cacheDisabledUntil={cacheDisabledUntil} />
+					<DevModeControl websiteId={websiteId} initialRemaining={devModeRemaining} />
 				</div>
 			</div>
 

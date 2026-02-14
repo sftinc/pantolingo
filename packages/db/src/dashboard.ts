@@ -176,15 +176,18 @@ export async function getWebsiteByPublicCode(publicCode: string): Promise<Websit
 		skip_path: string[] | null
 		skip_selectors: string[] | null
 		translate_path: boolean | null
-		cache_disabled_until: Date | null
+		cache_disabled_remaining: string | null
 	}>(
-		`SELECT id, public_code, hostname, name, source_lang, skip_words, skip_path, skip_selectors, translate_path, cache_disabled_until FROM website WHERE public_code = $1`,
+		`SELECT id, public_code, hostname, name, source_lang, skip_words, skip_path, skip_selectors, translate_path,
+		        EXTRACT(EPOCH FROM GREATEST(cache_disabled_until - NOW(), INTERVAL '0')) AS cache_disabled_remaining
+		 FROM website WHERE public_code = $1`,
 		[publicCode]
 	)
 
 	if (result.rows.length === 0) return null
 
 	const row = result.rows[0]
+	const remaining = row.cache_disabled_remaining ? Math.round(parseFloat(row.cache_disabled_remaining)) : null
 	return {
 		id: row.id,
 		publicCode: row.public_code,
@@ -195,7 +198,7 @@ export async function getWebsiteByPublicCode(publicCode: string): Promise<Websit
 		skipPath: row.skip_path || [],
 		skipSelectors: row.skip_selectors || [],
 		translatePath: row.translate_path ?? true,
-		cacheDisabledUntil: row.cache_disabled_until,
+		cacheDisabledRemaining: remaining && remaining > 0 ? remaining : null,
 	}
 }
 
@@ -827,20 +830,20 @@ export async function createWebsite(
  * @param websiteId - Website ID
  * @returns The expiry timestamp
  */
-export async function enableDevMode(websiteId: number): Promise<{ success: boolean; expiresAt?: string; error?: string }> {
+export async function enableDevMode(websiteId: number): Promise<{ success: boolean; remainingSeconds?: number; error?: string }> {
 	try {
-		const result = await pool.query<{ cache_disabled_until: Date }>(
+		const result = await pool.query<{ remaining_seconds: string }>(
 			`UPDATE website
 			 SET cache_disabled_until = NOW() + INTERVAL '15 minutes',
 			     updated_at = NOW()
 			 WHERE id = $1
-			 RETURNING cache_disabled_until`,
+			 RETURNING EXTRACT(EPOCH FROM cache_disabled_until - NOW()) AS remaining_seconds`,
 			[websiteId]
 		)
 		if (result.rows.length === 0) {
 			return { success: false, error: 'Website not found' }
 		}
-		return { success: true, expiresAt: result.rows[0].cache_disabled_until.toISOString() }
+		return { success: true, remainingSeconds: Math.round(parseFloat(result.rows[0].remaining_seconds)) }
 	} catch (error) {
 		console.error('Failed to enable dev mode:', error)
 		return { success: false, error: 'Failed to enable dev mode' }
