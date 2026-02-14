@@ -2,38 +2,12 @@
 
 import { useState, useActionState } from 'react'
 import { completeOnboarding, type AccountActionState } from '@/actions/account'
-import { getPasswordRules, type PasswordRules } from '@/lib/password'
-
-function PasswordRulesList({ rules, password }: { rules: PasswordRules; password: string }) {
-	const ruleItems = [
-		{ key: 'minLength' as const, label: 'At least 8 characters' },
-		{ key: 'hasLowercase' as const, label: 'At least 1 lowercase letter' },
-		{ key: 'hasUppercase' as const, label: 'At least 1 uppercase letter' },
-		{ key: 'hasNumber' as const, label: 'At least 1 number' },
-		{ key: 'hasSpecial' as const, label: 'At least 1 special character' },
-		{ key: 'noSpaces' as const, label: 'No spaces' },
-	]
-
-	return (
-		<ul className="text-xs mb-4 space-y-1">
-			{ruleItems.map(({ key, label }) => {
-				const passed = rules[key]
-				const showPassed = password.length > 0 && passed
-				return (
-					<li
-						key={key}
-						className={showPassed ? 'text-green-600' : 'text-[var(--text-muted)]'}
-					>
-						{showPassed ? '✓' : '○'} {label}
-					</li>
-				)
-			})}
-		</ul>
-	)
-}
+import { getPasswordRules } from '@/lib/password'
+import { PasswordRulesList } from '@/components/ui/PasswordRulesList'
 
 export default function SetupProfileForm() {
-	const [name, setName] = useState('')
+	const [firstName, setFirstName] = useState('')
+	const [lastName, setLastName] = useState('')
 	const [password, setPassword] = useState('')
 	const rules = getPasswordRules(password)
 
@@ -61,25 +35,49 @@ export default function SetupProfileForm() {
 				)}
 
 				<form action={formAction}>
-					<label
-						htmlFor="name"
-						className="block text-sm font-medium text-[var(--text-body)] mb-2"
-					>
-						Your name
-					</label>
-					<input
-						id="name"
-						name="name"
-						type="text"
-						required
-						autoFocus
-						maxLength={50}
-						disabled={isPending}
-						placeholder="Jane Smith"
-						value={name}
-						onChange={(e) => setName(e.target.value)}
-						className="w-full px-4 py-3 rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text-body)] mb-4 focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent disabled:opacity-50"
-					/>
+					<div className="flex gap-3 mb-4">
+						<div className="flex-1">
+							<label
+								htmlFor="firstName"
+								className="block text-sm font-medium text-[var(--text-body)] mb-2"
+							>
+								First name
+							</label>
+							<input
+								id="firstName"
+								name="firstName"
+								type="text"
+								required
+								autoFocus
+								maxLength={25}
+								disabled={isPending}
+								placeholder="Jane"
+								value={firstName}
+								onChange={(e) => setFirstName(e.target.value)}
+								className="w-full px-4 py-3 rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text-body)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent disabled:opacity-50"
+							/>
+						</div>
+						<div className="flex-1">
+							<label
+								htmlFor="lastName"
+								className="block text-sm font-medium text-[var(--text-body)] mb-2"
+							>
+								Last name
+							</label>
+							<input
+								id="lastName"
+								name="lastName"
+								type="text"
+								required
+								maxLength={25}
+								disabled={isPending}
+								placeholder="Smith"
+								value={lastName}
+								onChange={(e) => setLastName(e.target.value)}
+								className="w-full px-4 py-3 rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text-body)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent disabled:opacity-50"
+							/>
+						</div>
+					</div>
 
 					<label
 						htmlFor="password"

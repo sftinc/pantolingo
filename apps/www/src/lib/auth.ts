@@ -68,6 +68,8 @@ const authConfig = {
 					id: user.id,
 					accountId: user.accountId,
 					email: user.email,
+					firstName: user.firstName,
+					lastName: user.lastName,
 					name: user.name,
 				}
 			},
@@ -84,20 +86,28 @@ const authConfig = {
 		error: '/login/error',
 	},
 	callbacks: {
-		async jwt({ token, user }: { token: JWT; user?: { accountId?: number; name?: string | null } }) {
+		async jwt({ token, user }: { token: JWT; user?: { accountId?: number; firstName?: string | null; lastName?: string | null } }) {
 			// On sign-in, user is available - persist accountId to token
 			if (user?.accountId) {
 				token.accountId = user.accountId
+				token.firstName = user.firstName
+				token.lastName = user.lastName
 				// Record last login time
 				pool.query(`UPDATE account SET last_login_at = NOW() WHERE id = $1`, [user.accountId]).catch(
 					(err) => console.error('Failed to update last_login_at:', err)
 				)
 			}
-			// If name is missing from token (e.g. after setup), fetch from DB
-			if (!token.name && token.accountId) {
-				const result = await pool.query(`SELECT name FROM account WHERE id = $1`, [token.accountId])
-				if (result.rows[0]?.name) {
-					token.name = result.rows[0].name
+			// If firstName is missing from token (e.g. after setup), fetch from DB
+			if (!token.firstName && token.accountId) {
+				const result = await pool.query<{ first_name: string | null; last_name: string | null; email: string }>(
+					`SELECT first_name, last_name, email FROM account WHERE id = $1`,
+					[token.accountId]
+				)
+				if (result.rows[0]) {
+					token.firstName = result.rows[0].first_name
+					token.lastName = result.rows[0].last_name
+					token.email = result.rows[0].email
+					token.name = [result.rows[0].first_name, result.rows[0].last_name].filter(Boolean).join(' ') || null
 				}
 			}
 			return token
@@ -106,6 +116,8 @@ const authConfig = {
 			// Read from token, not user
 			if (session.user && token.accountId) {
 				session.user.accountId = token.accountId as number
+				session.user.firstName = token.firstName as string | null
+				session.user.lastName = token.lastName as string | null
 			}
 			return session
 		},

@@ -10,6 +10,12 @@ import { pool } from './pool.js'
 // Types
 // =============================================================================
 
+export interface AccountProfile {
+	firstName: string | null
+	lastName: string | null
+	email: string
+}
+
 export interface WebsiteWithStats {
 	id: number
 	publicCode: string
@@ -838,5 +844,83 @@ export async function enableDevMode(websiteId: number): Promise<{ success: boole
 	} catch (error) {
 		console.error('Failed to enable dev mode:', error)
 		return { success: false, error: 'Failed to enable dev mode' }
+	}
+}
+
+// =============================================================================
+// Account Profile
+// =============================================================================
+
+/**
+ * Get account profile (first name, last name, email)
+ */
+export async function getAccountProfile(accountId: number): Promise<AccountProfile | null> {
+	const result = await pool.query<{ first_name: string | null; last_name: string | null; email: string }>(
+		`SELECT first_name, last_name, email FROM account WHERE id = $1`,
+		[accountId]
+	)
+	if (!result.rows[0]) return null
+	return {
+		firstName: result.rows[0].first_name,
+		lastName: result.rows[0].last_name,
+		email: result.rows[0].email,
+	}
+}
+
+/**
+ * Update account profile (first name, last name, email)
+ * Checks email uniqueness before updating
+ */
+export async function updateAccountProfile(
+	accountId: number,
+	firstName: string,
+	lastName: string,
+	email: string
+): Promise<{ success: boolean; error?: string }> {
+	try {
+		// Check email uniqueness
+		const emailCheck = await pool.query(
+			`SELECT 1 FROM account WHERE email = $1 AND id != $2 LIMIT 1`,
+			[email, accountId]
+		)
+		if ((emailCheck.rowCount ?? 0) > 0) {
+			return { success: false, error: 'Email is already in use' }
+		}
+
+		await pool.query(
+			`UPDATE account SET first_name = $1, last_name = $2, email = $3, updated_at = NOW() WHERE id = $4`,
+			[firstName, lastName, email, accountId]
+		)
+		return { success: true }
+	} catch (error) {
+		console.error('Failed to update account profile:', error)
+		return { success: false, error: 'Failed to update profile' }
+	}
+}
+
+/**
+ * Get account password hash (for old-password verification)
+ */
+export async function getAccountPasswordHash(accountId: number): Promise<string | null> {
+	const result = await pool.query<{ password_hash: string | null }>(
+		`SELECT password_hash FROM account WHERE id = $1`,
+		[accountId]
+	)
+	return result.rows[0]?.password_hash ?? null
+}
+
+/**
+ * Change account password
+ */
+export async function changeAccountPassword(accountId: number, newPasswordHash: string): Promise<{ success: boolean; error?: string }> {
+	try {
+		await pool.query(
+			`UPDATE account SET password_hash = $1, updated_at = NOW() WHERE id = $2`,
+			[newPasswordHash, accountId]
+		)
+		return { success: true }
+	} catch (error) {
+		console.error('Failed to change password:', error)
+		return { success: false, error: 'Failed to change password' }
 	}
 }

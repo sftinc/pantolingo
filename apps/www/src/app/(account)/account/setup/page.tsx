@@ -11,7 +11,7 @@ export default async function SetupPage() {
 	const session = await auth()
 	if (!session) redirect('/login')
 
-	const hasName = !!session.user.name
+	const hasName = !!session.user.firstName
 
 	if (hasName) {
 		// Check if they already have websites

@@ -6,10 +6,17 @@ import Link from 'next/link'
 import { useTheme } from '@/hooks/useTheme'
 import { ProfileModal } from './ProfileModal'
 
+interface UserProfile {
+	firstName: string
+	lastName: string
+	email: string
+}
+
 interface AccountShellProps {
 	currentWebsite: { publicCode: string; hostname: string; name: string; sourceLang: string; role: string }
 	websites: { publicCode: string; hostname: string; name: string }[]
 	userName: string
+	userProfile: UserProfile
 	signOutAction: () => Promise<void>
 	children: React.ReactNode
 }
@@ -59,7 +66,7 @@ const SECONDARY_NAV = [
 	{ label: 'Setup', path: 'setup', icon: ClipboardCheckIcon },
 ]
 
-export function AccountShell({ currentWebsite, websites, userName, signOutAction, children }: AccountShellProps) {
+export function AccountShell({ currentWebsite, websites, userName, userProfile, signOutAction, children }: AccountShellProps) {
 	const pathname = usePathname()
 	const router = useRouter()
 	const { theme, cycleTheme, mounted } = useTheme()
@@ -105,7 +112,8 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 	return (
 		<div className="min-h-screen bg-[var(--content-bg)]">
 			{/* Top header bar */}
-			<header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-6 md:ml-60 h-14 bg-white dark:bg-[var(--sidebar-bg)] border-b border-[var(--sidebar-border)] md:bg-[var(--content-bg)] md:border-b-0">
+			<header className="sticky top-0 z-30 md:ml-60 h-14 bg-white dark:bg-[var(--sidebar-bg)] border-b border-[var(--sidebar-border)] md:bg-[var(--content-bg)] md:border-b-0">
+				<div className="mx-auto max-w-6xl flex items-center justify-between h-full px-4 sm:px-6 lg:px-8">
 				{/* Left: hamburger (mobile) + website switcher */}
 				<div className="flex items-center gap-3">
 					<button
@@ -226,6 +234,7 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 						)}
 					</div>
 				</div>
+				</div>
 			</header>
 
 			{/* Mobile overlay */}
@@ -306,7 +315,7 @@ export function AccountShell({ currentWebsite, websites, userName, signOutAction
 				<div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">{children}</div>
 			</main>
 
-			<ProfileModal isOpen={profileModalOpen} onClose={() => setProfileModalOpen(false)} />
+			<ProfileModal isOpen={profileModalOpen} onClose={() => setProfileModalOpen(false)} userProfile={userProfile} />
 		</div>
 	)
 }

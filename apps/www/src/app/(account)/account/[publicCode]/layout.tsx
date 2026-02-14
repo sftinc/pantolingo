@@ -42,17 +42,18 @@ export default async function WebsiteLayout({ params, children }: WebsiteLayoutP
 		await signOut({ redirectTo: '/login?msg=logout' })
 	}
 
-	const userName = (() => {
-		const parts = session.user.name!.trim().split(/\s+/)
-		if (parts.length === 1) return parts[0]
-		return `${parts[0][0]}. ${parts[parts.length - 1]}`
-	})()
+	const firstName = session.user.firstName ?? ''
+	const lastName = session.user.lastName ?? ''
+	const userName = firstName && lastName
+		? `${firstName[0]}. ${lastName}`
+		: firstName || lastName || session.user.email
 
 	return (
 		<AccountShell
 			currentWebsite={{ publicCode: website.publicCode, hostname: website.hostname, name: website.name, sourceLang: website.sourceLang, role }}
 			websites={allWebsites.map((w) => ({ publicCode: w.publicCode, hostname: w.hostname, name: w.name }))}
 			userName={userName}
+			userProfile={{ firstName, lastName, email: session.user.email }}
 			signOutAction={handleSignOut}
 		>
 			{children}

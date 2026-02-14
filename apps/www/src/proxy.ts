@@ -10,7 +10,7 @@ type MiddlewareFn = (req: NextRequest) => Response | void | Promise<Response | v
 export default auth((req) => {
 	const { pathname } = req.nextUrl
 	const isLoggedIn = !!req.auth
-	const userName = req.auth?.user?.name
+	const hasName = req.auth?.user?.firstName && req.auth?.user?.lastName
 
 	// Auth pages - redirect to account if already logged in
 	if (
@@ -18,7 +18,7 @@ export default auth((req) => {
 		pathname === '/signup' ||
 		pathname.startsWith('/auth/')
 	) {
-		if (isLoggedIn && userName) {
+		if (isLoggedIn && hasName) {
 			return NextResponse.redirect(new URL('/account', req.url))
 		}
 		return NextResponse.next()
@@ -45,7 +45,7 @@ export default auth((req) => {
 			return NextResponse.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, req.url))
 		}
 		// Redirect to setup if no name
-		if (!userName) {
+		if (!hasName) {
 			return NextResponse.redirect(new URL('/account/setup', req.url))
 		}
 		// Clear auth cookie on authenticated account access (cleanup after auth flow)

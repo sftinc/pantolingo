@@ -26,9 +26,9 @@ export async function checkEmailExists(email: string): Promise<{ exists: boolean
 	const trimmed = email.trim()
 	if (!trimmed) return { exists: false, hasName: false }
 
-	const result = await pool.query(`SELECT name FROM account WHERE email = $1 LIMIT 1`, [trimmed])
+	const result = await pool.query(`SELECT first_name FROM account WHERE email = $1 LIMIT 1`, [trimmed])
 	if (result.rows.length === 0) return { exists: false, hasName: false }
-	return { exists: true, hasName: !!result.rows[0].name }
+	return { exists: true, hasName: !!result.rows[0].first_name }
 }
 
 /**

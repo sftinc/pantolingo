@@ -1,13 +1,13 @@
 'use server'
 
 import { redirect } from 'next/navigation'
-import { auth, signOut } from '@/lib/auth'
+import { auth, requireAccountId, signOut } from '@/lib/auth'
 import { pool } from '@pantolingo/db/pool'
-import { createWebsite } from '@pantolingo/db'
+import { createWebsite, updateAccountProfile, getAccountPasswordHash, changeAccountPassword } from '@pantolingo/db'
 import { SUPPORTED_LANGUAGES } from '@pantolingo/lang'
-import { validatePassword, hashPassword } from '@/lib/password'
+import { validatePassword, hashPassword, verifyPassword } from '@/lib/password'
 
-const MAX_NAME_LENGTH = 50
+const MAX_NAME_LENGTH = 25
 
 export type AccountActionState = { error?: string; redirectUrl?: string } | null
 
@@ -19,7 +19,7 @@ export async function signOutToLogin() {
 }
 
 /**
- * Complete onboarding by setting name and password
+ * Complete onboarding by setting first name, last name, and password
  * Signature is compatible with useActionState: (prevState, formData) => Promise<state>
  * On success, returns { redirectUrl: '/account' } for client-side navigation
  */
@@ -32,19 +32,22 @@ export async function completeOnboarding(
 		return { error: 'Unauthorized' }
 	}
 
-	// Validate name
-	const name = formData.get('name')
-	if (typeof name !== 'string') {
-		return { error: 'Name is required' }
+	// Validate first name
+	const firstName = (formData.get('firstName') as string)?.trim()
+	if (!firstName) {
+		return { error: 'First name is required' }
+	}
+	if (firstName.length > MAX_NAME_LENGTH) {
+		return { error: `First name must be ${MAX_NAME_LENGTH} characters or less` }
 	}
 
-	const trimmedName = name.trim()
-	if (!trimmedName) {
-		return { error: 'Name is required' }
+	// Validate last name
+	const lastName = (formData.get('lastName') as string)?.trim()
+	if (!lastName) {
+		return { error: 'Last name is required' }
 	}
-
-	if (trimmedName.length > MAX_NAME_LENGTH) {
-		return { error: `Name must be ${MAX_NAME_LENGTH} characters or less` }
+	if (lastName.length > MAX_NAME_LENGTH) {
+		return { error: `Last name must be ${MAX_NAME_LENGTH} characters or less` }
 	}
 
 	// Validate password
@@ -69,8 +72,8 @@ export async function completeOnboarding(
 
 	try {
 		await pool.query(
-			`UPDATE account SET name = $1, password_hash = $2, updated_at = NOW() WHERE id = $3`,
-			[trimmedName, passwordHash, session.user.accountId]
+			`UPDATE account SET first_name = $1, last_name = $2, password_hash = $3, updated_at = NOW() WHERE id = $4`,
+			[firstName, lastName, passwordHash, session.user.accountId]
 		)
 	} catch (error) {
 		console.error('Failed to complete onboarding:', error)
@@ -121,4 +124,60 @@ export async function createFirstWebsite(
 	}
 
 	redirect(`/account/${publicCode}/languages`)
+}
+
+/**
+ * Update profile (first name, last name, email)
+ */
+export async function updateProfile(
+	firstName: string,
+	lastName: string,
+	email: string
+): Promise<{ success: boolean; error?: string }> {
+	const accountId = await requireAccountId()
+
+	const trimmedFirst = firstName.trim()
+	const trimmedLast = lastName.trim()
+	const trimmedEmail = email.trim().toLowerCase()
+
+	if (!trimmedFirst) return { success: false, error: 'First name is required' }
+	if (trimmedFirst.length > MAX_NAME_LENGTH) return { success: false, error: `First name must be ${MAX_NAME_LENGTH} characters or less` }
+
+	if (!trimmedLast) return { success: false, error: 'Last name is required' }
+	if (trimmedLast.length > MAX_NAME_LENGTH) return { success: false, error: `Last name must be ${MAX_NAME_LENGTH} characters or less` }
+
+	if (!trimmedEmail) return { success: false, error: 'Email is required' }
+
+	return updateAccountProfile(accountId, trimmedFirst, trimmedLast, trimmedEmail)
+}
+
+/**
+ * Change password (requires old password verification)
+ */
+export async function changePassword(
+	oldPassword: string,
+	newPassword: string
+): Promise<{ success: boolean; error?: string }> {
+	const accountId = await requireAccountId()
+
+	// Verify old password
+	const currentHash = await getAccountPasswordHash(accountId)
+	if (!currentHash) {
+		return { success: false, error: 'No password set on account' }
+	}
+
+	const isValid = await verifyPassword(oldPassword, currentHash)
+	if (!isValid) {
+		return { success: false, error: 'Current password is incorrect' }
+	}
+
+	// Validate new password
+	const passwordError = validatePassword(newPassword)
+	if (passwordError) {
+		return { success: false, error: passwordError }
+	}
+
+	// Hash and save
+	const newHash = await hashPassword(newPassword)
+	return changeAccountPassword(accountId, newHash)
 }

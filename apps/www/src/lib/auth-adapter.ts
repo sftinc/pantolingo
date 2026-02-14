@@ -11,7 +11,8 @@ interface AuthTokenRow {
 interface AccountRow {
 	id: number
 	email: string
-	name: string | null
+	first_name: string | null
+	last_name: string | null
 	verified_at: Date | null
 }
 
@@ -24,7 +25,7 @@ interface AccountWithPasswordRow extends AccountRow {
  */
 export async function getUserByEmailWithPassword(email: string) {
 	const result = await pool.query<AccountWithPasswordRow>(
-		`SELECT id, email, name, verified_at, password_hash FROM account WHERE email = $1`,
+		`SELECT id, email, first_name, last_name, verified_at, password_hash FROM account WHERE email = $1`,
 		[email]
 	)
 	if (!result.rows[0]) return null
@@ -33,7 +34,9 @@ export async function getUserByEmailWithPassword(email: string) {
 		id: String(row.id),
 		accountId: row.id,
 		email: row.email,
-		name: row.name,
+		firstName: row.first_name,
+		lastName: row.last_name,
+		name: [row.first_name, row.last_name].filter(Boolean).join(' ') || null,
 		emailVerified: row.verified_at ? new Date(row.verified_at) : null,
 		passwordHash: row.password_hash,
 	}
@@ -99,7 +102,9 @@ function toAdapterUser(row: AccountRow) {
 		id: String(row.id),
 		accountId: row.id,
 		email: row.email,
-		name: row.name,
+		firstName: row.first_name,
+		lastName: row.last_name,
+		name: [row.first_name, row.last_name].filter(Boolean).join(' ') || null,
 		emailVerified: row.verified_at ? new Date(row.verified_at) : null,
 	}
 }
@@ -112,15 +117,15 @@ export function PantolingoAdapter(): Adapter {
 	return {
 		async createUser(user) {
 			const result = await pool.query<AccountRow>(
-				`INSERT INTO account (email, name) VALUES ($1, $2) RETURNING id, email, name, verified_at`,
-				[user.email, user.name ?? null]
+				`INSERT INTO account (email) VALUES ($1) RETURNING id, email, first_name, last_name, verified_at`,
+				[user.email]
 			)
 			return toAdapterUser(result.rows[0])
 		},
 
 		async getUser(id) {
 			const result = await pool.query<AccountRow>(
-				`SELECT id, email, name, verified_at FROM account WHERE id = $1`,
+				`SELECT id, email, first_name, last_name, verified_at FROM account WHERE id = $1`,
 				[parseInt(id, 10)]
 			)
 			if (!result.rows[0]) return null
@@ -129,7 +134,7 @@ export function PantolingoAdapter(): Adapter {
 
 		async getUserByEmail(email) {
 			const result = await pool.query<AccountRow>(
-				`SELECT id, email, name, verified_at FROM account WHERE email = $1`,
+				`SELECT id, email, first_name, last_name, verified_at FROM account WHERE email = $1`,
 				[email]
 			)
 			if (!result.rows[0]) return null
@@ -138,9 +143,9 @@ export function PantolingoAdapter(): Adapter {
 
 		async updateUser(user) {
 			const result = await pool.query<AccountRow>(
-				`UPDATE account SET name = COALESCE($1, name), email = COALESCE($2, email), updated_at = NOW()
-				 WHERE id = $3 RETURNING id, email, name, verified_at`,
-				[user.name, user.email, parseInt(user.id!, 10)]
+				`UPDATE account SET first_name = COALESCE($1, first_name), last_name = COALESCE($2, last_name), email = COALESCE($3, email), updated_at = NOW()
+				 WHERE id = $4 RETURNING id, email, first_name, last_name, verified_at`,
+				[user.firstName, user.lastName, user.email, parseInt(user.id!, 10)]
 			)
 			return toAdapterUser(result.rows[0])
 		},
@@ -169,10 +174,11 @@ export function PantolingoAdapter(): Adapter {
 				expires_at: Date
 				id: number
 				email: string
-				name: string | null
+				first_name: string | null
+				last_name: string | null
 				verified_at: Date | null
 			}>(
-				`SELECT s.session_token, s.account_id, s.expires_at, a.id, a.email, a.name, a.verified_at
+				`SELECT s.session_token, s.account_id, s.expires_at, a.id, a.email, a.first_name, a.last_name, a.verified_at
 				 FROM auth_session s
 				 JOIN account a ON a.id = s.account_id
 				 WHERE s.session_token = $1`,
@@ -191,7 +197,9 @@ export function PantolingoAdapter(): Adapter {
 					id: String(row.id),
 					accountId: row.id,
 					email: row.email,
-					name: row.name,
+					firstName: row.first_name,
+					lastName: row.last_name,
+					name: [row.first_name, row.last_name].filter(Boolean).join(' ') || null,
 					emailVerified: row.verified_at ? new Date(row.verified_at) : null,
 				},
 			}
