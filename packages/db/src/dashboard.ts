@@ -22,6 +22,7 @@ export interface WebsiteWithStats {
 	hostname: string
 	name: string
 	sourceLang: string
+	uiColor: string | null
 	langCount: number
 	segmentCount: number
 	pathCount: number
@@ -67,6 +68,7 @@ export interface Website {
 	hostname: string
 	name: string
 	sourceLang: string
+	uiColor: string | null
 }
 
 export interface WebsiteWithSettings extends Website {
@@ -126,6 +128,7 @@ export async function getWebsitesWithStats(accountId: number): Promise<WebsiteWi
 		hostname: string
 		name: string
 		source_lang: string
+		ui_color: string | null
 		lang_count: string
 		segment_count: string
 		path_count: string
@@ -137,6 +140,7 @@ export async function getWebsitesWithStats(accountId: number): Promise<WebsiteWi
 			w.hostname,
 			w.name,
 			w.source_lang,
+			w.ui_color,
 			(SELECT COUNT(DISTINCT target_lang) FROM translation t WHERE t.website_id = w.id) as lang_count,
 			(SELECT COUNT(*) FROM translation_segment ts JOIN website_segment ws ON ws.id = ts.website_segment_id WHERE ws.website_id = w.id) as segment_count,
 			(SELECT COUNT(*) FROM translation_path tp JOIN website_path wp ON wp.id = tp.website_path_id WHERE wp.website_id = w.id AND EXISTS (SELECT 1 FROM website_path_segment wps WHERE wps.website_path_id = wp.id)) as path_count
@@ -154,6 +158,7 @@ export async function getWebsitesWithStats(accountId: number): Promise<WebsiteWi
 		hostname: row.hostname,
 		name: row.name,
 		sourceLang: row.source_lang,
+		uiColor: row.ui_color,
 		langCount: parseInt(row.lang_count, 10),
 		segmentCount: parseInt(row.segment_count, 10),
 		pathCount: parseInt(row.path_count, 10),
@@ -172,13 +177,14 @@ export async function getWebsiteByPublicCode(publicCode: string): Promise<Websit
 		hostname: string
 		name: string
 		source_lang: string
+		ui_color: string | null
 		skip_words: string[] | null
 		skip_path: string[] | null
 		skip_selectors: string[] | null
 		translate_path: boolean | null
 		cache_disabled_remaining: string | null
 	}>(
-		`SELECT id, public_code, hostname, name, source_lang, skip_words, skip_path, skip_selectors, translate_path,
+		`SELECT id, public_code, hostname, name, source_lang, ui_color, skip_words, skip_path, skip_selectors, translate_path,
 		        EXTRACT(EPOCH FROM GREATEST(cache_disabled_until - NOW(), INTERVAL '0')) AS cache_disabled_remaining
 		 FROM website WHERE public_code = $1`,
 		[publicCode]
@@ -194,6 +200,7 @@ export async function getWebsiteByPublicCode(publicCode: string): Promise<Websit
 		hostname: row.hostname,
 		name: row.name,
 		sourceLang: row.source_lang,
+		uiColor: row.ui_color,
 		skipWords: row.skip_words || [],
 		skipPath: row.skip_path || [],
 		skipSelectors: row.skip_selectors || [],

@@ -50,8 +50,8 @@ export default async function WebsiteLayout({ params, children }: WebsiteLayoutP
 
 	return (
 		<AccountShell
-			currentWebsite={{ publicCode: website.publicCode, hostname: website.hostname, name: website.name, sourceLang: website.sourceLang, role }}
-			websites={allWebsites.map((w) => ({ publicCode: w.publicCode, hostname: w.hostname, name: w.name }))}
+			currentWebsite={{ publicCode: website.publicCode, hostname: website.hostname, name: website.name, sourceLang: website.sourceLang, uiColor: website.uiColor, role }}
+			websites={allWebsites.map((w) => ({ publicCode: w.publicCode, hostname: w.hostname, name: w.name, uiColor: w.uiColor }))}
 			userName={userName}
 			userProfile={{ firstName, lastName, email: session.user.email }}
 			signOutAction={handleSignOut}
