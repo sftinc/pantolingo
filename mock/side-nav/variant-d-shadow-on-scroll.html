@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en" class="h-full">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Variant D: Shadow on Scroll - Pantolingo</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script>
+			tailwind.config = {
+				darkMode: 'class',
+				theme: {
+					extend: {
+						colors: {
+							sidebar: { light: '#ffffff', dark: '#1a1a1a' },
+							content: { light: '#f5f5f5', dark: '#111111' },
+							card: { light: '#ffffff', dark: '#222222' },
+						},
+					},
+				},
+			}
+		</script>
+		<style>
+			.nav-item-active { background-color: #e5e7eb; }
+			.dark .nav-item-active { background-color: #374151; }
+		</style>
+		<script>
+			;(function () {
+				var t = localStorage.getItem('theme') || 'system'
+				if (t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+					document.documentElement.classList.add('dark')
+				}
+			})()
+		</script>
+	</head>
+	<body class="h-full bg-content-light dark:bg-content-dark text-gray-900 dark:text-gray-100">
+
+		<!-- Scroll sentinel (zero-height, sits at top of content column) -->
+		<div id="sentinel" class="md:ml-60 h-0"></div>
+
+		<!-- ================================================================
+		     TOP HEADER — same position as current, but gains shadow on scroll
+		     At rest: transparent border, no shadow (blends with content)
+		     Scrolled: subtle shadow + border appears
+		     ================================================================ -->
+		<header
+			id="header"
+			class="sticky top-0 z-30 md:ml-60 h-14 bg-white dark:bg-sidebar-dark md:bg-content-light md:dark:bg-content-dark border-b border-gray-200 dark:border-gray-700 md:border-transparent"
+			style="transition: box-shadow 200ms ease, border-color 200ms ease;"
+		>
+			<div class="mx-auto max-w-6xl flex items-center justify-between h-full px-4 sm:px-6 lg:px-8">
+				<div class="flex items-center gap-2 mr-auto">
+					<button id="mobile-menu-btn" aria-label="Open menu" class="p-1 text-gray-600 dark:text-gray-300 md:hidden">
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+						</svg>
+					</button>
+					<div class="relative">
+						<button
+							id="website-switcher-btn"
+							class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors cursor-pointer"
+						>
+							<span class="w-4 h-4 rounded bg-blue-700/20 dark:bg-blue-200/20 text-blue-700 dark:text-blue-200 flex items-center justify-center text-[10px] font-semibold flex-shrink-0">E</span>
+							<span class="font-semibold truncate max-w-[60px] sm:max-w-none">eSnipe</span>
+							<svg class="w-4 h-4 text-blue-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+							</svg>
+						</button>
+					</div>
+				</div>
+				<div>
+					<div class="relative">
+						<button
+							id="profile-btn"
+							class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+						>
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<circle cx="12" cy="8" r="4" stroke-width="1.5" />
+								<path stroke-width="1.5" d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+							</svg>
+							<span class="hidden sm:inline">W. Williams</span>
+							<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+							</svg>
+						</button>
+						<div id="profile-dropdown" class="hidden absolute right-0 top-full mt-1 w-48 bg-white dark:bg-sidebar-dark border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-1 z-50">
+							<button id="theme-cycle-btn" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
+								<svg class="theme-icon theme-icon-light w-5 h-5 text-gray-500 dark:text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" stroke-width="1.5"/><path stroke-linecap="round" stroke-width="1.5" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+								<svg class="theme-icon theme-icon-dark w-5 h-5 text-gray-500 dark:text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
+								<svg class="theme-icon theme-icon-system w-5 h-5 text-gray-500 dark:text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5"/><path stroke-linecap="round" stroke-width="1.5" d="M8 21h8m-4-4v4"/></svg>
+								<span id="theme-label"></span>
+							</button>
+							<div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+							<a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+								<svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/></svg>
+								Sign out
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</header>
+
+		<!-- Mobile Sidebar Overlay -->
+		<div id="mobile-overlay" class="md:hidden fixed inset-0 bg-black/40 z-40 hidden"></div>
+
+		<!-- Sidebar (unchanged from current) -->
+		<aside id="sidebar" class="fixed top-0 left-0 z-50 h-full w-60 bg-sidebar-light dark:bg-sidebar-dark border-r border-gray-200 dark:border-gray-700 flex flex-col transition-transform -translate-x-full md:translate-x-0">
+			<div class="h-14 flex items-center px-5 flex-shrink-0">
+				<span class="text-base font-bold text-gray-900 dark:text-white">Pantolingo</span>
+			</div>
+			<nav class="px-2 pt-9 space-y-1">
+				<a href="#" class="nav-item-active flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-900 dark:text-white transition-colors">
+					<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5h8M7 5V3m2.5 7.5L7 9m0 0L5 12m2-3l2 3m5-3h6m-3 0v8m-2-4h4"/><text x="14" y="9" font-size="7" fill="currentColor" stroke="none" font-weight="600">A</text></svg>
+					<span>Languages</span>
+				</a>
+				<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+					<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h12M4 14h16M4 18h8"/></svg>
+					<span>Segments</span>
+				</a>
+				<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+					<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+					<span>Paths</span>
+				</a>
+				<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+					<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3v18h18M7 16v-3m4 3v-6m4 6v-4m4 4V7"/></svg>
+					<span>Stats</span>
+				</a>
+				<div class="pt-6 space-y-1">
+					<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+						<svg class="w-5 h-5 flex-shrink-0 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+						<span>Setup</span>
+					</a>
+					<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+						<svg class="w-5 h-5 flex-shrink-0 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="1.5"/></svg>
+						<span>Settings</span>
+					</a>
+				</div>
+			</nav>
+		</aside>
+
+		<!-- Main Content -->
+		<div class="md:ml-60 min-h-[calc(100%-3.5rem)] flex flex-col">
+			<main class="flex-1 p-6">
+				<div class="mx-auto max-w-6xl">
+					<div class="px-0 py-3 mb-4 min-h-[52px] flex items-center">
+						<h1 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Languages</h1>
+					</div>
+					<p class="text-xs text-gray-500 dark:text-gray-400 mb-6 -mt-4">Variant D: Header gains a shadow + border when you scroll down. Scroll to see the effect.</p>
+
+					<div class="space-y-4" id="lang-cards"></div>
+				</div>
+			</main>
+		</div>
+
+		<script>
+			// Generate language cards
+			const languages = [
+				{ name: 'Spanish', code: 'es', flag: '\u{1F1EA}\u{1F1F8}', status: 'Active', pct: 89, segments: '1,247', words: '24,891' },
+				{ name: 'French', code: 'fr', flag: '\u{1F1EB}\u{1F1F7}', status: 'Active', pct: 72, segments: '1,247', words: '22,103' },
+				{ name: 'German', code: 'de', flag: '\u{1F1E9}\u{1F1EA}', status: 'Draft', pct: 31, segments: '1,247', words: '8,442' },
+				{ name: 'Japanese', code: 'ja', flag: '\u{1F1EF}\u{1F1F5}', status: 'Active', pct: 95, segments: '1,247', words: '26,120' },
+				{ name: 'Portuguese', code: 'pt', flag: '\u{1F1E7}\u{1F1F7}', status: 'Draft', pct: 15, segments: '1,247', words: '4,201' },
+				{ name: 'Italian', code: 'it', flag: '\u{1F1EE}\u{1F1F9}', status: 'Active', pct: 68, segments: '1,247', words: '18,903' },
+				{ name: 'Korean', code: 'ko', flag: '\u{1F1F0}\u{1F1F7}', status: 'Active', pct: 54, segments: '1,247', words: '14,562' },
+				{ name: 'Chinese', code: 'zh', flag: '\u{1F1E8}\u{1F1F3}', status: 'Draft', pct: 8, segments: '1,247', words: '2,100' },
+			]
+			const container = document.getElementById('lang-cards')
+			languages.forEach(lang => {
+				const statusColor = lang.status === 'Active' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
+				container.innerHTML += `
+					<div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+						<div class="flex items-center justify-between mb-4">
+							<h3 class="font-semibold text-gray-800 dark:text-gray-200">${lang.flag} ${lang.name} (${lang.code})</h3>
+							<span class="text-xs px-2 py-1 rounded-full ${statusColor}">${lang.status}</span>
+						</div>
+						<div class="grid grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400">
+							<div><span class="block text-xs uppercase tracking-wide mb-1 text-gray-400 dark:text-gray-500">Segments</span>${lang.segments}</div>
+							<div><span class="block text-xs uppercase tracking-wide mb-1 text-gray-400 dark:text-gray-500">Translated</span>${lang.pct}%</div>
+							<div><span class="block text-xs uppercase tracking-wide mb-1 text-gray-400 dark:text-gray-500">Words</span>${lang.words}</div>
+						</div>
+					</div>`
+			})
+
+			// ================================================================
+			// KEY FEATURE: IntersectionObserver for scroll shadow
+			// ================================================================
+			const sentinel = document.getElementById('sentinel')
+			const header = document.getElementById('header')
+			const observer = new IntersectionObserver(
+				([entry]) => {
+					if (entry.isIntersecting) {
+						// At top — no shadow, transparent border on desktop
+						header.style.boxShadow = 'none'
+						if (window.innerWidth >= 768) {
+							header.style.borderColor = 'transparent'
+						}
+					} else {
+						// Scrolled — add shadow + border
+						header.style.boxShadow = '0 4px 16px 0 rgb(0 0 0 / 0.06), 0 1px 4px -1px rgb(0 0 0 / 0.04)'
+						header.style.borderColor = ''
+					}
+				},
+				{ threshold: 1.0 }
+			)
+			observer.observe(sentinel)
+
+			// Mobile sidebar
+			const sidebar = document.getElementById('sidebar')
+			const mobileOverlay = document.getElementById('mobile-overlay')
+			document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+				sidebar.classList.remove('-translate-x-full')
+				mobileOverlay.classList.remove('hidden')
+			})
+			mobileOverlay.addEventListener('click', () => {
+				sidebar.classList.add('-translate-x-full')
+				mobileOverlay.classList.add('hidden')
+			})
+
+			// Theme cycle
+			const themeModes = ['light', 'dark', 'system']
+			const themeLabels = { light: 'Light mode', dark: 'Dark mode', system: 'System' }
+			function applyTheme(theme) {
+				localStorage.setItem('theme', theme)
+				if (theme === 'system') {
+					document.documentElement.classList.toggle('dark', window.matchMedia('(prefers-color-scheme: dark)').matches)
+				} else {
+					document.documentElement.classList.toggle('dark', theme === 'dark')
+				}
+				document.querySelectorAll('.theme-icon').forEach(el => el.classList.add('hidden'))
+				document.querySelector('.theme-icon-' + theme).classList.remove('hidden')
+				document.getElementById('theme-label').textContent = themeLabels[theme]
+			}
+			document.getElementById('theme-cycle-btn').addEventListener('click', e => {
+				e.stopPropagation()
+				const current = localStorage.getItem('theme') || 'system'
+				const next = themeModes[(themeModes.indexOf(current) + 1) % themeModes.length]
+				applyTheme(next)
+			})
+			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+				if (localStorage.getItem('theme') === 'system') applyTheme('system')
+			})
+			applyTheme(localStorage.getItem('theme') || 'system')
+
+			// Profile dropdown
+			const profileBtn = document.getElementById('profile-btn')
+			const profileDropdown = document.getElementById('profile-dropdown')
+			profileBtn.addEventListener('click', e => { e.stopPropagation(); profileDropdown.classList.toggle('hidden') })
+			document.addEventListener('click', () => profileDropdown.classList.add('hidden'))
+		</script>
+	</body>
+</html>

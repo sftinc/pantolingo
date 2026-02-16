@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>UI Color Picker Options</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script>
+			tailwind.config = { darkMode: 'class' }
+		</script>
+		<style>
+			body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+			.picker-card { transition: box-shadow 0.15s; }
+			.picker-card:has(.color-option:focus-visible) { box-shadow: 0 0 0 2px rgba(99,102,241,0.5); }
+		</style>
+		<script>
+			;(function () {
+				var t = localStorage.getItem('theme') || 'system'
+				if (t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+					document.documentElement.classList.add('dark')
+				}
+			})()
+		</script>
+	</head>
+	<body class="min-h-screen bg-[#f5f5f5] dark:bg-[#111111] text-gray-900 dark:text-gray-100">
+		<!-- Tailwind CDN safelist -->
+		<div class="hidden">
+			<span class="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 bg-red-500 ring-red-500 bg-red-700/20 dark:bg-red-300/20 hover:bg-red-200 dark:hover:bg-red-800"></span>
+			<span class="bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-300 bg-rose-500 ring-rose-500 bg-rose-700/20 dark:bg-rose-300/20 hover:bg-rose-200 dark:hover:bg-rose-800"></span>
+			<span class="bg-pink-100 dark:bg-pink-900 text-pink-700 dark:text-pink-300 bg-pink-500 ring-pink-500 bg-pink-700/20 dark:bg-pink-300/20 hover:bg-pink-200 dark:hover:bg-pink-800"></span>
+			<span class="bg-fuchsia-100 dark:bg-fuchsia-900 text-fuchsia-700 dark:text-fuchsia-300 bg-fuchsia-500 ring-fuchsia-500 bg-fuchsia-700/20 dark:bg-fuchsia-300/20 hover:bg-fuchsia-200 dark:hover:bg-fuchsia-800"></span>
+			<span class="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 bg-purple-500 ring-purple-500 bg-purple-700/20 dark:bg-purple-300/20 hover:bg-purple-200 dark:hover:bg-purple-800"></span>
+			<span class="bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300 bg-violet-500 ring-violet-500 bg-violet-700/20 dark:bg-violet-300/20 hover:bg-violet-200 dark:hover:bg-violet-800"></span>
+			<span class="bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 bg-indigo-500 ring-indigo-500 bg-indigo-700/20 dark:bg-indigo-300/20 hover:bg-indigo-200 dark:hover:bg-indigo-800"></span>
+			<span class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 bg-blue-500 ring-blue-500 bg-blue-700/20 dark:bg-blue-300/20 hover:bg-blue-200 dark:hover:bg-blue-800"></span>
+			<span class="bg-sky-100 dark:bg-sky-900 text-sky-700 dark:text-sky-300 bg-sky-500 ring-sky-500 bg-sky-700/20 dark:bg-sky-300/20 hover:bg-sky-200 dark:hover:bg-sky-800"></span>
+			<span class="bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-300 bg-cyan-500 ring-cyan-500 bg-cyan-700/20 dark:bg-cyan-300/20 hover:bg-cyan-200 dark:hover:bg-cyan-800"></span>
+			<span class="bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 bg-teal-500 ring-teal-500 bg-teal-700/20 dark:bg-teal-300/20 hover:bg-teal-200 dark:hover:bg-teal-800"></span>
+			<span class="bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 bg-emerald-500 ring-emerald-500 bg-emerald-700/20 dark:bg-emerald-300/20 hover:bg-emerald-200 dark:hover:bg-emerald-800"></span>
+			<span class="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 bg-green-500 ring-green-500 bg-green-700/20 dark:bg-green-300/20 hover:bg-green-200 dark:hover:bg-green-800"></span>
+			<span class="bg-lime-100 dark:bg-lime-900 text-lime-700 dark:text-lime-300 bg-lime-500 ring-lime-500 bg-lime-700/20 dark:bg-lime-300/20 hover:bg-lime-200 dark:hover:bg-lime-800"></span>
+			<span class="bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 bg-yellow-500 ring-yellow-500 bg-yellow-700/20 dark:bg-yellow-300/20 hover:bg-yellow-200 dark:hover:bg-yellow-800"></span>
+			<span class="bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 bg-amber-500 ring-amber-500 bg-amber-700/20 dark:bg-amber-300/20 hover:bg-amber-200 dark:hover:bg-amber-800"></span>
+			<span class="bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 bg-orange-500 ring-orange-500 bg-orange-700/20 dark:bg-orange-300/20 hover:bg-orange-200 dark:hover:bg-orange-800"></span>
+			<span class="bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-300 bg-slate-500 ring-slate-500 bg-slate-700/20 dark:bg-slate-300/20 hover:bg-slate-300 dark:hover:bg-slate-800"></span>
+		</div>
+
+		<!-- Theme toggle -->
+		<div class="fixed top-4 right-4 z-50">
+			<button id="theme-btn" class="px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
+				Toggle dark mode
+			</button>
+		</div>
+
+		<div class="max-w-5xl mx-auto px-6 py-12">
+			<h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-2">UI Color Picker Options</h1>
+			<p class="text-sm text-gray-500 dark:text-gray-400 mb-10">Three approaches for letting users select a website accent color in Settings. Each includes a live preview of how the chosen color appears in the website switcher button.</p>
+
+			<!-- ================================================================ -->
+			<!-- OPTION A: Dropdown with swatches                                  -->
+			<!-- ================================================================ -->
+			<section class="mb-16">
+				<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1">Option A: Dropdown with Swatches</h2>
+				<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">A select-style dropdown showing a colored dot + color name for each option. Familiar pattern, matches the existing Source Language dropdown.</p>
+
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+					<!-- Settings card -->
+					<div class="bg-white dark:bg-[#1a1a1a] rounded-lg border border-gray-200 dark:border-gray-700 p-6 picker-card">
+						<h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-5">Appearance</h3>
+
+						<div>
+							<label class="block mb-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">UI Color</label>
+							<div class="relative" id="dropdownA-container">
+								<button id="dropdownA-btn" type="button"
+									class="w-full flex items-center gap-2.5 px-3 py-2 rounded-md bg-white dark:bg-[#222] border border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 transition-colors cursor-pointer">
+									<span id="dropdownA-dot" class="w-3.5 h-3.5 rounded-full bg-blue-500 shrink-0"></span>
+									<span id="dropdownA-label" class="flex-1 text-left">Blue</span>
+									<svg id="dropdownA-chevron" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+									</svg>
+								</button>
+								<ul id="dropdownA-list" class="hidden absolute left-0 top-full z-50 mt-1 w-full max-h-64 overflow-y-auto rounded-lg bg-white dark:bg-[#222] border border-gray-200 dark:border-gray-700 shadow-lg py-1
+									[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
+								</ul>
+							</div>
+							<p class="mt-1.5 text-xs text-gray-400 dark:text-gray-500">Accent color for navigation and website switcher</p>
+						</div>
+					</div>
+
+					<!-- Live preview -->
+					<div class="bg-white dark:bg-[#1a1a1a] rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+						<h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-5">Preview</h3>
+						<div class="flex items-center gap-3 px-4 h-14 bg-gray-50 dark:bg-[#111] rounded-lg border border-gray-200 dark:border-gray-700">
+							<button id="previewA-btn" class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+								<span id="previewA-avatar" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-semibold shrink-0 bg-blue-700/20 dark:bg-blue-300/20">E</span>
+								<span class="font-semibold">eSnipe</span>
+								<svg class="w-4 h-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+							</button>
+							<span class="ml-auto text-xs text-gray-400">website switcher</span>
+						</div>
+						<!-- Nav items preview -->
+						<div class="mt-4 space-y-1">
+							<div id="previewA-nav-active" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-semibold text-blue-700 dark:text-blue-300">
+								<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5h8M7 5V3m2.5 7.5L7 9m0 0L5 12m2-3l2 3m5-3h6m-3 0v8m-2-4h4" /><text x="14" y="9" font-size="7" fill="currentColor" stroke="none" font-weight="600">A</text></svg>
+								Languages
+							</div>
+							<div class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-500 dark:text-gray-400">
+								<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h12M4 14h16M4 18h8" /></svg>
+								Segments
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- ================================================================ -->
+			<!-- OPTION B: Color circle grid                                       -->
+			<!-- ================================================================ -->
+			<section class="mb-16">
+				<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1">Option B: Color Circle Grid</h2>
+				<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">A compact grid of clickable colored circles. More visual, takes less vertical space. Similar to Notion/Slack workspace pickers.</p>
+
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+					<!-- Settings card -->
+					<div class="bg-white dark:bg-[#1a1a1a] rounded-lg border border-gray-200 dark:border-gray-700 p-6 picker-card">
+						<h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-5">Appearance</h3>
+
+						<div>
+							<label class="block mb-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">UI Color</label>
+							<div id="gridB" class="flex flex-wrap gap-2"></div>
+							<p class="mt-2 text-xs text-gray-400 dark:text-gray-500">Accent color for navigation and website switcher</p>
+						</div>
+					</div>
+
+					<!-- Live preview -->
+					<div class="bg-white dark:bg-[#1a1a1a] rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+						<h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-5">Preview</h3>
+						<div class="flex items-center gap-3 px-4 h-14 bg-gray-50 dark:bg-[#111] rounded-lg border border-gray-200 dark:border-gray-700">
+							<button id="previewB-btn" class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+								<span id="previewB-avatar" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-semibold shrink-0 bg-blue-700/20 dark:bg-blue-300/20">E</span>
+								<span class="font-semibold">eSnipe</span>
+								<svg class="w-4 h-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+							</button>
+							<span class="ml-auto text-xs text-gray-400">website switcher</span>
+						</div>
+						<div class="mt-4 space-y-1">
+							<div id="previewB-nav-active" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-semibold text-blue-700 dark:text-blue-300">
+								<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5h8M7 5V3m2.5 7.5L7 9m0 0L5 12m2-3l2 3m5-3h6m-3 0v8m-2-4h4" /><text x="14" y="9" font-size="7" fill="currentColor" stroke="none" font-weight="600">A</text></svg>
+								Languages
+							</div>
+							<div class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-500 dark:text-gray-400">
+								<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h12M4 14h16M4 18h8" /></svg>
+								Segments
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- ================================================================ -->
+			<!-- OPTION C: Grid + Label                                            -->
+			<!-- ================================================================ -->
+			<section class="mb-16">
+				<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1">Option C: Grid with Label</h2>
+				<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">A grid of circles with the selected color name shown below. Combines the compact grid layout with a text label for clarity.</p>
+
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+					<!-- Settings card -->
+					<div class="bg-white dark:bg-[#1a1a1a] rounded-lg border border-gray-200 dark:border-gray-700 p-6 picker-card">
+						<h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-5">Appearance</h3>
+
+						<div>
+							<label class="block mb-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">UI Color</label>
+							<div id="gridC" class="flex flex-wrap gap-2"></div>
+							<div class="mt-2 flex items-center gap-2">
+								<span id="gridC-selected-dot" class="w-3 h-3 rounded-full bg-blue-500 shrink-0"></span>
+								<span id="gridC-selected-label" class="text-sm text-gray-600 dark:text-gray-300">Blue</span>
+							</div>
+							<p class="mt-1.5 text-xs text-gray-400 dark:text-gray-500">Accent color for navigation and website switcher</p>
+						</div>
+					</div>
+
+					<!-- Live preview -->
+					<div class="bg-white dark:bg-[#1a1a1a] rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+						<h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-5">Preview</h3>
+						<div class="flex items-center gap-3 px-4 h-14 bg-gray-50 dark:bg-[#111] rounded-lg border border-gray-200 dark:border-gray-700">
+							<button id="previewC-btn" class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+								<span id="previewC-avatar" class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-semibold shrink-0 bg-blue-700/20 dark:bg-blue-300/20">E</span>
+								<span class="font-semibold">eSnipe</span>
+								<svg class="w-4 h-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+							</button>
+							<span class="ml-auto text-xs text-gray-400">website switcher</span>
+						</div>
+						<div class="mt-4 space-y-1">
+							<div id="previewC-nav-active" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-semibold text-blue-700 dark:text-blue-300">
+								<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5h8M7 5V3m2.5 7.5L7 9m0 0L5 12m2-3l2 3m5-3h6m-3 0v8m-2-4h4" /><text x="14" y="9" font-size="7" fill="currentColor" stroke="none" font-weight="600">A</text></svg>
+								Languages
+							</div>
+							<div class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-500 dark:text-gray-400">
+								<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h12M4 14h16M4 18h8" /></svg>
+								Segments
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+		</div>
+
+		<script>
+			// ── Shared data ──────────────────────────────────────────────────
+			const COLORS = [
+				{ key: 'red',     label: 'Red' },
+				{ key: 'rose',    label: 'Rose' },
+				{ key: 'pink',    label: 'Pink' },
+				{ key: 'fuchsia', label: 'Fuchsia' },
+				{ key: 'purple',  label: 'Purple' },
+				{ key: 'violet',  label: 'Violet' },
+				{ key: 'indigo',  label: 'Indigo' },
+				{ key: 'blue',    label: 'Blue' },
+				{ key: 'sky',     label: 'Sky' },
+				{ key: 'cyan',    label: 'Cyan' },
+				{ key: 'teal',    label: 'Teal' },
+				{ key: 'emerald', label: 'Emerald' },
+				{ key: 'green',   label: 'Green' },
+				{ key: 'lime',    label: 'Lime' },
+				{ key: 'yellow',  label: 'Yellow' },
+				{ key: 'amber',   label: 'Amber' },
+				{ key: 'orange',  label: 'Orange' },
+				{ key: 'slate',   label: 'Slate' },
+			]
+
+			function btnClasses(c) {
+				if (c === 'slate') return { btn: `bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-300`, avatar: `bg-slate-700/20 dark:bg-slate-300/20` }
+				return { btn: `bg-${c}-100 dark:bg-${c}-900 text-${c}-700 dark:text-${c}-300`, avatar: `bg-${c}-700/20 dark:bg-${c}-300/20` }
+			}
+
+			function textClass(c) {
+				if (c === 'slate') return 'text-slate-700 dark:text-slate-300'
+				return `text-${c}-700 dark:text-${c}-300`
+			}
+
+			// ── State ────────────────────────────────────────────────────────
+			const state = { a: 'blue', b: 'blue', c: 'blue' }
+
+			function updatePreview(section, color) {
+				const cls = btnClasses(color)
+				const btn = document.getElementById(`preview${section}-btn`)
+				const avatar = document.getElementById(`preview${section}-avatar`)
+				const nav = document.getElementById(`preview${section}-nav-active`)
+
+				// Reset classes then apply new
+				btn.className = `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${cls.btn}`
+				avatar.className = `w-4 h-4 rounded flex items-center justify-center text-[10px] font-semibold shrink-0 ${cls.avatar}`
+				nav.className = `flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-semibold ${textClass(color)}`
+			}
+
+			// ── Option A: Dropdown ───────────────────────────────────────────
+			;(function initDropdownA() {
+				const container = document.getElementById('dropdownA-container')
+				const btn = document.getElementById('dropdownA-btn')
+				const list = document.getElementById('dropdownA-list')
+				const dot = document.getElementById('dropdownA-dot')
+				const label = document.getElementById('dropdownA-label')
+				const chevron = document.getElementById('dropdownA-chevron')
+				let open = false
+
+				// Auto option
+				const autoLi = document.createElement('li')
+				autoLi.innerHTML = `
+					<button type="button" class="color-option w-full text-left px-3 py-2 text-sm flex items-center gap-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer text-gray-500 dark:text-gray-400">
+						<span class="w-3.5 h-3.5 rounded-full bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 shrink-0"></span>
+						<span>Auto</span>
+						<span class="ml-auto text-[10px] text-gray-400">based on name</span>
+					</button>`
+				list.appendChild(autoLi)
+
+				// Divider
+				const divider = document.createElement('li')
+				divider.className = 'border-t border-gray-200 dark:border-gray-700 my-1'
+				list.appendChild(divider)
+
+				COLORS.forEach(({ key, label: name }) => {
+					const li = document.createElement('li')
+					const selected = key === state.a
+					li.innerHTML = `
+						<button type="button" data-color="${key}" class="color-option w-full text-left px-3 py-2 text-sm flex items-center gap-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer ${
+							selected ? 'bg-gray-100 dark:bg-gray-800 font-medium text-gray-800 dark:text-gray-200' : 'text-gray-600 dark:text-gray-300'
+						}">
+							<span class="w-3.5 h-3.5 rounded-full bg-${key}-500 shrink-0"></span>
+							<span>${name}</span>
+							${selected ? '<svg class="ml-auto w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>' : ''}
+						</button>`
+					li.querySelector('button').addEventListener('click', () => selectA(key, name))
+					list.appendChild(li)
+				})
+
+				function selectA(key, name) {
+					state.a = key
+					dot.className = `w-3.5 h-3.5 rounded-full bg-${key}-500 shrink-0`
+					label.textContent = name
+					toggleList(false)
+					updatePreview('A', key)
+					rebuildDropdownA()
+				}
+
+				function rebuildDropdownA() {
+					list.querySelectorAll('[data-color]').forEach(el => {
+						const c = el.dataset.color
+						const sel = c === state.a
+						el.className = `color-option w-full text-left px-3 py-2 text-sm flex items-center gap-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer ${
+							sel ? 'bg-gray-100 dark:bg-gray-800 font-medium text-gray-800 dark:text-gray-200' : 'text-gray-600 dark:text-gray-300'
+						}`
+						const check = el.querySelector('svg')
+						if (sel && !check) {
+							el.insertAdjacentHTML('beforeend', '<svg class="ml-auto w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>')
+						} else if (!sel && check) {
+							check.remove()
+						}
+					})
+				}
+
+				function toggleList(show) {
+					open = show
+					list.classList.toggle('hidden', !show)
+					chevron.style.transform = show ? 'rotate(180deg)' : ''
+				}
+
+				btn.addEventListener('click', () => toggleList(!open))
+				document.addEventListener('mousedown', (e) => {
+					if (!container.contains(e.target)) toggleList(false)
+				})
+			})()
+
+			// ── Option B: Circle Grid ────────────────────────────────────────
+			;(function initGridB() {
+				const grid = document.getElementById('gridB')
+
+				// Auto circle
+				const autoBtn = document.createElement('button')
+				autoBtn.type = 'button'
+				autoBtn.title = 'Auto'
+				autoBtn.className = 'w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 cursor-pointer transition-all hover:scale-110 ring-offset-2 ring-offset-white dark:ring-offset-[#1a1a1a]'
+				grid.appendChild(autoBtn)
+
+				COLORS.forEach(({ key, label }) => {
+					const btn = document.createElement('button')
+					btn.type = 'button'
+					btn.title = label
+					btn.dataset.color = key
+					const selected = key === state.b
+					btn.className = `w-7 h-7 rounded-full bg-${key}-500 cursor-pointer transition-all hover:scale-110 ring-offset-2 ring-offset-white dark:ring-offset-[#1a1a1a] ${selected ? 'ring-2 ring-' + key + '-500 scale-110' : ''}`
+					btn.addEventListener('click', () => selectB(key))
+					grid.appendChild(btn)
+				})
+
+				function selectB(key) {
+					state.b = key
+					grid.querySelectorAll('[data-color]').forEach(el => {
+						const c = el.dataset.color
+						const sel = c === key
+						el.className = `w-7 h-7 rounded-full bg-${c}-500 cursor-pointer transition-all hover:scale-110 ring-offset-2 ring-offset-white dark:ring-offset-[#1a1a1a] ${sel ? 'ring-2 ring-' + c + '-500 scale-110' : ''}`
+					})
+					updatePreview('B', key)
+				}
+			})()
+
+			// ── Option C: Grid + Label ───────────────────────────────────────
+			;(function initGridC() {
+				const grid = document.getElementById('gridC')
+				const selectedDot = document.getElementById('gridC-selected-dot')
+				const selectedLabel = document.getElementById('gridC-selected-label')
+
+				// Auto circle
+				const autoBtn = document.createElement('button')
+				autoBtn.type = 'button'
+				autoBtn.title = 'Auto'
+				autoBtn.className = 'w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 cursor-pointer transition-all hover:scale-110 ring-offset-2 ring-offset-white dark:ring-offset-[#1a1a1a]'
+				autoBtn.addEventListener('click', () => {
+					selectC(null, 'Auto')
+				})
+				grid.appendChild(autoBtn)
+
+				COLORS.forEach(({ key, label }) => {
+					const btn = document.createElement('button')
+					btn.type = 'button'
+					btn.title = label
+					btn.dataset.color = key
+					const selected = key === state.c
+					btn.className = `w-7 h-7 rounded-full bg-${key}-500 cursor-pointer transition-all hover:scale-110 ring-offset-2 ring-offset-white dark:ring-offset-[#1a1a1a] ${selected ? 'ring-2 ring-' + key + '-500 scale-110' : ''}`
+					btn.addEventListener('click', () => selectC(key, label))
+					grid.appendChild(btn)
+				})
+
+				function selectC(key, label) {
+					const effectiveKey = key || 'blue'
+					state.c = effectiveKey
+
+					// Update grid selection
+					grid.querySelectorAll('[data-color]').forEach(el => {
+						const c = el.dataset.color
+						const sel = c === key
+						el.className = `w-7 h-7 rounded-full bg-${c}-500 cursor-pointer transition-all hover:scale-110 ring-offset-2 ring-offset-white dark:ring-offset-[#1a1a1a] ${sel ? 'ring-2 ring-' + c + '-500 scale-110' : ''}`
+					})
+
+					// Auto btn ring
+					autoBtn.className = `w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 cursor-pointer transition-all hover:scale-110 ring-offset-2 ring-offset-white dark:ring-offset-[#1a1a1a] ${key === null ? 'ring-2 ring-purple-500 scale-110' : ''}`
+
+					// Update label
+					if (key) {
+						selectedDot.className = `w-3 h-3 rounded-full bg-${key}-500 shrink-0`
+					} else {
+						selectedDot.className = 'w-3 h-3 rounded-full bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 shrink-0'
+					}
+					selectedLabel.textContent = label
+
+					updatePreview('C', effectiveKey)
+				}
+			})()
+
+			// ── Theme toggle ─────────────────────────────────────────────────
+			document.getElementById('theme-btn').addEventListener('click', () => {
+				document.documentElement.classList.toggle('dark')
+				localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light')
+			})
+		</script>
+	</body>
+</html>
