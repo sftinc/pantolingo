@@ -4,6 +4,12 @@ import { requireAccountId } from '@/lib/auth'
 import { canAccessWebsite, updateWebsiteSettings as dbUpdateWebsiteSettings, enableDevMode as dbEnableDevMode } from '@pantolingo/db'
 import { SUPPORTED_LANGUAGES } from '@pantolingo/lang'
 
+const VALID_UI_COLORS = new Set([
+	'red', 'rose', 'pink', 'fuchsia', 'purple', 'violet',
+	'indigo', 'blue', 'sky', 'cyan', 'teal', 'emerald',
+	'green', 'lime', 'yellow', 'amber', 'orange', 'slate',
+])
+
 export async function saveWebsiteSettings(
 	websiteId: number,
 	settings: {
@@ -13,6 +19,7 @@ export async function saveWebsiteSettings(
 		skipPath: string[]
 		skipSelectors: string[]
 		translatePath: boolean
+		uiColor: string | null
 	}
 ): Promise<{ success: boolean; error?: string }> {
 	try {
@@ -25,6 +32,9 @@ export async function saveWebsiteSettings(
 		}
 		if (!SUPPORTED_LANGUAGES.includes(settings.sourceLang)) {
 			return { success: false, error: 'Invalid source language' }
+		}
+		if (settings.uiColor !== null && !VALID_UI_COLORS.has(settings.uiColor)) {
+			return { success: false, error: 'Invalid accent color' }
 		}
 
 		const skipWords = settings.skipWords.map(s => s.trim()).filter(Boolean)

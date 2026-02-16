@@ -30,6 +30,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 				initialName={website.name}
 				hostname={website.hostname}
 				sourceLang={website.sourceLang}
+				initialUiColor={website.uiColor}
 				initialSkipWords={website.skipWords}
 				initialSkipPath={website.skipPath}
 				initialSkipSelectors={website.skipSelectors}

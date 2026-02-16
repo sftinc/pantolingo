@@ -770,6 +770,7 @@ export async function updateWebsiteSettings(
 		skipPath: string[]
 		skipSelectors: string[]
 		translatePath: boolean
+		uiColor: string | null
 	}
 ): Promise<{ success: boolean; error?: string }> {
 	try {
@@ -781,9 +782,10 @@ export async function updateWebsiteSettings(
 			     skip_path = $5,
 			     skip_selectors = $6,
 			     translate_path = $7,
+			     ui_color = $8,
 			     updated_at = NOW()
 			 WHERE id = $1`,
-			[websiteId, settings.name, settings.sourceLang, settings.skipWords, settings.skipPath, settings.skipSelectors, settings.translatePath]
+			[websiteId, settings.name, settings.sourceLang, settings.skipWords, settings.skipPath, settings.skipSelectors, settings.translatePath, settings.uiColor]
 		)
 		return { success: true }
 	} catch (error) {

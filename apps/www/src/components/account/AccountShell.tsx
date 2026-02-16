@@ -47,7 +47,7 @@ const COLOR_CLASSES: Record<WebsiteColor, { btn: string; hover: string; avatar: 
 	yellow:  { btn: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300',  hover: 'hover:bg-yellow-200 dark:hover:bg-yellow-800',  avatar: 'bg-yellow-700/20 dark:bg-yellow-300/20',  chevron: 'text-yellow-400',  text: 'text-yellow-700 dark:text-yellow-300' },
 	amber:   { btn: 'bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300',    hover: 'hover:bg-amber-200 dark:hover:bg-amber-800',    avatar: 'bg-amber-700/20 dark:bg-amber-300/20',    chevron: 'text-amber-400',   text: 'text-amber-700 dark:text-amber-300' },
 	orange:  { btn: 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300',  hover: 'hover:bg-orange-200 dark:hover:bg-orange-800',  avatar: 'bg-orange-700/20 dark:bg-orange-300/20',  chevron: 'text-orange-400',  text: 'text-orange-700 dark:text-orange-300' },
-	slate:   { btn: 'bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300',    hover: 'hover:bg-slate-200 dark:hover:bg-slate-800',    avatar: 'bg-slate-700/20 dark:bg-slate-300/20',    chevron: 'text-slate-400',   text: 'text-slate-700 dark:text-slate-300' },
+	slate:   { btn: 'bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-300',    hover: 'hover:bg-slate-300 dark:hover:bg-slate-800',    avatar: 'bg-slate-700/20 dark:bg-slate-300/20',    chevron: 'text-slate-400',   text: 'text-slate-700 dark:text-slate-300' },
 }
 
 function getWebsiteColor(name: string): WebsiteColor {
@@ -264,10 +264,10 @@ export function AccountShell({ currentWebsite, websites, userName, userProfile, 
 								key={item.path}
 								href={`${basePath}/${item.path}`}
 								onClick={() => setMobileOpen(false)}
-								className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+								className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
 									active
-										? currentColor.text
-										: 'text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] hover:text-[var(--text-heading)]'
+										? `font-semibold ${currentColor.text}`
+										: 'font-medium text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] hover:text-[var(--text-heading)]'
 								}`}
 							>
 								<item.icon className="w-5 h-5 shrink-0" />
@@ -281,10 +281,10 @@ export function AccountShell({ currentWebsite, websites, userName, userProfile, 
 						<Link
 							href={`${basePath}/settings`}
 							onClick={() => setMobileOpen(false)}
-							className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+							className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
 								pathname.startsWith(`${basePath}/settings`)
-									? currentColor.text
-									: 'text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] hover:text-[var(--text-heading)]'
+									? `font-semibold ${currentColor.text}`
+									: 'font-medium text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] hover:text-[var(--text-heading)]'
 							}`}
 						>
 							<SettingsIcon className="w-5 h-5 shrink-0 text-[var(--text-subtle)]" />
@@ -297,10 +297,10 @@ export function AccountShell({ currentWebsite, websites, userName, userProfile, 
 									key={item.path}
 									href={`${basePath}/${item.path}`}
 									onClick={() => setMobileOpen(false)}
-									className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+									className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
 										active
-											? currentColor.text
-											: 'text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] hover:text-[var(--text-heading)]'
+											? `font-semibold ${currentColor.text}`
+											: 'font-medium text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] hover:text-[var(--text-heading)]'
 									}`}
 								>
 									<item.icon className="w-5 h-5 shrink-0 text-[var(--text-subtle)]" />

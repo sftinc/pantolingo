@@ -13,11 +13,54 @@ interface WebsiteSettingsFormProps {
 	initialName: string
 	hostname: string
 	sourceLang: string
+	initialUiColor: string | null
 	initialSkipWords: string[]
 	initialSkipPath: string[]
 	initialSkipSelectors: string[]
 	initialTranslatePath: boolean
 	devModeRemaining: number | null
+}
+
+const UI_COLORS = [
+	{ key: 'red', label: 'Red' },
+	{ key: 'rose', label: 'Rose' },
+	{ key: 'pink', label: 'Pink' },
+	{ key: 'fuchsia', label: 'Fuchsia' },
+	{ key: 'purple', label: 'Purple' },
+	{ key: 'violet', label: 'Violet' },
+	{ key: 'indigo', label: 'Indigo' },
+	{ key: 'blue', label: 'Blue' },
+	{ key: 'sky', label: 'Sky' },
+	{ key: 'cyan', label: 'Cyan' },
+	{ key: 'teal', label: 'Teal' },
+	{ key: 'emerald', label: 'Emerald' },
+	{ key: 'green', label: 'Green' },
+	{ key: 'lime', label: 'Lime' },
+	{ key: 'yellow', label: 'Yellow' },
+	{ key: 'amber', label: 'Amber' },
+	{ key: 'orange', label: 'Orange' },
+	{ key: 'slate', label: 'Slate' },
+] as const
+
+const COLOR_SWATCH: Record<string, { bg: string; ring: string }> = {
+	red:     { bg: 'bg-red-500',     ring: 'ring-red-500' },
+	rose:    { bg: 'bg-rose-500',    ring: 'ring-rose-500' },
+	pink:    { bg: 'bg-pink-500',    ring: 'ring-pink-500' },
+	fuchsia: { bg: 'bg-fuchsia-500', ring: 'ring-fuchsia-500' },
+	purple:  { bg: 'bg-purple-500',  ring: 'ring-purple-500' },
+	violet:  { bg: 'bg-violet-500',  ring: 'ring-violet-500' },
+	indigo:  { bg: 'bg-indigo-500',  ring: 'ring-indigo-500' },
+	blue:    { bg: 'bg-blue-500',    ring: 'ring-blue-500' },
+	sky:     { bg: 'bg-sky-500',     ring: 'ring-sky-500' },
+	cyan:    { bg: 'bg-cyan-500',    ring: 'ring-cyan-500' },
+	teal:    { bg: 'bg-teal-500',    ring: 'ring-teal-500' },
+	emerald: { bg: 'bg-emerald-500', ring: 'ring-emerald-500' },
+	green:   { bg: 'bg-green-500',   ring: 'ring-green-500' },
+	lime:    { bg: 'bg-lime-500',    ring: 'ring-lime-500' },
+	yellow:  { bg: 'bg-yellow-500',  ring: 'ring-yellow-500' },
+	amber:   { bg: 'bg-amber-500',   ring: 'ring-amber-500' },
+	orange:  { bg: 'bg-orange-500',  ring: 'ring-orange-500' },
+	slate:   { bg: 'bg-slate-500',   ring: 'ring-slate-500' },
 }
 
 function parseSkipPath(skipPath: string[]): { contains: string[]; regex: string[] } {
@@ -228,6 +271,7 @@ export function WebsiteSettingsForm({
 	initialName,
 	hostname,
 	sourceLang,
+	initialUiColor,
 	initialSkipWords,
 	initialSkipPath,
 	initialSkipSelectors,
@@ -243,6 +287,7 @@ export function WebsiteSettingsForm({
 
 	const [name, setName] = useState(initialName)
 	const [selectedSourceLang, setSelectedSourceLang] = useState(sourceLang)
+	const [uiColor, setUiColor] = useState<string | null>(initialUiColor)
 	const [skipWords, setSkipWords] = useState(initialSkipWords)
 	const [skipPathContains, setSkipPathContains] = useState(initialContains)
 	const [skipPathRegex, setSkipPathRegex] = useState(initialRegex)
@@ -272,6 +317,7 @@ export function WebsiteSettingsForm({
 			const result = await saveWebsiteSettings(websiteId, {
 				name: trimmedName,
 				sourceLang: selectedSourceLang,
+				uiColor,
 				skipWords: trimmedSkipWords,
 				skipPath: combineSkipPath(trimmedContains, trimmedRegex),
 				skipSelectors: trimmedSelectors,
@@ -341,6 +387,44 @@ export function WebsiteSettingsForm({
 						onChange={setSelectedSourceLang}
 						disabled={isPending}
 					/>
+
+					{/* Accent Color */}
+					<div>
+						<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">
+							Accent Color
+						</label>
+						<div className="flex flex-wrap gap-2">
+							{/* Auto (null) circle */}
+							<button
+								type="button"
+								title="Auto"
+								onClick={() => setUiColor(null)}
+								disabled={isPending}
+								className={`w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 cursor-pointer transition-transform disabled:opacity-50 ${
+									uiColor === null ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-[var(--card-bg)] scale-110' : ''
+								}`}
+							/>
+							{UI_COLORS.map(({ key, label }) => {
+								const swatch = COLOR_SWATCH[key]
+								const selected = uiColor === key
+								return (
+									<button
+										key={key}
+										type="button"
+										title={label}
+										onClick={() => setUiColor(key)}
+										disabled={isPending}
+										className={`w-7 h-7 rounded-full ${swatch.bg} cursor-pointer transition-transform disabled:opacity-50 ${
+											selected ? `ring-2 ${swatch.ring} ring-offset-2 ring-offset-[var(--card-bg)] scale-110` : ''
+										}`}
+									/>
+								)
+							})}
+						</div>
+						<p className="text-xs text-[var(--text-muted)] mt-1.5">
+							Accent color for navigation and website switcher
+						</p>
+					</div>
 				</div>
 			</div>
 

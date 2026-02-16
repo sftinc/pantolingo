@@ -40,7 +40,9 @@
 			<span class="bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 bg-yellow-700/20 dark:bg-yellow-300/20"></span>
 			<span class="bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 bg-amber-700/20 dark:bg-amber-300/20"></span>
 			<span class="bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 bg-orange-700/20 dark:bg-orange-300/20"></span>
-			<span class="bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 bg-slate-700/20 dark:bg-slate-300/20"></span>
+			<span class="bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 bg-slate-800/25 dark:bg-slate-200/25"></span>
+			<span class="bg-stone-100 dark:bg-stone-900 text-stone-700 dark:text-stone-300 bg-stone-700/20 dark:bg-stone-300/20"></span>
+			<span class="bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 bg-stone-800/25 dark:bg-stone-200/25"></span>
 		</div>
 
 		<!-- Theme toggle -->
@@ -61,6 +63,14 @@
 			<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">How each option looks next to a neutral profile button.</p>
 
 			<div class="space-y-3" id="topbar-grid"></div>
+
+			<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mt-16 mb-2">Purposed Colors</h2>
+			<p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Neutral tones with punched-up contrast (bg -200/-800, text -800/-200).</p>
+
+			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="purposed-grid"></div>
+
+			<h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-8 mb-4">In context</h3>
+			<div class="space-y-3" id="purposed-topbar-grid"></div>
 		</div>
 
 		<script>
@@ -70,7 +80,17 @@
 				'green', 'lime', 'yellow', 'amber', 'orange', 'slate',
 			]
 
+			const purposedColors = ['stone']
+
 			function cls(color) {
+				// Punched-up neutrals use -200/-800 for more contrast
+				if (color === 'slate' || color === 'stone') {
+					return {
+						btn: `bg-${color}-200 dark:bg-${color}-800 text-${color}-800 dark:text-${color}-200`,
+						avatar: `bg-${color}-800/25 dark:bg-${color}-200/25 text-${color}-800 dark:text-${color}-200`,
+						label: `bg-${color}-200 / text-${color}-800`,
+					}
+				}
 				return {
 					btn: `bg-${color}-100 dark:bg-${color}-900 text-${color}-700 dark:text-${color}-300`,
 					avatar: `bg-${color}-700/20 dark:bg-${color}-300/20 text-${color}-700 dark:text-${color}-300`,
@@ -80,64 +100,79 @@
 
 			const chevronSvg = `<svg class="w-4 h-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>`
 
+			function renderColorCard(color, container) {
+				const c = cls(color)
+				const name = color.charAt(0).toUpperCase() + color.slice(1)
+				const card = document.createElement('div')
+				card.className = 'bg-white dark:bg-[#222] rounded-lg border border-gray-200 dark:border-gray-700 p-5'
+				card.innerHTML = `
+					<div class="flex items-center justify-between mb-3">
+						<span class="text-sm font-semibold text-gray-800 dark:text-gray-200">${name}</span>
+						<span class="text-[10px] font-mono text-gray-400 dark:text-gray-500">${c.label}</span>
+					</div>
+					<button class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors w-full ${c.btn}">
+						<span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-semibold shrink-0 ${c.avatar}">E</span>
+						<span class="font-semibold">eSnipe</span>
+						<span class="ml-auto">${chevronSvg}</span>
+					</button>
+					<div class="mt-2 flex gap-2">
+						<button class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium ${c.btn}">
+							<span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-semibold shrink-0 ${c.avatar}">A</span>
+							<span class="font-semibold">Acme</span>
+						</button>
+						<button class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium ${c.btn}">
+							<span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-semibold shrink-0 ${c.avatar}">M</span>
+							<span class="font-semibold">MyShop</span>
+						</button>
+					</div>
+				`
+				container.appendChild(card)
+			}
+
+			function renderTopbarRow(color, container) {
+				const c = cls(color)
+				const name = color.charAt(0).toUpperCase() + color.slice(1)
+				const row = document.createElement('div')
+				row.className = 'flex items-center justify-end gap-1 px-4 h-14 bg-white dark:bg-[#1a1a1a] rounded-lg border border-gray-200 dark:border-gray-700'
+				row.innerHTML = `
+					<span class="mr-auto text-xs font-mono text-gray-400 dark:text-gray-500">${name}</span>
+					<button class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium ${c.btn}">
+						<span class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-semibold shrink-0 ${c.avatar}">E</span>
+						<span class="font-semibold">eSnipe</span>
+						${chevronSvg}
+					</button>
+					<button class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<circle cx="12" cy="8" r="4" stroke-width="1.5" />
+							<path stroke-width="1.5" d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+						</svg>
+						<span class="text-sm">W. Williams</span>
+						<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+						</svg>
+					</button>
+				`
+				container.appendChild(row)
+			}
+
 			function renderAll() {
 				const grid = document.getElementById('color-grid')
 				const topbar = document.getElementById('topbar-grid')
+				const purposedGrid = document.getElementById('purposed-grid')
+				const purposedTopbar = document.getElementById('purposed-topbar-grid')
 				grid.innerHTML = ''
 				topbar.innerHTML = ''
+				purposedGrid.innerHTML = ''
+				purposedTopbar.innerHTML = ''
 
 				colors.forEach(color => {
-					const c = cls(color)
-					const name = color.charAt(0).toUpperCase() + color.slice(1)
+					renderColorCard(color, grid)
+					renderTopbarRow(color, topbar)
+				})
 
-					// Card
-					const card = document.createElement('div')
-					card.className = 'bg-white dark:bg-[#222] rounded-lg border border-gray-200 dark:border-gray-700 p-5'
-					card.innerHTML = `
-						<div class="flex items-center justify-between mb-3">
-							<span class="text-sm font-semibold text-gray-800 dark:text-gray-200">${name}</span>
-							<span class="text-[10px] font-mono text-gray-400 dark:text-gray-500">${c.label}</span>
-						</div>
-						<button class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors w-full ${c.btn}">
-							<span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-semibold shrink-0 ${c.avatar}">E</span>
-							<span class="font-semibold">eSnipe</span>
-							<span class="ml-auto">${chevronSvg}</span>
-						</button>
-						<div class="mt-2 flex gap-2">
-							<button class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium ${c.btn}">
-								<span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-semibold shrink-0 ${c.avatar}">A</span>
-								<span class="font-semibold">Acme</span>
-							</button>
-							<button class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium ${c.btn}">
-								<span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-semibold shrink-0 ${c.avatar}">M</span>
-								<span class="font-semibold">MyShop</span>
-							</button>
-						</div>
-					`
-					grid.appendChild(card)
-
-					// Top bar row
-					const row = document.createElement('div')
-					row.className = 'flex items-center justify-end gap-1 px-4 h-14 bg-white dark:bg-[#1a1a1a] rounded-lg border border-gray-200 dark:border-gray-700'
-					row.innerHTML = `
-						<span class="mr-auto text-xs font-mono text-gray-400 dark:text-gray-500">${name}</span>
-						<button class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium ${c.btn}">
-							<span class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-semibold shrink-0 ${c.avatar}">E</span>
-							<span class="font-semibold">eSnipe</span>
-							${chevronSvg}
-						</button>
-						<button class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
-							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<circle cx="12" cy="8" r="4" stroke-width="1.5" />
-								<path stroke-width="1.5" d="M4 20c0-4 4-6 8-6s8 2 8 6" />
-							</svg>
-							<span class="text-sm">W. Williams</span>
-							<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-							</svg>
-						</button>
-					`
-					topbar.appendChild(row)
+				purposedColors.forEach(color => {
+					renderColorCard(color, purposedGrid)
+					renderTopbarRow(color, purposedTopbar)
 				})
 			}
 

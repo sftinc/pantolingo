@@ -33,6 +33,7 @@ describe('saveWebsiteSettings', () => {
 		skipPath: [],
 		skipSelectors: [],
 		translatePath: false,
+		uiColor: null as string | null,
 	}
 
 	it('trims the name before validation and DB call', async () => {
@@ -114,5 +115,28 @@ describe('saveWebsiteSettings', () => {
 		expect(mockDbUpdate).toHaveBeenCalledWith(1, expect.objectContaining({
 			skipSelectors: ['.nav'],
 		}))
+	})
+
+	it('passes valid uiColor through to DB', async () => {
+		await saveWebsiteSettings(1, { ...baseSettings, uiColor: 'blue' })
+
+		expect(mockDbUpdate).toHaveBeenCalledWith(1, expect.objectContaining({
+			uiColor: 'blue',
+		}))
+	})
+
+	it('passes null uiColor (auto) through to DB', async () => {
+		await saveWebsiteSettings(1, { ...baseSettings, uiColor: null })
+
+		expect(mockDbUpdate).toHaveBeenCalledWith(1, expect.objectContaining({
+			uiColor: null,
+		}))
+	})
+
+	it('rejects invalid uiColor string', async () => {
+		const result = await saveWebsiteSettings(1, { ...baseSettings, uiColor: 'neon' })
+
+		expect(result).toEqual({ success: false, error: 'Invalid accent color' })
+		expect(mockDbUpdate).not.toHaveBeenCalled()
 	})
 })
