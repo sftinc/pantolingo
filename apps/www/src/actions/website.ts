@@ -3,12 +3,7 @@
 import { requireAccountId } from '@/lib/auth'
 import { canAccessWebsite, updateWebsiteSettings as dbUpdateWebsiteSettings, enableDevMode as dbEnableDevMode } from '@pantolingo/db'
 import { SUPPORTED_LANGUAGES } from '@pantolingo/lang'
-
-const VALID_UI_COLORS = new Set([
-	'red', 'rose', 'pink', 'fuchsia', 'purple', 'violet',
-	'indigo', 'blue', 'sky', 'cyan', 'teal', 'emerald',
-	'green', 'lime', 'yellow', 'amber', 'orange', 'slate',
-])
+import { VALID_UI_COLORS } from '@/lib/ui-colors'
 
 export async function saveWebsiteSettings(
 	websiteId: number,

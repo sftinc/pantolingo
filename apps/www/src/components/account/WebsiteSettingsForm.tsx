@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/Switch'
 import { Button } from '@/components/ui/Modal'
 import { saveWebsiteSettings, enableDevMode } from '@/actions/website'
 import { LANGUAGE_DATA } from '@pantolingo/lang'
+import { UI_COLORS, UI_COLOR_LABELS, COLOR_SWATCH } from '@/lib/ui-colors'
 
 interface WebsiteSettingsFormProps {
 	websiteId: number
@@ -19,48 +20,6 @@ interface WebsiteSettingsFormProps {
 	initialSkipSelectors: string[]
 	initialTranslatePath: boolean
 	devModeRemaining: number | null
-}
-
-const UI_COLORS = [
-	{ key: 'red', label: 'Red' },
-	{ key: 'rose', label: 'Rose' },
-	{ key: 'pink', label: 'Pink' },
-	{ key: 'fuchsia', label: 'Fuchsia' },
-	{ key: 'purple', label: 'Purple' },
-	{ key: 'violet', label: 'Violet' },
-	{ key: 'indigo', label: 'Indigo' },
-	{ key: 'blue', label: 'Blue' },
-	{ key: 'sky', label: 'Sky' },
-	{ key: 'cyan', label: 'Cyan' },
-	{ key: 'teal', label: 'Teal' },
-	{ key: 'emerald', label: 'Emerald' },
-	{ key: 'green', label: 'Green' },
-	{ key: 'lime', label: 'Lime' },
-	{ key: 'yellow', label: 'Yellow' },
-	{ key: 'amber', label: 'Amber' },
-	{ key: 'orange', label: 'Orange' },
-	{ key: 'slate', label: 'Slate' },
-] as const
-
-const COLOR_SWATCH: Record<string, { bg: string; ring: string }> = {
-	red:     { bg: 'bg-red-500',     ring: 'ring-red-500' },
-	rose:    { bg: 'bg-rose-500',    ring: 'ring-rose-500' },
-	pink:    { bg: 'bg-pink-500',    ring: 'ring-pink-500' },
-	fuchsia: { bg: 'bg-fuchsia-500', ring: 'ring-fuchsia-500' },
-	purple:  { bg: 'bg-purple-500',  ring: 'ring-purple-500' },
-	violet:  { bg: 'bg-violet-500',  ring: 'ring-violet-500' },
-	indigo:  { bg: 'bg-indigo-500',  ring: 'ring-indigo-500' },
-	blue:    { bg: 'bg-blue-500',    ring: 'ring-blue-500' },
-	sky:     { bg: 'bg-sky-500',     ring: 'ring-sky-500' },
-	cyan:    { bg: 'bg-cyan-500',    ring: 'ring-cyan-500' },
-	teal:    { bg: 'bg-teal-500',    ring: 'ring-teal-500' },
-	emerald: { bg: 'bg-emerald-500', ring: 'ring-emerald-500' },
-	green:   { bg: 'bg-green-500',   ring: 'ring-green-500' },
-	lime:    { bg: 'bg-lime-500',    ring: 'ring-lime-500' },
-	yellow:  { bg: 'bg-yellow-500',  ring: 'ring-yellow-500' },
-	amber:   { bg: 'bg-amber-500',   ring: 'ring-amber-500' },
-	orange:  { bg: 'bg-orange-500',  ring: 'ring-orange-500' },
-	slate:   { bg: 'bg-slate-500',   ring: 'ring-slate-500' },
 }
 
 function parseSkipPath(skipPath: string[]): { contains: string[]; regex: string[] } {
@@ -147,7 +106,15 @@ function validateSelector(selector: string): string | null {
 	return null
 }
 
-function SourceLanguageDropdown({ value, onChange, disabled }: { value: string; onChange: (code: string) => void; disabled: boolean }) {
+function SourceLanguageDropdown({
+	value,
+	onChange,
+	disabled,
+}: {
+	value: string
+	onChange: (code: string) => void
+	disabled: boolean
+}) {
 	const [isOpen, setIsOpen] = useState(false)
 	const containerRef = useRef<HTMLDivElement>(null)
 	const sortedLangs = [...LANGUAGE_DATA].sort((a, b) => a.englishName.localeCompare(b.englishName))
@@ -165,9 +132,7 @@ function SourceLanguageDropdown({ value, onChange, disabled }: { value: string; 
 
 	return (
 		<div>
-			<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">
-				Source Language
-			</label>
+			<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">Source Language</label>
 			<div ref={containerRef} className="relative">
 				<button
 					type="button"
@@ -177,7 +142,16 @@ function SourceLanguageDropdown({ value, onChange, disabled }: { value: string; 
 				>
 					<span>{selectedLang?.flag}</span>
 					<span className="flex-1 text-left">{selectedLang?.englishName ?? value}</span>
-					<svg className={`w-4 h-4 text-[var(--text-subtle)] transition-transform ${isOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+					<svg
+						className={`w-4 h-4 text-[var(--text-subtle)] transition-transform ${isOpen ? 'rotate-180' : ''}`}
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="2"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+					>
 						<path d="m6 9 6 6 6-6" />
 					</svg>
 				</button>
@@ -188,7 +162,10 @@ function SourceLanguageDropdown({ value, onChange, disabled }: { value: string; 
 							<li key={lang.code}>
 								<button
 									type="button"
-									onClick={() => { onChange(lang.code); setIsOpen(false) }}
+									onClick={() => {
+										onChange(lang.code)
+										setIsOpen(false)
+									}}
 									className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-[var(--accent)] hover:text-white transition-colors cursor-pointer ${
 										lang.code === value
 											? 'bg-[var(--accent)]/10 text-[var(--accent)] font-medium'
@@ -209,7 +186,7 @@ function SourceLanguageDropdown({ value, onChange, disabled }: { value: string; 
 
 function DevModeControl({ websiteId, initialRemaining }: { websiteId: number; initialRemaining: number | null }) {
 	const [remaining, setRemaining] = useState<number | null>(
-		initialRemaining && initialRemaining > 0 ? initialRemaining : null
+		initialRemaining && initialRemaining > 0 ? initialRemaining : null,
 	)
 	const [isEnabling, startTransition] = useTransition()
 
@@ -234,15 +211,16 @@ function DevModeControl({ websiteId, initialRemaining }: { websiteId: number; in
 	}
 
 	const isActive = remaining !== null && remaining > 0
-	const timeLeft = isActive
-		? `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, '0')} remaining`
-		: ''
+	const timeLeft = isActive ? `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, '0')} remaining` : ''
 
 	return (
 		<div className="flex items-center justify-between gap-4">
 			<div>
 				<label className="block text-sm font-medium text-[var(--text-muted)]">
-					Dev Mode: <span className={isActive ? 'text-orange-600 dark:text-orange-400' : ''}>{isActive ? 'Enabled' : 'Disabled'}</span>
+					Dev Mode:{' '}
+					<span className={isActive ? 'text-orange-600 dark:text-orange-400' : ''}>
+						{isActive ? 'Enabled' : 'Disabled'}
+					</span>
 				</label>
 				<p className="text-xs text-[var(--text-muted)] mt-0.5">
 					Bypass static asset caching for development and testing
@@ -301,16 +279,16 @@ export function WebsiteSettingsForm({
 		const trimmedName = name.trim()
 		setName(trimmedName)
 
-		const trimmedSkipWords = skipWords.map(s => s.trim()).filter(Boolean)
+		const trimmedSkipWords = skipWords.map((s) => s.trim()).filter(Boolean)
 		setSkipWords(trimmedSkipWords)
 
-		const trimmedContains = skipPathContains.map(s => s.trim()).filter(Boolean)
+		const trimmedContains = skipPathContains.map((s) => s.trim()).filter(Boolean)
 		setSkipPathContains(trimmedContains)
 
-		const trimmedRegex = skipPathRegex.map(s => s.trim()).filter(Boolean)
+		const trimmedRegex = skipPathRegex.map((s) => s.trim()).filter(Boolean)
 		setSkipPathRegex(trimmedRegex)
 
-		const trimmedSelectors = skipSelectors.map(s => s.trim()).filter(Boolean)
+		const trimmedSelectors = skipSelectors.map((s) => s.trim()).filter(Boolean)
 		setSkipSelectors(trimmedSelectors)
 
 		startTransition(async () => {
@@ -330,6 +308,7 @@ export function WebsiteSettingsForm({
 			} else {
 				setError(result.error || 'Failed to save settings')
 			}
+			window.scrollTo({ top: 0, behavior: 'smooth' })
 		})
 	}
 
@@ -343,11 +322,7 @@ export function WebsiteSettingsForm({
 				</div>
 			)}
 
-			{error && (
-				<div className="p-3 rounded-lg bg-[var(--error)]/10 text-[var(--error)] text-sm">
-					{error}
-				</div>
-			)}
+			{error && <div className="p-3 rounded-lg bg-[var(--error)]/10 text-[var(--error)] text-sm">{error}</div>}
 
 			{/* General */}
 			<div className={cardClass}>
@@ -355,9 +330,7 @@ export function WebsiteSettingsForm({
 				<div className="space-y-5">
 					{/* Name */}
 					<div>
-						<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">
-							Name
-						</label>
+						<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">Name</label>
 						<input
 							type="text"
 							value={name}
@@ -370,9 +343,7 @@ export function WebsiteSettingsForm({
 
 					{/* Hostname (read-only) */}
 					<div>
-						<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">
-							Hostname
-						</label>
+						<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">Hostname</label>
 						<input
 							type="text"
 							value={hostname}
@@ -390,9 +361,7 @@ export function WebsiteSettingsForm({
 
 					{/* Accent Color */}
 					<div>
-						<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">
-							Accent Color
-						</label>
+						<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">Theme Color</label>
 						<div className="flex flex-wrap gap-2">
 							{/* Auto (null) circle */}
 							<button
@@ -401,21 +370,25 @@ export function WebsiteSettingsForm({
 								onClick={() => setUiColor(null)}
 								disabled={isPending}
 								className={`w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 cursor-pointer transition-transform disabled:opacity-50 ${
-									uiColor === null ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-[var(--card-bg)] scale-110' : ''
+									uiColor === null
+										? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-[var(--card-bg)] scale-110'
+										: ''
 								}`}
 							/>
-							{UI_COLORS.map(({ key, label }) => {
-								const swatch = COLOR_SWATCH[key]
-								const selected = uiColor === key
+							{UI_COLORS.map((color) => {
+								const swatch = COLOR_SWATCH[color]
+								const selected = uiColor === color
 								return (
 									<button
-										key={key}
+										key={color}
 										type="button"
-										title={label}
-										onClick={() => setUiColor(key)}
+										title={UI_COLOR_LABELS[color]}
+										onClick={() => setUiColor(color)}
 										disabled={isPending}
 										className={`w-7 h-7 rounded-full ${swatch.bg} cursor-pointer transition-transform disabled:opacity-50 ${
-											selected ? `ring-2 ${swatch.ring} ring-offset-2 ring-offset-[var(--card-bg)] scale-110` : ''
+											selected
+												? `ring-2 ${swatch.ring} ring-offset-2 ring-offset-[var(--card-bg)] scale-110`
+												: ''
 										}`}
 									/>
 								)
@@ -435,18 +408,12 @@ export function WebsiteSettingsForm({
 					{/* Translate URL Paths */}
 					<div className="flex items-center justify-between gap-4">
 						<div>
-							<label className="block text-sm font-medium text-[var(--text-muted)]">
-								Translate URL Paths
-							</label>
+							<label className="block text-sm font-medium text-[var(--text-muted)]">Translate URL Paths</label>
 							<p className="text-xs text-[var(--text-muted)] mt-0.5">
 								When enabled, URL paths will be translated (e.g., /about becomes /acerca-de)
 							</p>
 						</div>
-						<Switch
-							checked={translatePath}
-							onChange={setTranslatePath}
-							disabled={isPending}
-						/>
+						<Switch checked={translatePath} onChange={setTranslatePath} disabled={isPending} />
 					</div>
 
 					{/* Dev Mode */}
@@ -475,9 +442,7 @@ export function WebsiteSettingsForm({
 				<div className="space-y-5">
 					{/* Contains */}
 					<div>
-						<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">
-							Contains
-						</label>
+						<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">Contains</label>
 						<p className="text-xs text-[var(--text-muted)] mb-2">
 							Paths containing these strings will not be translated
 						</p>
@@ -491,9 +456,7 @@ export function WebsiteSettingsForm({
 
 					{/* Regex */}
 					<div>
-						<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">
-							Regex
-						</label>
+						<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">Regex</label>
 						<p className="text-xs text-[var(--text-muted)] mb-2">
 							Paths matching these regular expressions will not be translated
 						</p>
@@ -525,11 +488,7 @@ export function WebsiteSettingsForm({
 
 			{/* Save Button */}
 			<div className="flex justify-end">
-				<Button
-					variant="primary"
-					onClick={handleSave}
-					loading={isPending}
-				>
+				<Button variant="primary" onClick={handleSave} loading={isPending}>
 					Save Settings
 				</Button>
 			</div>

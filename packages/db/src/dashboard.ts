@@ -84,8 +84,8 @@ export interface PathOption {
 	path: string
 }
 
-// Changelog types for tracking translation edits
-export type ChangelogType = 'segment' | 'path' | 'setting'
+// Changelog types for tracking changes
+export type ChangelogType = 'segment' | 'path' | 'setting' | 'profile'
 
 export interface ChangelogItem {
 	table: string
@@ -635,9 +635,9 @@ export async function updateSegmentTranslation(
 				change[0].columns.reviewed = { old: wasReviewed, new: reviewed as boolean }
 			}
 			await client.query(
-				`INSERT INTO changelog (website_id, account_id, type, change)
+				`INSERT INTO changelog (account_id, website_id, type, change)
 				 VALUES ($1, $2, $3, $4)`,
-				[websiteId, accountId, 'segment', JSON.stringify(change)]
+				[accountId, websiteId, 'segment', JSON.stringify(change)]
 			)
 		}
 
@@ -737,9 +737,9 @@ export async function updatePathTranslation(
 				change[0].columns.reviewed = { old: wasReviewed, new: reviewed as boolean }
 			}
 			await client.query(
-				`INSERT INTO changelog (website_id, account_id, type, change)
+				`INSERT INTO changelog (account_id, website_id, type, change)
 				 VALUES ($1, $2, $3, $4)`,
-				[websiteId, accountId, 'path', JSON.stringify(change)]
+				[accountId, websiteId, 'path', JSON.stringify(change)]
 			)
 		}
 

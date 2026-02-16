@@ -129,7 +129,7 @@ The `PlaceholderEditor` component renders and validates placeholders in translat
 
 ## Changelog Tracking
 
-Translation edits are tracked in the `changelog` table. Records are created when translation text or reviewed status changes.
+Changes are tracked in the `changelog` table. `account_id` is always required; `website_id` is set for website-scoped changes, NULL for profile changes.
 
 ### Changelog Types
 
@@ -138,6 +138,7 @@ Translation edits are tracked in the `changelog` table. Records are created when
 | `segment` | Segment translation changed |
 | `path` | Path translation changed |
 | `setting` | Website setting changed (future) |
+| `profile` | Account profile changed (future) |
 
 ### Change Schema
 
