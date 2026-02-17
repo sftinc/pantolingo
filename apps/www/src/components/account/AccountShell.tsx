@@ -173,6 +173,16 @@ export function AccountShell({ currentWebsite, websites, userName, userProfile, 
 									Profile
 								</button>
 
+								{/* Billing link */}
+								<Link
+									href="/account/billing"
+									onClick={() => setProfileOpen(false)}
+									className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
+								>
+									<BillingIcon className="w-5 h-5 text-[var(--text-subtle)]" />
+									Billing
+								</Link>
+
 								<div className="border-t border-[var(--border)] my-1" />
 
 								{/* Theme cycle */}
@@ -374,6 +384,15 @@ function MonitorIcon({ className }: { className?: string }) {
 		<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<rect x="2" y="3" width="20" height="14" rx="2" strokeWidth="1.5" />
 			<path strokeLinecap="round" strokeWidth="1.5" d="M8 21h8m-4-4v4" />
+		</svg>
+	)
+}
+
+function BillingIcon({ className }: { className?: string }) {
+	return (
+		<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<rect x="2" y="5" width="20" height="14" rx="2" strokeWidth="1.5" />
+			<path strokeLinecap="round" strokeWidth="1.5" d="M2 10h20" />
 		</svg>
 	)
 }
