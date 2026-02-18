@@ -3,7 +3,6 @@
  * Provides aggregated stats and CRUD operations for websites, languages, segments, and paths
  */
 
-import crypto from 'crypto'
 import { pool } from './pool.js'
 
 // =============================================================================
@@ -795,33 +794,67 @@ export async function updateWebsiteSettings(
 }
 
 /**
- * Create a new website and link it to an account as owner
- * @param accountId - Account ID of the owner
- * @param name - Display name for the website
- * @param hostname - Hostname (e.g., "example.com")
- * @param sourceLang - Source language code
- * @returns The generated public_code for the new website
+ * Check if a hostname is taken.
+ * Blocks when:
+ * - Active (not removed) + verified by any account
+ * - Active (not removed) + unverified but owned by the same account
+ * Allows: removed websites, unverified websites from other accounts, no records.
  */
-export async function createWebsite(
+export async function isHostnameTaken(hostname: string, accountId: number): Promise<boolean> {
+	const result = await pool.query(
+		`SELECT 1 FROM website w
+		 JOIN account_website aw ON aw.website_id = w.id
+		 WHERE w.hostname = $1
+		 AND w.removed_at IS NULL
+		 AND (w.verified_at IS NOT NULL OR aw.account_id = $2)
+		 LIMIT 1`,
+		[hostname, accountId]
+	)
+	return result.rows.length > 0
+}
+
+/**
+ * Create a website with an initial translation in a single transaction.
+ * Used during the onboarding wizard to atomically create website + account_website + translation.
+ *
+ * @param accountId - Owner account ID
+ * @param name - Display name for the website
+ * @param hostname - Source hostname (e.g., "example.com")
+ * @param sourceLang - Source language code
+ * @param apex - Apex domain (e.g., "example.com")
+ * @param publicCode - Pre-generated public code
+ * @param targetLang - Target language code
+ * @param translationHostname - Translation hostname (e.g., "es.example.com")
+ * @returns The public code
+ */
+export async function createWebsiteWithTranslation(
 	accountId: number,
 	name: string,
 	hostname: string,
-	sourceLang: string
+	sourceLang: string,
+	apex: string,
+	publicCode: string,
+	targetLang: string,
+	translationHostname: string
 ): Promise<string> {
-	const publicCode = crypto.randomBytes(8).toString('hex')
-
 	const client = await pool.connect()
 	try {
 		await client.query('BEGIN')
 		const result = await client.query<{ id: number }>(
-			`INSERT INTO website (name, hostname, source_lang, public_code)
-			 VALUES ($1, $2, $3, $4) RETURNING id`,
-			[name, hostname, sourceLang, publicCode]
+			`INSERT INTO website (name, hostname, source_lang, public_code, apex, verified_at)
+			 VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING id`,
+			[name, hostname, sourceLang, publicCode, apex]
 		)
+		const websiteId = result.rows[0].id
 		await client.query(
 			`INSERT INTO account_website (account_id, website_id, role)
 			 VALUES ($1, $2, 'owner')`,
-			[accountId, result.rows[0].id]
+			[accountId, websiteId]
+		)
+		await client.query(
+			`INSERT INTO translation (website_id, hostname, target_lang)
+			 VALUES ($1, $2, $3)`,
+			[websiteId, translationHostname, targetLang]
 		)
 		await client.query('COMMIT')
 		return publicCode

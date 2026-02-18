@@ -11,12 +11,17 @@ export default async function AccountPage() {
 		redirect('/login')
 	}
 
-	const publicCode = await getMostRecentWebsite(session.user.accountId)
+	// Missing name — onboard first
+	if (!session.user.firstName) {
+		redirect('/account/onboard')
+	}
 
+	// Has websites — go to last website
+	const publicCode = await getMostRecentWebsite(session.user.accountId)
 	if (publicCode) {
 		redirect(`/account/${publicCode}/languages`)
 	}
 
-	// No websites — send to setup to add first website
-	redirect('/account/setup')
+	// No websites — start the website wizard
+	redirect('/account/website')
 }

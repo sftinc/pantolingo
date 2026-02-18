@@ -10,8 +10,10 @@ Next.js 16 app with Tailwind CSS v4 and React 19.
 -   `/auth/check-email` - "Check your email" confirmation page
 -   `/auth/enter-code` - Manual 8-character code entry page
 -   `/auth/magic` - Magic link verification (redirects to `/api/auth/callback/smtp`)
--   `/account` - Smart router (redirects to last website or `/account/setup`)
--   `/account/setup` - Two-step onboarding: step 1 (name + password), step 2 (add first website). Auto-detects step from account state.
+-   `/account` - Smart router (no name → `/account/onboard`, has websites → last website, no websites → `/account/website`)
+-   `/account/onboard` - Profile setup (name + password) for new users missing first/last name
+-   `/account/website` - 4-step wizard for creating a website with DNS verification
+-   `/account/setup` - Legacy redirect (no name → `/account/onboard`, else → `/account/website`)
 -   `/account/[publicCode]/languages` - Languages list with pill links
 -   `/account/[publicCode]/segments?lang=es` - Segments editor (language via query param)
 -   `/account/[publicCode]/paths?lang=es` - Paths editor (language via query param)
@@ -58,7 +60,9 @@ src/
 │   ├── (account)/              # Customer account (sidebar layout)
 │   │   └── account/
 │   │       ├── page.tsx                        # /account - smart router
-│   │       ├── setup/                           # /account/setup - two-step onboarding
+│   │       ├── onboard/                        # /account/onboard - profile setup
+│   │       ├── website/                        # /account/website - 4-step wizard
+│   │       ├── setup/                           # /account/setup - legacy redirect
 │   │       └── [publicCode]/
 │   │           ├── layout.tsx                  # Sidebar layout (auth gate + data)
 │   │           ├── languages/page.tsx          # /account/:publicCode/languages

@@ -24,29 +24,44 @@ export default auth((req) => {
 		return NextResponse.next()
 	}
 
-	// Legacy /onboarding - redirect to new path
-	if (pathname === '/onboarding') {
-		return NextResponse.redirect(new URL('/account/setup', req.url))
+	// Legacy routes — redirect to new paths
+	if (pathname === '/onboarding' || pathname === '/account/setup') {
+		if (!isLoggedIn) {
+			return NextResponse.redirect(new URL('/login', req.url))
+		}
+		return NextResponse.redirect(
+			new URL(hasName ? '/account/website' : '/account/onboard', req.url)
+		)
 	}
 
-	// Account setup - require session but allow null name
-	// Page handles step detection (profile vs website) and "done" redirect
-	if (pathname === '/account/setup') {
+	// Onboard — require session, allow no name
+	if (pathname === '/account/onboard') {
 		if (!isLoggedIn) {
 			return NextResponse.redirect(new URL('/login', req.url))
 		}
 		return NextResponse.next()
 	}
 
-	// Account routes - require session with name
+	// Website wizard — require session + name
+	if (pathname === '/account/website') {
+		if (!isLoggedIn) {
+			return NextResponse.redirect(new URL('/login', req.url))
+		}
+		if (!hasName) {
+			return NextResponse.redirect(new URL('/account/onboard', req.url))
+		}
+		return NextResponse.next()
+	}
+
+	// Account routes — require session with name
 	if (pathname.startsWith('/account')) {
 		if (!isLoggedIn) {
 			const callbackUrl = encodeURIComponent(pathname + req.nextUrl.search)
 			return NextResponse.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, req.url))
 		}
-		// Redirect to setup if no name
+		// Redirect to onboard if no name
 		if (!hasName) {
-			return NextResponse.redirect(new URL('/account/setup', req.url))
+			return NextResponse.redirect(new URL('/account/onboard', req.url))
 		}
 		// Clear auth cookie on authenticated account access (cleanup after auth flow)
 		const response = NextResponse.next()

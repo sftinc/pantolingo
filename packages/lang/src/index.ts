@@ -19,6 +19,9 @@ export { getLanguageInfo, getLanguageOptions, getLanguageName, getLanguageLabel,
 // Lookup functions
 export { getLanguagesForRegion, getLanguagesForCountry, getCountriesForLanguage, isRtlLanguage } from './lookup.js'
 
+// Subdomain utilities
+export { deriveTranslationSubdomain } from './subdomain.js'
+
 // Derived constants
 import { LANGUAGE_DATA } from './data.js'
 
