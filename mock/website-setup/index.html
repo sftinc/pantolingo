@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mock — Website Setup Wizard</title>
+<style>
+  :root {
+    --page-bg: #f8f8f8;
+    --page-fg: #333;
+    --card-bg: #ffffff;
+    --text-heading: #111;
+    --text-body: #333;
+    --text-muted: #555;
+    --text-subtle: #888;
+    --shadow-color: rgba(0,0,0,0.1);
+    --accent: #2563eb;
+    --error: #dc2626;
+    --border: #d1d5db;
+    --border-hover: #9ca3af;
+    --input-bg: #fff;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page-bg: #111;
+      --page-fg: #e5e5e5;
+      --card-bg: #222;
+      --text-heading: #f5f5f5;
+      --text-body: #e5e5e5;
+      --text-muted: #b5b5b5;
+      --text-subtle: #777;
+      --shadow-color: rgba(0,0,0,0.3);
+      --accent: #3b82f6;
+      --error: #ef4444;
+      --border: #374151;
+      --border-hover: #4b5563;
+      --input-bg: #1a1a1a;
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--page-bg); color: var(--page-fg); }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    background: var(--card-bg);
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  header .logo { font-size: 20px; font-weight: 600; color: var(--text-heading); }
+  header .label { font-size: 14px; color: var(--text-muted); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+
+  .step-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .step-wrapper h2 { font-size: 24px; font-weight: 700; color: var(--text-heading); margin-bottom: 8px; }
+  .step-wrapper .subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; text-align: center; max-width: 400px; }
+
+  /* Step indicator */
+  .step-indicator { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }
+  .step-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 500;
+  }
+  .step-dot.active { background: var(--accent); color: #fff; }
+  .step-dot.done { background: color-mix(in srgb, var(--accent) 20%, transparent); color: var(--accent); }
+  .step-dot.future { background: var(--border); color: var(--text-muted); }
+  .step-line { width: 32px; height: 2px; }
+  .step-line.done { background: color-mix(in srgb, var(--accent) 40%, transparent); }
+  .step-line.future { background: var(--border); }
+
+  /* Card */
+  .card {
+    width: 100%; max-width: 420px;
+    background: var(--card-bg);
+    padding: 32px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+  }
+
+  /* Form elements */
+  label { display: block; font-size: 14px; font-weight: 500; color: var(--text-body); margin-bottom: 8px; }
+  input[type="text"] {
+    width: 100%; padding: 12px 16px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--input-bg);
+    color: var(--text-body); font-size: 14px; outline: none;
+  }
+  input[type="text"]:focus { box-shadow: 0 0 0 2px var(--accent); border-color: transparent; }
+  .helper { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .spacer { margin-bottom: 16px; }
+
+  /* Buttons */
+  .btn-row { display: flex; gap: 12px; margin-top: 24px; }
+  .btn-primary, .btn-secondary { flex: 1; padding: 12px; border-radius: 6px; font-weight: 500; font-size: 14px; cursor: pointer; }
+  .btn-primary { background: var(--accent); color: #fff; border: none; }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-secondary { background: transparent; color: var(--text-body); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: color-mix(in srgb, var(--border) 30%, transparent); }
+  .btn-full { width: 100%; margin-top: 24px; }
+
+  /* Dropdown */
+  .dropdown { position: relative; }
+  .dropdown-trigger {
+    width: 100%; display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px; border-radius: 6px;
+    background: var(--input-bg); border: 1px solid var(--border);
+    font-size: 14px; font-weight: 500; color: var(--text-heading);
+    cursor: pointer;
+  }
+  .dropdown-trigger .placeholder { flex: 1; text-align: left; color: var(--text-muted); font-weight: 400; }
+  .dropdown-trigger .selected-flag { /* flag */ }
+  .dropdown-trigger .selected-name { flex: 1; text-align: left; }
+  .dropdown-trigger .chevron { width: 16px; height: 16px; color: var(--text-subtle); transition: transform 0.2s; }
+  .dropdown-trigger .chevron.open { transform: rotate(180deg); }
+  .dropdown-panel {
+    position: absolute; left: 0; top: 100%; z-index: 50;
+    margin-top: 4px; width: 100%; border-radius: 8px;
+    background: var(--card-bg); border: 1px solid var(--border);
+    box-shadow: 0 4px 12px var(--shadow-color);
+    display: none;
+  }
+  .dropdown-panel.open { display: block; }
+  .dropdown-search {
+    padding: 8px; border-bottom: 1px solid var(--border);
+  }
+  .dropdown-search input {
+    width: 100%; padding: 6px 12px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--input-bg);
+    font-size: 14px; color: var(--text-body); outline: none;
+  }
+  .dropdown-list { max-height: 208px; overflow-y: auto; list-style: none; }
+  .dropdown-list li button {
+    width: 100%; text-align: left; padding: 8px 12px;
+    font-size: 14px; display: flex; align-items: center; gap: 8px;
+    cursor: pointer; border: none; background: transparent;
+    color: var(--text-muted);
+  }
+  .dropdown-list li button:hover { background: var(--accent); color: #fff; }
+  .dropdown-list li button.active { background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--accent); font-weight: 500; }
+
+  /* DNS panel */
+  .dns-panel {
+    background: var(--input-bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 16px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .dns-label { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .dns-value { font-size: 14px; color: var(--text-heading); font-family: monospace; margin-top: 2px; }
+  .dns-value-row { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+  .dns-value-row code { flex: 1; font-size: 14px; color: var(--text-heading); word-break: break-all; }
+  .btn-copy {
+    flex-shrink: 0; padding: 4px 10px; font-size: 12px; font-weight: 500;
+    border: 1px solid var(--border); border-radius: 6px;
+    color: var(--text-muted); background: transparent; cursor: pointer;
+  }
+  .btn-copy:hover { color: var(--text-heading); background: color-mix(in srgb, var(--border) 30%, transparent); }
+  .dns-note { font-size: 12px; color: var(--text-muted); margin-top: 16px; margin-bottom: 24px; }
+
+  /* Subdomain input */
+  .subdomain-row {
+    display: flex; align-items: center; gap: 0;
+    margin-top: 16px;
+  }
+  .subdomain-row input {
+    flex: 1 1 50%; min-width: 0;
+    padding: 12px 12px; border-radius: 6px 0 0 6px;
+    border: 1px solid var(--border); border-right: none;
+    background: var(--input-bg); color: var(--text-body);
+    font-size: 14px; outline: none; text-align: right;
+  }
+  .subdomain-row input:focus { box-shadow: 0 0 0 2px var(--accent); border-color: transparent; z-index: 1; position: relative; }
+  .subdomain-suffix {
+    flex: 1 1 50%; min-width: 0;
+    padding: 12px 12px; border-radius: 0 6px 6px 0;
+    border: 1px solid var(--border);
+    background: var(--border); color: var(--text-muted);
+    font-size: 14px; font-weight: 500;
+    user-select: none;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .subdomain-hidden { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">Pantolingo</span>
+  <span class="label">Mock — Website Setup Wizard</span>
+</header>
+
+<div class="grid">
+
+  <!-- Step 1: Website Name -->
+  <div class="step-wrapper">
+    <h2>Add your website</h2>
+    <p class="subtitle">Name your website to get started.</p>
+    <div class="step-indicator">
+      <div class="step-dot active">1</div>
+      <div class="step-line future"></div>
+      <div class="step-dot future">2</div>
+      <div class="step-line future"></div>
+      <div class="step-dot future">3</div>
+      <div class="step-line future"></div>
+      <div class="step-dot future">4</div>
+    </div>
+    <div class="card">
+      <label for="s1-name">Website name</label>
+      <input type="text" id="s1-name" placeholder="My Blog" value="eSNipe">
+      <button type="button" class="btn-primary btn-full">Continue</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Hostname + Source Language -->
+  <div class="step-wrapper">
+    <h2>Add your website</h2>
+    <p class="subtitle">Enter your hostname and source language.</p>
+    <div class="step-indicator">
+      <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <div class="step-line done"></div>
+      <div class="step-dot active">2</div>
+      <div class="step-line future"></div>
+      <div class="step-dot future">3</div>
+      <div class="step-line future"></div>
+      <div class="step-dot future">4</div>
+    </div>
+    <div class="card">
+      <label for="s2-host">Hostname</label>
+      <input type="text" id="s2-host" placeholder="example.com" value="www.esnipe.com">
+      <p class="helper">Enter without https:// (e.g., www.example.com)</p>
+      <div class="spacer"></div>
+      <label>Source language</label>
+      <div class="dropdown" id="dd-source">
+        <button type="button" class="dropdown-trigger" onclick="toggleDropdown('dd-source')">
+          <span class="placeholder">Select a language</span>
+          <svg class="chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="dropdown-panel">
+          <div class="dropdown-search"><input type="text" placeholder="Search languages..." oninput="filterDropdown('dd-source', this.value)"></div>
+          <ul class="dropdown-list"></ul>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn-secondary">Back</button>
+        <button type="button" class="btn-primary">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Translation Language + Subdomain -->
+  <div class="step-wrapper">
+    <h2>Add your website</h2>
+    <p class="subtitle">Choose the language you want to translate into.</p>
+    <div class="step-indicator">
+      <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <div class="step-line done"></div>
+      <div class="step-dot active">3</div>
+      <div class="step-line future"></div>
+      <div class="step-dot future">4</div>
+    </div>
+    <div class="card">
+      <label>Translation language</label>
+      <div class="dropdown" id="dd-target">
+        <button type="button" class="dropdown-trigger" onclick="toggleDropdown('dd-target')">
+          <span class="placeholder">Select a language</span>
+          <svg class="chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="dropdown-panel">
+          <div class="dropdown-search"><input type="text" placeholder="Search languages..." oninput="filterDropdown('dd-target', this.value)"></div>
+          <ul class="dropdown-list"></ul>
+        </div>
+      </div>
+      <div id="subdomain-section" class="subdomain-hidden">
+        <label style="margin-top:16px">Subdomain</label>
+        <div class="subdomain-row">
+          <input type="text" id="subdomain-input" maxlength="20">
+          <span class="subdomain-suffix" id="subdomain-suffix">.esnipe.com</span>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn-secondary">Back</button>
+        <button type="button" class="btn-primary">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: DNS Verification -->
+  <div class="step-wrapper">
+    <h2>Add your website</h2>
+    <p class="subtitle">Verify ownership of your domain.</p>
+    <div class="step-indicator">
+      <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <div class="step-line done"></div>
+      <div class="step-dot active">4</div>
+    </div>
+    <div class="card">
+      <p style="font-size:14px; color:var(--text-body); margin-bottom:16px;">
+        Add a TXT record to <strong style="color:var(--text-heading)">esnipe.com</strong> to verify domain ownership.
+      </p>
+      <div class="dns-panel">
+        <div>
+          <span class="dns-label">Type</span>
+          <p class="dns-value">TXT</p>
+        </div>
+        <div>
+          <span class="dns-label">Host</span>
+          <p class="dns-value">_pantolingo</p>
+        </div>
+        <div>
+          <span class="dns-label">Value</span>
+          <div class="dns-value-row">
+            <code>v=a3f7b2c91e04d685</code>
+            <button type="button" class="btn-copy" onclick="copyValue(this)">Copy</button>
+          </div>
+        </div>
+      </div>
+      <p class="dns-note">DNS changes can take a few minutes to propagate. If verification fails, wait and try again.</p>
+      <div class="btn-row" style="margin-top:0">
+        <button type="button" class="btn-secondary">Back</button>
+        <button type="button" class="btn-primary">Verify &amp; Create</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const LANGUAGES = [
+  { code: 'en-us', name: 'English (US)', flag: '\u{1F1FA}\u{1F1F8}' },
+  { code: 'es-mx', name: 'Spanish (Mexico)', flag: '\u{1F1F2}\u{1F1FD}' },
+  { code: 'es-es', name: 'Spanish (Spain)', flag: '\u{1F1EA}\u{1F1F8}' },
+  { code: 'fr-fr', name: 'French (France)', flag: '\u{1F1EB}\u{1F1F7}' },
+  { code: 'de-de', name: 'German (Germany)', flag: '\u{1F1E9}\u{1F1EA}' },
+  { code: 'pt-br', name: 'Portuguese (Brazil)', flag: '\u{1F1E7}\u{1F1F7}' },
+  { code: 'ja-jp', name: 'Japanese (Japan)', flag: '\u{1F1EF}\u{1F1F5}' },
+  { code: 'ko-kr', name: 'Korean (South Korea)', flag: '\u{1F1F0}\u{1F1F7}' },
+  { code: 'zh-hans', name: 'Chinese (Simplified)', flag: '\u{1F1E8}\u{1F1F3}' },
+  { code: 'ar-sa', name: 'Arabic (Saudi Arabia)', flag: '\u{1F1F8}\u{1F1E6}' },
+  { code: 'it-it', name: 'Italian (Italy)', flag: '\u{1F1EE}\u{1F1F9}' },
+  { code: 'nl-nl', name: 'Dutch (Netherlands)', flag: '\u{1F1F3}\u{1F1F1}' },
+];
+
+// Track selected source lang (for filtering target dropdown)
+let selectedSourceCode = null;
+
+// Populate dropdowns on load
+function populateDropdown(dd, langs) {
+  const list = dd.querySelector('.dropdown-list');
+  list.innerHTML = '';
+  langs.forEach(lang => {
+    const li = document.createElement('li');
+    li.innerHTML = `<button type="button" data-code="${lang.code}" onclick="selectLang('${dd.id}','${lang.code}')">${lang.flag} ${lang.name}</button>`;
+    list.appendChild(li);
+  });
+}
+
+document.querySelectorAll('.dropdown').forEach(dd => {
+  populateDropdown(dd, LANGUAGES);
+});
+
+function toggleDropdown(id) {
+  const dd = document.getElementById(id);
+  const panel = dd.querySelector('.dropdown-panel');
+  const chevron = dd.querySelector('.chevron');
+  const isOpen = panel.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.dropdown-panel').forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('.chevron').forEach(c => c.classList.remove('open'));
+  if (!isOpen) {
+    panel.classList.add('open');
+    chevron.classList.add('open');
+    const input = panel.querySelector('input');
+    if (input) { input.value = ''; input.focus(); }
+    filterDropdown(id, '');
+  }
+}
+
+function filterDropdown(id, query) {
+  const dd = document.getElementById(id);
+  const buttons = dd.querySelectorAll('.dropdown-list button');
+  const q = query.toLowerCase();
+  buttons.forEach(btn => {
+    btn.parentElement.style.display = btn.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function deriveSubdomain(langCode) {
+  const lower = langCode.toLowerCase();
+  const dash = lower.indexOf('-');
+  if (dash === -1) return lower;
+  const suffix = lower.slice(dash + 1);
+  // Script subtags >= 4 chars (e.g., "hans"), region subtags are 2 chars
+  return suffix.length >= 4 ? lower : lower.slice(0, dash);
+}
+
+function selectLang(ddId, code) {
+  const dd = document.getElementById(ddId);
+  const lang = LANGUAGES.find(l => l.code === code);
+  const trigger = dd.querySelector('.dropdown-trigger');
+  trigger.innerHTML = `${lang.flag} <span class="selected-name">${lang.name}</span>
+    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
+  // Mark active
+  dd.querySelectorAll('.dropdown-list button').forEach(b => b.classList.remove('active'));
+  dd.querySelector(`[data-code="${code}"]`).classList.add('active');
+  // Close
+  dd.querySelector('.dropdown-panel').classList.remove('open');
+
+  // When source lang changes, re-populate target dropdown excluding source
+  if (ddId === 'dd-source') {
+    selectedSourceCode = code;
+    const targetDd = document.getElementById('dd-target');
+    const filtered = LANGUAGES.filter(l => l.code !== code);
+    populateDropdown(targetDd, filtered);
+    // Reset target trigger
+    targetDd.querySelector('.dropdown-trigger').innerHTML = `<span class="placeholder">Select a language</span>
+      <svg class="chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
+    // Hide subdomain section
+    document.getElementById('subdomain-section').classList.add('subdomain-hidden');
+  }
+
+  // Show subdomain input when target language is selected
+  if (ddId === 'dd-target') {
+    const section = document.getElementById('subdomain-section');
+    const input = document.getElementById('subdomain-input');
+    section.classList.remove('subdomain-hidden');
+    input.value = deriveSubdomain(code);
+  }
+}
+
+function copyValue(btn) {
+  const code = btn.previousElementSibling;
+  navigator.clipboard.writeText(code.textContent);
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy', 2000);
+}
+
+// Close dropdowns on outside click
+document.addEventListener('mousedown', e => {
+  document.querySelectorAll('.dropdown').forEach(dd => {
+    if (!dd.contains(e.target)) {
+      dd.querySelector('.dropdown-panel').classList.remove('open');
+      dd.querySelector('.chevron').classList.remove('open');
+    }
+  });
+});
+</script>
+
+</body>
+</html>
