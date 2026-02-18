@@ -123,7 +123,6 @@
     cursor: pointer;
   }
   .dropdown-trigger .placeholder { flex: 1; text-align: left; color: var(--text-muted); font-weight: 400; }
-  .dropdown-trigger .selected-flag { /* flag */ }
   .dropdown-trigger .selected-name { flex: 1; text-align: left; }
   .dropdown-trigger .chevron { width: 16px; height: 16px; color: var(--text-subtle); transition: transform 0.2s; }
   .dropdown-trigger .chevron.open { transform: rotate(180deg); }
@@ -153,47 +152,16 @@
   .dropdown-list li button:hover { background: var(--accent); color: #fff; }
   .dropdown-list li button.active { background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--accent); font-weight: 500; }
 
-  /* DNS panel */
-  .dns-panel {
+  /* Confirm — Stacked labels in panel */
+  .confirm-panel {
+    display: flex; flex-direction: column; gap: 16px;
     background: var(--input-bg); border: 1px solid var(--border);
     border-radius: 6px; padding: 16px;
-    display: flex; flex-direction: column; gap: 12px;
   }
-  .dns-label { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-  .dns-value { font-size: 14px; color: var(--text-heading); font-family: monospace; margin-top: 2px; }
-  .dns-value-row { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
-  .dns-value-row code { flex: 1; font-size: 14px; color: var(--text-heading); word-break: break-all; }
-  .btn-copy {
-    flex-shrink: 0; padding: 4px 10px; font-size: 12px; font-weight: 500;
-    border: 1px solid var(--border); border-radius: 6px;
-    color: var(--text-muted); background: transparent; cursor: pointer;
-  }
-  .btn-copy:hover { color: var(--text-heading); background: color-mix(in srgb, var(--border) 30%, transparent); }
-  .dns-note { font-size: 12px; color: var(--text-muted); margin-top: 16px; margin-bottom: 24px; }
+  .confirm-stacked-item { display: flex; flex-direction: column; gap: 2px; }
+  .confirm-stacked-label { font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+  .confirm-stacked-value { font-size: 15px; font-weight: 500; color: var(--text-heading); }
 
-  /* Subdomain input */
-  .subdomain-row {
-    display: flex; align-items: center; gap: 0;
-    margin-top: 16px;
-  }
-  .subdomain-row input {
-    flex: 1 1 50%; min-width: 0;
-    padding: 12px 12px; border-radius: 6px 0 0 6px;
-    border: 1px solid var(--border); border-right: none;
-    background: var(--input-bg); color: var(--text-body);
-    font-size: 14px; outline: none; text-align: right;
-  }
-  .subdomain-row input:focus { box-shadow: 0 0 0 2px var(--accent); border-color: transparent; z-index: 1; position: relative; }
-  .subdomain-suffix {
-    flex: 1 1 50%; min-width: 0;
-    padding: 12px 12px; border-radius: 0 6px 6px 0;
-    border: 1px solid var(--border);
-    background: var(--border); color: var(--text-muted);
-    font-size: 14px; font-weight: 500;
-    user-select: none;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .subdomain-hidden { display: none; }
 </style>
 </head>
 <body>
@@ -217,6 +185,8 @@
       <div class="step-dot future">3</div>
       <div class="step-line future"></div>
       <div class="step-dot future">4</div>
+      <div class="step-line future"></div>
+      <div class="step-dot future">5</div>
     </div>
     <div class="card">
       <label for="s1-name">Website name</label>
@@ -225,10 +195,10 @@
     </div>
   </div>
 
-  <!-- Step 2: Hostname + Source Language -->
+  <!-- Step 2: Hostname -->
   <div class="step-wrapper">
     <h2>Add your website</h2>
-    <p class="subtitle">Enter your hostname and source language.</p>
+    <p class="subtitle">Enter the hostname of your website.</p>
     <div class="step-indicator">
       <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
       <div class="step-line done"></div>
@@ -237,12 +207,36 @@
       <div class="step-dot future">3</div>
       <div class="step-line future"></div>
       <div class="step-dot future">4</div>
+      <div class="step-line future"></div>
+      <div class="step-dot future">5</div>
     </div>
     <div class="card">
       <label for="s2-host">Hostname</label>
       <input type="text" id="s2-host" placeholder="example.com" value="www.esnipe.com">
       <p class="helper">Enter without https:// (e.g., www.example.com)</p>
-      <div class="spacer"></div>
+      <div class="btn-row">
+        <button type="button" class="btn-secondary">Back</button>
+        <button type="button" class="btn-primary">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Source Language -->
+  <div class="step-wrapper">
+    <h2>Add your website</h2>
+    <p class="subtitle">What language is your website currently in?</p>
+    <div class="step-indicator">
+      <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <div class="step-line done"></div>
+      <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <div class="step-line done"></div>
+      <div class="step-dot active">3</div>
+      <div class="step-line future"></div>
+      <div class="step-dot future">4</div>
+      <div class="step-line future"></div>
+      <div class="step-dot future">5</div>
+    </div>
+    <div class="card">
       <label>Source language</label>
       <div class="dropdown" id="dd-source">
         <button type="button" class="dropdown-trigger" onclick="toggleDropdown('dd-source')">
@@ -261,7 +255,7 @@
     </div>
   </div>
 
-  <!-- Step 3: Translation Language + Subdomain -->
+  <!-- Step 4: Translation Language -->
   <div class="step-wrapper">
     <h2>Add your website</h2>
     <p class="subtitle">Choose the language you want to translate into.</p>
@@ -270,9 +264,11 @@
       <div class="step-line done"></div>
       <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
       <div class="step-line done"></div>
-      <div class="step-dot active">3</div>
+      <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <div class="step-line done"></div>
+      <div class="step-dot active">4</div>
       <div class="step-line future"></div>
-      <div class="step-dot future">4</div>
+      <div class="step-dot future">5</div>
     </div>
     <div class="card">
       <label>Translation language</label>
@@ -286,13 +282,6 @@
           <ul class="dropdown-list"></ul>
         </div>
       </div>
-      <div id="subdomain-section" class="subdomain-hidden">
-        <label style="margin-top:16px">Subdomain</label>
-        <div class="subdomain-row">
-          <input type="text" id="subdomain-input" maxlength="20">
-          <span class="subdomain-suffix" id="subdomain-suffix">.esnipe.com</span>
-        </div>
-      </div>
       <div class="btn-row">
         <button type="button" class="btn-secondary">Back</button>
         <button type="button" class="btn-primary">Continue</button>
@@ -300,10 +289,10 @@
     </div>
   </div>
 
-  <!-- Step 4: DNS Verification -->
+  <!-- Step 5: Confirm & Create -->
   <div class="step-wrapper">
     <h2>Add your website</h2>
-    <p class="subtitle">Verify ownership of your domain.</p>
+    <p class="subtitle">Review your details and create your website.</p>
     <div class="step-indicator">
       <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
       <div class="step-line done"></div>
@@ -311,36 +300,36 @@
       <div class="step-line done"></div>
       <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
       <div class="step-line done"></div>
-      <div class="step-dot active">4</div>
+      <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <div class="step-line done"></div>
+      <div class="step-dot active">5</div>
     </div>
     <div class="card">
-      <p style="font-size:14px; color:var(--text-body); margin-bottom:16px;">
-        Add a TXT record to <strong style="color:var(--text-heading)">esnipe.com</strong> to verify domain ownership.
-      </p>
-      <div class="dns-panel">
-        <div>
-          <span class="dns-label">Type</span>
-          <p class="dns-value">TXT</p>
+      <div class="confirm-panel">
+        <div class="confirm-stacked-item">
+          <span class="confirm-stacked-label">Website name</span>
+          <span class="confirm-stacked-value">eSNipe</span>
         </div>
-        <div>
-          <span class="dns-label">Host</span>
-          <p class="dns-value">_pantolingo</p>
+        <div class="confirm-stacked-item">
+          <span class="confirm-stacked-label">Hostname</span>
+          <span class="confirm-stacked-value">www.esnipe.com</span>
         </div>
-        <div>
-          <span class="dns-label">Value</span>
-          <div class="dns-value-row">
-            <code>v=a3f7b2c91e04d685</code>
-            <button type="button" class="btn-copy" onclick="copyValue(this)">Copy</button>
-          </div>
+        <div class="confirm-stacked-item">
+          <span class="confirm-stacked-label">Source language</span>
+          <span class="confirm-stacked-value">&#x1F1FA;&#x1F1F8; English (US)</span>
+        </div>
+        <div class="confirm-stacked-item">
+          <span class="confirm-stacked-label">Translation language</span>
+          <span class="confirm-stacked-value">&#x1F1F2;&#x1F1FD; Spanish (Mexico)</span>
         </div>
       </div>
-      <p class="dns-note">DNS changes can take a few minutes to propagate. If verification fails, wait and try again.</p>
-      <div class="btn-row" style="margin-top:0">
+      <div class="btn-row">
         <button type="button" class="btn-secondary">Back</button>
-        <button type="button" class="btn-primary">Verify &amp; Create</button>
+        <button type="button" class="btn-primary">Create Website</button>
       </div>
     </div>
   </div>
+
 
 </div>
 
@@ -360,10 +349,8 @@ const LANGUAGES = [
   { code: 'nl-nl', name: 'Dutch (Netherlands)', flag: '\u{1F1F3}\u{1F1F1}' },
 ];
 
-// Track selected source lang (for filtering target dropdown)
 let selectedSourceCode = null;
 
-// Populate dropdowns on load
 function populateDropdown(dd, langs) {
   const list = dd.querySelector('.dropdown-list');
   list.innerHTML = '';
@@ -383,7 +370,6 @@ function toggleDropdown(id) {
   const panel = dd.querySelector('.dropdown-panel');
   const chevron = dd.querySelector('.chevron');
   const isOpen = panel.classList.contains('open');
-  // Close all
   document.querySelectorAll('.dropdown-panel').forEach(p => p.classList.remove('open'));
   document.querySelectorAll('.chevron').forEach(c => c.classList.remove('open'));
   if (!isOpen) {
@@ -404,57 +390,26 @@ function filterDropdown(id, query) {
   });
 }
 
-function deriveSubdomain(langCode) {
-  const lower = langCode.toLowerCase();
-  const dash = lower.indexOf('-');
-  if (dash === -1) return lower;
-  const suffix = lower.slice(dash + 1);
-  // Script subtags >= 4 chars (e.g., "hans"), region subtags are 2 chars
-  return suffix.length >= 4 ? lower : lower.slice(0, dash);
-}
-
 function selectLang(ddId, code) {
   const dd = document.getElementById(ddId);
   const lang = LANGUAGES.find(l => l.code === code);
   const trigger = dd.querySelector('.dropdown-trigger');
   trigger.innerHTML = `${lang.flag} <span class="selected-name">${lang.name}</span>
     <svg class="chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
-  // Mark active
   dd.querySelectorAll('.dropdown-list button').forEach(b => b.classList.remove('active'));
   dd.querySelector(`[data-code="${code}"]`).classList.add('active');
-  // Close
   dd.querySelector('.dropdown-panel').classList.remove('open');
 
-  // When source lang changes, re-populate target dropdown excluding source
   if (ddId === 'dd-source') {
     selectedSourceCode = code;
     const targetDd = document.getElementById('dd-target');
     const filtered = LANGUAGES.filter(l => l.code !== code);
     populateDropdown(targetDd, filtered);
-    // Reset target trigger
     targetDd.querySelector('.dropdown-trigger').innerHTML = `<span class="placeholder">Select a language</span>
       <svg class="chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
-    // Hide subdomain section
-    document.getElementById('subdomain-section').classList.add('subdomain-hidden');
-  }
-
-  // Show subdomain input when target language is selected
-  if (ddId === 'dd-target') {
-    const section = document.getElementById('subdomain-section');
-    const input = document.getElementById('subdomain-input');
-    section.classList.remove('subdomain-hidden');
-    input.value = deriveSubdomain(code);
   }
 }
 
-function copyValue(btn) {
-  const code = btn.previousElementSibling;
-  navigator.clipboard.writeText(code.textContent);
-  btn.textContent = 'Copied!';
-  setTimeout(() => btn.textContent = 'Copy', 2000);
-}
-
-// Close dropdowns on outside click
 document.addEventListener('mousedown', e => {
   document.querySelectorAll('.dropdown').forEach(dd => {
     if (!dd.contains(e.target)) {
