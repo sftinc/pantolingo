@@ -4,7 +4,7 @@
 
 export { pool, testConnection, closePool } from './pool.js'
 export { hashText } from './utils/hash.js'
-export { getTranslationConfig, clearTranslationCache, type TranslationConfig } from './translation.js'
+export { getWebsiteLanguageConfig, clearWebsiteLanguageCache, type WebsiteLanguageConfig } from './website-language.js'
 export {
 	batchGetTranslations,
 	batchUpsertTranslations,
@@ -41,7 +41,7 @@ export {
 	updatePathTranslation,
 	updateWebsiteSettings,
 	isHostnameTaken,
-	createWebsiteWithTranslation,
+	createWebsiteWithLanguage,
 	enableDevMode,
 	getAccountProfile,
 	updateAccountProfile,

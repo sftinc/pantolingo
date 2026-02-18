@@ -1,20 +1,20 @@
 /**
- * Translation configuration queries
- * Replaces HOST_SETTINGS lookup with database query
+ * Website language configuration queries
+ * Looks up language config (hostname → target_lang) from the website_language table
  */
 
 import { pool } from './pool.js'
 
 /**
- * Translation configuration from database
- * Matches structure needed by index.ts
+ * Website language configuration from database
+ * Matches structure needed by the translate app pipeline
  */
-export interface TranslationConfig {
-	translationId: number
+export interface WebsiteLanguageConfig {
+	websiteLanguageId: number
 	websiteId: number // website.id - used for translation lookups
 	websiteHostname: string // website.hostname
 	sourceLang: string // website.source_lang
-	targetLang: string // translation.target_lang
+	targetLang: string // website_language.target_lang
 	skipWords: string[]
 	skipPath: (string | RegExp)[]
 	skipSelectors: string[] // CSS selectors for elements to skip during translation
@@ -22,9 +22,9 @@ export interface TranslationConfig {
 	cacheDisabledUntil: Date | null // website.cache_disabled_until - dev override for caching
 }
 
-// In-memory cache for hot path (translation config rarely changes)
-const translationCache = new Map<string, { config: TranslationConfig | null; expiresAt: number }>()
-const TRANSLATION_CACHE_TTL = 60_000 // 60 seconds
+// In-memory cache for hot path (website language config rarely changes)
+const websiteLanguageCache = new Map<string, { config: WebsiteLanguageConfig | null; expiresAt: number }>()
+const WEBSITE_LANGUAGE_CACHE_TTL = 60_000 // 60 seconds
 
 /**
  * Parse skip_path array from database format
@@ -52,25 +52,25 @@ function parseSkipPath(dbArray: string[] | null): (string | RegExp)[] {
 }
 
 /**
- * Get translation configuration by hostname
+ * Get website language configuration by hostname
  * Uses in-memory cache to avoid DB hit on every request
  *
  * @param hostname - Request hostname (e.g., 'es.esnipe.com')
- * @returns TranslationConfig or null if not found/disabled
+ * @returns WebsiteLanguageConfig or null if not found/disabled
  *
- * SQL: 1 query (translation JOIN website)
+ * SQL: 1 query (website_language JOIN website)
  */
-export async function getTranslationConfig(hostname: string): Promise<TranslationConfig | null> {
+export async function getWebsiteLanguageConfig(hostname: string): Promise<WebsiteLanguageConfig | null> {
 	// Check in-memory cache first
 	const now = Date.now()
-	const cached = translationCache.get(hostname)
+	const cached = websiteLanguageCache.get(hostname)
 	if (cached && cached.expiresAt > now) {
 		return cached.config
 	}
 
 	try {
 		const result = await pool.query<{
-			translation_id: number
+			website_language_id: number
 			website_id: number
 			target_lang: string
 			skip_words: string[] | null
@@ -82,9 +82,9 @@ export async function getTranslationConfig(hostname: string): Promise<Translatio
 			source_lang: string
 		}>(
 			`SELECT
-				t.id AS translation_id,
-				t.website_id,
-				t.target_lang,
+				wl.id AS website_language_id,
+				wl.website_id,
+				wl.target_lang,
 				w.skip_words,
 				w.skip_path,
 				w.skip_selectors,
@@ -92,21 +92,21 @@ export async function getTranslationConfig(hostname: string): Promise<Translatio
 				w.cache_disabled_until,
 				w.hostname AS website_hostname,
 				w.source_lang
-			FROM translation t
-			JOIN website w ON w.id = t.website_id
-			WHERE t.hostname = $1 AND t.enabled = TRUE`,
+			FROM website_language wl
+			JOIN website w ON w.id = wl.website_id
+			WHERE wl.hostname = $1 AND wl.enabled = TRUE`,
 			[hostname]
 		)
 
 		if (result.rows.length === 0) {
 			// Cache the miss too (prevents repeated queries for unknown hostnames)
-			translationCache.set(hostname, { config: null, expiresAt: now + TRANSLATION_CACHE_TTL })
+			websiteLanguageCache.set(hostname, { config: null, expiresAt: now + WEBSITE_LANGUAGE_CACHE_TTL })
 			return null
 		}
 
 		const row = result.rows[0]
-		const config: TranslationConfig = {
-			translationId: row.translation_id,
+		const config: WebsiteLanguageConfig = {
+			websiteLanguageId: row.website_language_id,
 			websiteId: row.website_id,
 			websiteHostname: row.website_hostname,
 			sourceLang: row.source_lang,
@@ -119,18 +119,18 @@ export async function getTranslationConfig(hostname: string): Promise<Translatio
 		}
 
 		// Cache the result
-		translationCache.set(hostname, { config, expiresAt: now + TRANSLATION_CACHE_TTL })
+		websiteLanguageCache.set(hostname, { config, expiresAt: now + WEBSITE_LANGUAGE_CACHE_TTL })
 		return config
 	} catch (error) {
-		console.error('DB translation config lookup failed:', error)
+		console.error('DB website language config lookup failed:', error)
 		return null // Fail open
 	}
 }
 
 /**
- * Clear translation config cache
+ * Clear website language config cache
  * Useful for testing or after config changes
  */
-export function clearTranslationCache(): void {
-	translationCache.clear()
+export function clearWebsiteLanguageCache(): void {
+	websiteLanguageCache.clear()
 }

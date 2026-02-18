@@ -3,7 +3,7 @@
  * Handles the POST /__pantolingo/deferred endpoint for deferred translation polling
  */
 
-import { getTranslationConfig, batchGetTranslationsByHash } from '@pantolingo/db'
+import { getWebsiteLanguageConfig, batchGetTranslationsByHash } from '@pantolingo/db'
 import { applyPatterns, restorePatterns } from '../translation/skip-patterns.js'
 import { htmlToPlaceholders, placeholdersToHtml } from '../dom/placeholders.js'
 
@@ -37,7 +37,7 @@ export async function handlePollingRequest(
 	}
 
 	// Get translation config from hostname
-	const config = await getTranslationConfig(host.startsWith('localhost') ? host.split(':')[0] : host)
+	const config = await getWebsiteLanguageConfig(host.startsWith('localhost') ? host.split(':')[0] : host)
 	if (!config) {
 		console.warn(`[Deferred Polling] No config for host: ${host}`)
 		return {}

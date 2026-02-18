@@ -5,7 +5,7 @@ import dns from 'dns'
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { pool } from '@pantolingo/db/pool'
-import { isHostnameTaken, createWebsiteWithTranslation } from '@pantolingo/db'
+import { isHostnameTaken, createWebsiteWithLanguage } from '@pantolingo/db'
 import { SUPPORTED_LANGUAGES, deriveTranslationSubdomain } from '@pantolingo/lang'
 import { validatePassword, hashPassword } from '@/lib/password'
 import { parse } from 'tldts'
@@ -130,7 +130,7 @@ export async function createWebsite(data: {
 
 	// Create website + translation
 	try {
-		await createWebsiteWithTranslation(
+		await createWebsiteWithLanguage(
 			session.user.accountId,
 			trimmedName,
 			clean,

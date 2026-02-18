@@ -22,7 +22,7 @@ export interface TranslationItem {
  * Batch lookup translations by text
  * Uses text_hash for efficient indexed lookups
  *
- * @param websiteId - Website ID from getTranslationConfig()
+ * @param websiteId - Website ID from getWebsiteLanguageConfig()
  * @param lang - Target language code
  * @param texts - Array of normalized text strings to look up
  * @returns Map of original text -> translated text (only cache hits)

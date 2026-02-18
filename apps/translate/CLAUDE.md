@@ -10,7 +10,7 @@ The translation proxy processes each request through this pipeline:
 
 **Key Flow**:
 
--   Requests hit Express -> Host determines target language from database (`translation` table)
+-   Requests hit Express -> Host determines target language from database (`website_language` table)
 -   Static assets (`.js`, `.css`, `.png`, etc.) are proxied directly with optional caching
 -   HTML content flows through the full translation pipeline
 -   PostgreSQL stores: host configuration, translations, and pathname mappings

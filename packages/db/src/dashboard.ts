@@ -140,7 +140,7 @@ export async function getWebsitesWithStats(accountId: number): Promise<WebsiteWi
 			w.name,
 			w.source_lang,
 			w.ui_color,
-			(SELECT COUNT(DISTINCT target_lang) FROM translation t WHERE t.website_id = w.id) as lang_count,
+			(SELECT COUNT(DISTINCT target_lang) FROM website_language wl WHERE wl.website_id = w.id) as lang_count,
 			(SELECT COUNT(*) FROM translation_segment ts JOIN website_segment ws ON ws.id = ts.website_segment_id WHERE ws.website_id = w.id) as segment_count,
 			(SELECT COUNT(*) FROM translation_path tp JOIN website_path wp ON wp.id = tp.website_path_id WHERE wp.website_id = w.id AND EXISTS (SELECT 1 FROM website_path_segment wps WHERE wps.website_path_id = wp.id)) as path_count
 		FROM account_website aw
@@ -265,18 +265,18 @@ export async function getLangsForWebsite(websiteId: number): Promise<LangWithSta
 			GROUP BY tp.lang
 		)
 		SELECT DISTINCT
-			t.target_lang,
+			wl.target_lang,
 			COALESCE(ss.total, 0) as translated_segment_count,
 			COALESCE(ps.total, 0) as translated_path_count,
 			COALESCE(ss.unreviewed, 0) as unreviewed_segment_count,
 			COALESCE(ps.unreviewed, 0) as unreviewed_path_count,
 			COALESCE(ss.total_words, 0) + COALESCE(ps.total_words, 0) as total_word_count,
 			COALESCE(ss.unreviewed_words, 0) + COALESCE(ps.unreviewed_words, 0) as unreviewed_word_count
-		FROM translation t
-		LEFT JOIN segment_stats ss ON ss.lang = t.target_lang
-		LEFT JOIN path_stats ps ON ps.lang = t.target_lang
-		WHERE t.website_id = $1
-		ORDER BY t.target_lang
+		FROM website_language wl
+		LEFT JOIN segment_stats ss ON ss.lang = wl.target_lang
+		LEFT JOIN path_stats ps ON ps.lang = wl.target_lang
+		WHERE wl.website_id = $1
+		ORDER BY wl.target_lang
 	`,
 		[websiteId]
 	)
@@ -297,7 +297,7 @@ export async function getLangsForWebsite(websiteId: number): Promise<LangWithSta
  */
 export async function isValidLangForWebsite(websiteId: number, lang: string): Promise<boolean> {
 	const result = await pool.query<{ exists: boolean }>(
-		'SELECT EXISTS(SELECT 1 FROM translation WHERE website_id = $1 AND target_lang = $2) as exists',
+		'SELECT EXISTS(SELECT 1 FROM website_language WHERE website_id = $1 AND target_lang = $2) as exists',
 		[websiteId, lang]
 	)
 	return result.rows[0]?.exists ?? false
@@ -814,8 +814,8 @@ export async function isHostnameTaken(hostname: string, accountId: number): Prom
 }
 
 /**
- * Create a website with an initial translation in a single transaction.
- * Used during the onboarding wizard to atomically create website + account_website + translation.
+ * Create a website with an initial language in a single transaction.
+ * Used during the onboarding wizard to atomically create website + account_website + website_language.
  *
  * @param accountId - Owner account ID
  * @param name - Display name for the website
@@ -827,7 +827,7 @@ export async function isHostnameTaken(hostname: string, accountId: number): Prom
  * @param translationHostname - Translation hostname (e.g., "es.example.com")
  * @returns The public code
  */
-export async function createWebsiteWithTranslation(
+export async function createWebsiteWithLanguage(
 	accountId: number,
 	name: string,
 	hostname: string,
@@ -852,7 +852,7 @@ export async function createWebsiteWithTranslation(
 			[accountId, websiteId]
 		)
 		await client.query(
-			`INSERT INTO translation (website_id, hostname, target_lang)
+			`INSERT INTO website_language (website_id, hostname, target_lang)
 			 VALUES ($1, $2, $3)`,
 			[websiteId, translationHostname, targetLang]
 		)

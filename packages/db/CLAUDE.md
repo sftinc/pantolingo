@@ -5,7 +5,7 @@ Shared PostgreSQL queries and utilities used by both apps.
 ## Modules
 
 -   `pool.ts`: Connection pool with lazy initialization (uses Proxy to defer pool creation until first query, ensuring env vars are loaded)
--   `translation.ts`: Translation configuration queries with in-memory caching
+-   `website-language.ts`: Website language configuration queries with in-memory caching
 -   `segments.ts`: Batch get/upsert translations with hash-based lookups
 -   `paths.ts`: Bidirectional URL mapping storage
 -   `junctions.ts`: Junction table linking translations to pathnames
@@ -16,7 +16,7 @@ Shared PostgreSQL queries and utilities used by both apps.
 ## Usage
 
 ```typescript
-import { getTranslationConfig, batchGetTranslations } from '@pantolingo/db'
+import { getWebsiteLanguageConfig, batchGetTranslations } from '@pantolingo/db'
 import { getWebsitesWithStats, updateSegmentTranslation } from '@pantolingo/db'
 ```
 
@@ -25,7 +25,7 @@ import { getWebsitesWithStats, updateSegmentTranslation } from '@pantolingo/db'
 **Tables** (website-scoped model):
 
 -   `website`: Source websites (hostname, source language)
--   `translation`: Translated domains (hostname, target language, config options)
+-   `website_language`: Language configurations per website (hostname, target language, enabled)
 -   `website_segment`: Source text segments scoped to website (text, text_hash)
 -   `translation_segment`: Translations scoped to website + language
 -   `website_path`: Source URL paths scoped to website
