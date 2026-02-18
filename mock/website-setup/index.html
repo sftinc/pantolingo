@@ -1,3 +1,24 @@
+<!--
+  Changes from current wizard (WebsiteWizard.tsx) to this mock:
+
+  Step structure: 4 steps → 5 steps (one thing per step)
+
+  | Step | Current Wizard               | Mock                  |
+  |------|------------------------------|-----------------------|
+  | 1    | Website Name + Source Lang   | Website Name          |
+  | 2    | Translation Language          | Hostname              |
+  | 3    | Hostname                      | Source Language        |
+  | 4    | DNS Verification              | Translation Language  |
+  | 5    | —                             | Confirm & Create      |
+
+  - Split step 1 (name + source language) into two separate steps
+  - Moved hostname earlier (step 4 → step 2)
+  - Removed DNS TXT verification step entirely
+  - Added confirmation step (step 5) — stacked labels in a bordered panel
+    showing: website name, hostname, source language (with flag),
+    translation language (with flag)
+  - Final button is "Create Website" instead of "Verify & Create"
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>

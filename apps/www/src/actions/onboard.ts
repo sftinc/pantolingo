@@ -12,11 +12,6 @@ import { parse } from 'tldts'
 
 const MAX_NAME_LENGTH = 25
 const HOSTNAME_REGEX = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/
-const CODE_REGEX = /^[a-f0-9]{16}$/
-
-function validateCode(code: string): boolean {
-	return CODE_REGEX.test(code)
-}
 
 export type OnboardActionState = { error?: string } | null
 
@@ -70,72 +65,29 @@ export async function completeProfile(
 }
 
 /**
- * Validate a hostname for uniqueness, DNS resolution, and extract apex domain.
- * Returns pre-generated publicCode on success.
+ * Create a website with a single translation language.
+ * Validates hostname, checks DNS resolution, extracts apex, and creates records.
  */
-export async function validateHostname(
-	hostname: string
-): Promise<{ valid: boolean; error?: string; apex?: string; publicCode?: string }> {
-	const session = await auth()
-	if (!session?.user?.accountId) {
-		return { valid: false, error: 'Unauthorized' }
-	}
-
-	// Clean hostname
-	let clean = hostname.trim().toLowerCase()
-	clean = clean.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
-
-	if (!clean) return { valid: false, error: 'Hostname is required' }
-	if (!HOSTNAME_REGEX.test(clean)) {
-		return { valid: false, error: 'Enter a valid hostname (e.g., example.com)' }
-	}
-
-	// Check uniqueness
-	const taken = await isHostnameTaken(clean, session.user.accountId)
-	if (taken) return { valid: false, error: 'This hostname is already registered' }
-
-	// Check DNS resolution
-	try {
-		await dns.promises.resolve(clean)
-	} catch {
-		return { valid: false, error: 'This hostname does not resolve. Make sure it has a DNS record.' }
-	}
-
-	// Extract apex domain
-	const parsed = parse(clean)
-	const apex = parsed.domain
-	if (!apex) return { valid: false, error: 'Could not determine the apex domain' }
-
-	// Pre-generate publicCode
-	const publicCode = crypto.randomBytes(8).toString('hex')
-
-	return { valid: true, apex, publicCode }
-}
-
-/**
- * Verify DNS TXT record and create the website + translation.
- */
-export async function verifyDnsAndCreate(data: {
+export async function createWebsite(data: {
 	name: string
 	hostname: string
 	sourceLang: string
 	targetLang: string
-	apex: string
-	publicCode: string
 }): Promise<{ success: boolean; error?: string; publicCode?: string }> {
 	const session = await auth()
 	if (!session?.user?.accountId) {
 		return { success: false, error: 'Unauthorized' }
 	}
 
-	const { name, hostname, sourceLang, targetLang, apex, publicCode } = data
+	const { name, hostname, sourceLang, targetLang } = data
 
-	// Re-validate inputs
+	// Validate name
 	const trimmedName = name.trim()
 	if (!trimmedName || trimmedName.length > 100) {
 		return { success: false, error: 'Website name must be 1-100 characters' }
 	}
 
+	// Validate languages
 	if (!SUPPORTED_LANGUAGES.includes(sourceLang)) {
 		return { success: false, error: 'Invalid source language' }
 	}
@@ -146,28 +98,32 @@ export async function verifyDnsAndCreate(data: {
 		return { success: false, error: 'Source and target languages must be different' }
 	}
 
-	if (!validateCode(publicCode)) {
-		return { success: false, error: 'Invalid verification code' }
+	// Clean & validate hostname
+	let clean = hostname.trim().toLowerCase()
+	clean = clean.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
+	if (!clean) return { success: false, error: 'Hostname is required' }
+	if (!HOSTNAME_REGEX.test(clean)) {
+		return { success: false, error: 'Enter a valid hostname (e.g., example.com)' }
 	}
 
-	// Clean hostname
-	const cleanHostname = hostname.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '')
-	if (!HOSTNAME_REGEX.test(cleanHostname)) {
-		return { success: false, error: 'Invalid hostname' }
-	}
+	// Check uniqueness
+	const taken = await isHostnameTaken(clean, session.user.accountId)
+	if (taken) return { success: false, error: 'This hostname is already registered' }
 
-	// Verify DNS TXT record at _pantolingo.{apex}
-	const txtHost = `_pantolingo.${apex}`
-	const expectedRecord = `v=${publicCode}`
+	// Check DNS resolution
 	try {
-		const records = await dns.promises.resolveTxt(txtHost)
-		const flat = records.map((r) => r.join('')).map((r) => r.trim())
-		if (!flat.includes(expectedRecord)) {
-			return { success: false, error: `TXT record not found. Add a TXT record for _pantolingo with value "${expectedRecord}" and try again.` }
-		}
+		await dns.promises.resolve(clean)
 	} catch {
-		return { success: false, error: `Could not read DNS TXT records for ${txtHost}. Check your DNS configuration.` }
+		return { success: false, error: 'This hostname does not resolve. Make sure it has a DNS record.' }
 	}
+
+	// Extract apex domain
+	const parsed = parse(clean)
+	const apex = parsed.domain
+	if (!apex) return { success: false, error: 'Could not determine the apex domain' }
+
+	// Generate publicCode
+	const publicCode = crypto.randomBytes(8).toString('hex')
 
 	// Derive translation hostname
 	const translationHostname = deriveTranslationSubdomain(targetLang) + '.' + apex
@@ -177,7 +133,7 @@ export async function verifyDnsAndCreate(data: {
 		await createWebsiteWithTranslation(
 			session.user.accountId,
 			trimmedName,
-			cleanHostname,
+			clean,
 			sourceLang,
 			apex,
 			publicCode,
