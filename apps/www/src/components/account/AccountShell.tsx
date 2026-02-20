@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useTheme } from '@/hooks/useTheme'
 import { type UiColor, COLOR_CLASSES, getWebsiteColor } from '@/lib/ui-colors'
 import { ProfileModal } from './ProfileModal'
+import { WebsiteWizardModal, type LanguageOption } from './WebsiteWizardModal'
 
 interface UserProfile {
 	firstName: string
@@ -16,6 +17,7 @@ interface UserProfile {
 interface AccountShellProps {
 	currentWebsite: { publicCode: string; hostname: string; name: string; sourceLang: string; uiColor: string | null; role: string }
 	websites: { publicCode: string; hostname: string; name: string; uiColor: string | null }[]
+	languages: LanguageOption[]
 	userName: string
 	userProfile: UserProfile
 	signOutAction: () => Promise<void>
@@ -33,7 +35,7 @@ const SECONDARY_NAV = [
 	{ label: 'Setup', path: 'setup', icon: ClipboardCheckIcon },
 ]
 
-export function AccountShell({ currentWebsite, websites, userName, userProfile, signOutAction, children }: AccountShellProps) {
+export function AccountShell({ currentWebsite, websites, languages, userName, userProfile, signOutAction, children }: AccountShellProps) {
 	const pathname = usePathname()
 	const router = useRouter()
 	const { theme, cycleTheme, mounted } = useTheme()
@@ -42,6 +44,7 @@ export function AccountShell({ currentWebsite, websites, userName, userProfile, 
 	const [switcherOpen, setSwitcherOpen] = useState(false)
 	const [profileOpen, setProfileOpen] = useState(false)
 	const [profileModalOpen, setProfileModalOpen] = useState(false)
+	const [wizardOpen, setWizardOpen] = useState(false)
 	const switcherRef = useRef<HTMLDivElement>(null)
 	const profileRef = useRef<HTMLDivElement>(null)
 
@@ -110,8 +113,11 @@ export function AccountShell({ currentWebsite, websites, userName, userProfile, 
 							<div className="absolute left-0 top-full mt-1 w-64 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg shadow-lg overflow-hidden z-50">
 								{/* Add website */}
 								<button
-									disabled
-									className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] opacity-50 cursor-not-allowed"
+									onClick={() => {
+										setSwitcherOpen(false)
+										setWizardOpen(true)
+									}}
+									className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
 								>
 									<PlusIcon className="w-5 h-5 text-[var(--text-subtle)]" />
 									Add website
@@ -295,6 +301,7 @@ export function AccountShell({ currentWebsite, websites, userName, userProfile, 
 			</main>
 
 			<ProfileModal isOpen={profileModalOpen} onClose={() => setProfileModalOpen(false)} userProfile={userProfile} />
+			<WebsiteWizardModal isOpen={wizardOpen} onClose={() => setWizardOpen(false)} languages={languages} />
 		</div>
 	)
 }

@@ -49,7 +49,7 @@ export function EnterCodeForm() {
 					autoFocus
 					autoComplete="one-time-code"
 					placeholder="XXXXXXXX"
-					className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text-body)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] mb-4"
+					className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest rounded-md border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text-body)] placeholder:text-[#ccc] dark:placeholder:text-[#555] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] mb-4"
 					maxLength={8}
 				/>
 

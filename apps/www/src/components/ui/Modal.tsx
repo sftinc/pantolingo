@@ -8,13 +8,15 @@ interface ModalProps {
 	isOpen: boolean
 	onClose: () => void
 	title: string
+	description?: string
 	children: React.ReactNode
 	className?: string
 	contentClassName?: string
 	badge?: React.ReactNode
+	closeOnBackdropClick?: boolean
 }
 
-export function Modal({ isOpen, onClose, title, children, className, contentClassName, badge }: ModalProps) {
+export function Modal({ isOpen, onClose, title, description, children, className, contentClassName, badge, closeOnBackdropClick = true }: ModalProps) {
 	const dialogRef = useRef<HTMLDialogElement>(null)
 
 	useEffect(() => {
@@ -39,7 +41,7 @@ export function Modal({ isOpen, onClose, title, children, className, contentClas
 
 	// Close on backdrop click
 	const handleBackdropClick = (e: React.MouseEvent) => {
-		if (e.target === dialogRef.current) {
+		if (e.target === dialogRef.current && closeOnBackdropClick) {
 			onClose()
 		}
 	}
@@ -59,14 +61,17 @@ export function Modal({ isOpen, onClose, title, children, className, contentClas
 		<dialog
 			ref={dialogRef}
 			className={cn(
-				'fixed inset-y-0 inset-x-4 m-auto max-h-[85vh] w-full max-w-[min(calc(100%-2rem),56rem)] rounded-lg bg-[var(--card-bg)] text-[var(--page-fg)] p-0 shadow-[0_4px_24px_var(--shadow-color)] backdrop:bg-black/50',
+				'fixed inset-x-4 top-[20%] mx-auto max-h-[85vh] w-full max-w-[min(calc(100%-2rem),56rem)] rounded-lg bg-[var(--card-bg)] text-[var(--page-fg)] p-0 shadow-[0_4px_24px_var(--shadow-color)] [&::backdrop]:bg-black/50 [&::backdrop]:backdrop-blur-[3px] [&::backdrop]:backdrop-grayscale',
 				className
 			)}
 			onClick={handleBackdropClick}
 		>
 			<div className="flex flex-col max-h-[85vh]">
-				<div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
-					<h2 className="text-lg font-semibold text-[var(--text-heading)]">{title}</h2>
+				<div className="flex items-start justify-between border-b border-[var(--border)] px-6 py-4">
+					<div>
+						<h2 className="text-lg font-semibold text-[var(--text-heading)]">{title}</h2>
+						{description && <p className="text-sm text-[var(--text-muted)] mt-0.5">{description}</p>}
+					</div>
 					<div className="flex items-center gap-3">
 						{badge}
 						<button

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { auth, signOut } from '@/lib/auth'
 import { canAccessWebsiteByPublicCode, getWebsiteByPublicCode, getWebsitesWithStats } from '@pantolingo/db'
+import { getLanguageOptions, SUPPORTED_LANGUAGES } from '@pantolingo/lang'
 import { AccountShell } from '@/components/account/AccountShell'
 
 interface WebsiteLayoutProps {
@@ -37,6 +38,13 @@ export default async function WebsiteLayout({ params, children }: WebsiteLayoutP
 	// Load websites for switcher
 	const allWebsites = await getWebsitesWithStats(session.user.accountId)
 
+	// Load languages for wizard modal
+	const languages = getLanguageOptions(SUPPORTED_LANGUAGES).map((l) => ({
+		code: l.code,
+		name: l.name,
+		flag: l.flag,
+	}))
+
 	async function handleSignOut() {
 		'use server'
 		await signOut({ redirectTo: '/login?msg=logout' })
@@ -52,6 +60,7 @@ export default async function WebsiteLayout({ params, children }: WebsiteLayoutP
 		<AccountShell
 			currentWebsite={{ publicCode: website.publicCode, hostname: website.hostname, name: website.name, sourceLang: website.sourceLang, uiColor: website.uiColor, role }}
 			websites={allWebsites.map((w) => ({ publicCode: w.publicCode, hostname: w.hostname, name: w.name, uiColor: w.uiColor }))}
+			languages={languages}
 			userName={userName}
 			userProfile={{ firstName, lastName, email: session.user.email }}
 			signOutAction={handleSignOut}

@@ -15,9 +15,16 @@ function getPool(): Pool {
 			max: 50, // Maximum connections (single instance)
 			idleTimeoutMillis: 30000, // Close idle connections after 30s
 			connectionTimeoutMillis: 10000, // Connection timeout
+			keepAlive: true, // Detect dead connections
+			keepAliveInitialDelayMillis: 10000,
 			ssl: process.env.POSTGRES_DB_URL?.includes('render.com')
 				? { rejectUnauthorized: false }
 				: false, // Only use SSL for Render
+		})
+
+		// Prevent crash when an idle client receives an error (e.g. connection reset)
+		_pool.on('error', (err) => {
+			console.error('Unexpected error on idle database client:', err.message)
 		})
 	}
 	return _pool

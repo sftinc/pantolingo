@@ -1,9 +1,12 @@
 'use server'
 
+import dns from 'dns'
 import { requireAccountId } from '@/lib/auth'
-import { canAccessWebsite, updateWebsiteSettings as dbUpdateWebsiteSettings, enableDevMode as dbEnableDevMode } from '@pantolingo/db'
+import { canAccessWebsite, updateWebsiteSettings as dbUpdateWebsiteSettings, enableDevMode as dbEnableDevMode, isHostnameTaken } from '@pantolingo/db'
 import { SUPPORTED_LANGUAGES } from '@pantolingo/lang'
 import { VALID_UI_COLORS } from '@/lib/ui-colors'
+
+const HOSTNAME_REGEX = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/
 
 export async function saveWebsiteSettings(
 	websiteId: number,
@@ -80,5 +83,35 @@ export async function enableDevMode(
 		return dbEnableDevMode(websiteId)
 	} catch {
 		return { success: false, error: 'An error occurred' }
+	}
+}
+
+/**
+ * Validate a hostname during the website wizard (step 2).
+ * Checks format, DB uniqueness, and DNS resolution.
+ */
+export async function validateHostname(hostname: string): Promise<{ valid: boolean; error?: string }> {
+	try {
+		const accountId = await requireAccountId()
+
+		let clean = hostname.trim().toLowerCase()
+		clean = clean.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
+		if (!clean) return { valid: false, error: 'Hostname is required' }
+		if (!HOSTNAME_REGEX.test(clean)) {
+			return { valid: false, error: 'Enter a valid hostname (e.g., example.com)' }
+		}
+
+		const taken = await isHostnameTaken(clean, accountId)
+		if (taken) return { valid: false, error: 'This hostname is already registered' }
+
+		try {
+			await dns.promises.resolve(clean)
+		} catch {
+			return { valid: false, error: 'This hostname does not resolve. Make sure it has a DNS record.' }
+		}
+
+		return { valid: true }
+	} catch {
+		return { valid: false, error: 'An error occurred' }
 	}
 }
