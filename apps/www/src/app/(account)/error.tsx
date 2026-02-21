@@ -12,7 +12,7 @@ export default function AccountError({ reset }: { error: Error; reset: () => voi
 					We&apos;re having trouble loading this page. This is usually temporary &mdash; please try again in a moment.
 				</p>
 				<button
-					onClick={() => reset()}
+					onClick={() => window.location.reload()}
 					className="px-4 py-2 text-sm font-medium rounded-md bg-[var(--accent)] text-white hover:opacity-90 transition-opacity cursor-pointer"
 				>
 					Try Again

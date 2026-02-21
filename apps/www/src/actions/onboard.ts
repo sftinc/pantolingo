@@ -8,6 +8,7 @@ import { pool } from '@pantolingo/db/pool'
 import { isHostnameTaken, createWebsiteWithLanguage } from '@pantolingo/db'
 import { SUPPORTED_LANGUAGES, deriveTranslationSubdomain } from '@pantolingo/lang'
 import { validatePassword, hashPassword } from '@/lib/password'
+import { registerTranslationHostnames } from '@/lib/perfprox'
 import { parse } from 'tldts'
 
 const MAX_NAME_LENGTH = 25
@@ -160,6 +161,9 @@ export async function createWebsite(data: {
 		console.error('Failed to create website:', error)
 		return { success: false, error: 'Failed to create website' }
 	}
+
+	// Register translation hostnames with Perfprox (async, non-blocking)
+	registerTranslationHostnames(targetLanguages.map((t) => t.translationHostname))
 
 	return { success: true, publicCode }
 }

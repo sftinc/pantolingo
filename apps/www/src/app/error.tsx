@@ -10,7 +10,7 @@ export default function GlobalError({ reset }: { error: Error; reset: () => void
 					We&apos;re having trouble loading this page. Please try again in a moment.
 				</p>
 				<button
-					onClick={() => reset()}
+					onClick={() => window.location.reload()}
 					className="px-4 py-2 text-sm font-medium rounded-md bg-[var(--accent)] text-white hover:opacity-90 transition-opacity cursor-pointer"
 				>
 					Try Again
