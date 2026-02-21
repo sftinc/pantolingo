@@ -1,23 +1,14 @@
 <!--
-  Changes from current wizard (WebsiteWizard.tsx) to this mock:
+  Static mock of the 5-step website setup wizard (WebsiteWizardModal.tsx).
+  Shows all steps side-by-side for visual reference.
 
-  Step structure: 4 steps → 5 steps (one thing per step)
-
-  | Step | Current Wizard               | Mock                  |
-  |------|------------------------------|-----------------------|
-  | 1    | Website Name + Source Lang   | Website Name          |
-  | 2    | Translation Language          | Hostname              |
-  | 3    | Hostname                      | Source Language        |
-  | 4    | DNS Verification              | Translation Language  |
-  | 5    | —                             | Confirm & Create      |
-
-  - Split step 1 (name + source language) into two separate steps
-  - Moved hostname earlier (step 4 → step 2)
-  - Removed DNS TXT verification step entirely
-  - Added confirmation step (step 5) — stacked labels in a bordered panel
-    showing: website name, hostname, source language (with flag),
-    translation language (with flag)
-  - Final button is "Create Website" instead of "Verify & Create"
+  | Step | Purpose              |
+  |------|----------------------|
+  | 1    | Website Name         |
+  | 2    | Hostname             |
+  | 3    | Source Language       |
+  | 4    | Translation Languages |
+  | 5    | Confirm & Create     |
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -132,6 +123,8 @@
   .btn-primary:hover { opacity: 0.9; }
   .btn-secondary { background: transparent; color: var(--text-body); border: 1px solid var(--border); }
   .btn-secondary:hover { background: color-mix(in srgb, var(--border) 30%, transparent); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary:disabled:hover { opacity: 0.5; }
   .btn-full { width: 100%; margin-top: 24px; }
 
   /* Dropdown */
@@ -173,6 +166,22 @@
   .dropdown-list li button:hover { background: var(--accent); color: #fff; }
   .dropdown-list li button.active { background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--accent); font-weight: 500; }
 
+  /* Language pills */
+  .lang-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .lang-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 10px; border-radius: 6px;
+    background: var(--input-bg); border: 1px solid var(--border);
+    font-size: 13px; font-weight: 500; color: var(--text-heading);
+  }
+  .lang-pill .remove-pill {
+    width: 16px; height: 16px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--border); border: none; cursor: pointer;
+    color: var(--text-muted); font-size: 11px; line-height: 1;
+    padding: 0;
+  }
+  .lang-pill .remove-pill:hover { background: var(--error); color: #fff; }
   /* Confirm — Stacked labels in panel */
   .confirm-panel {
     display: flex; flex-direction: column; gap: 16px;
@@ -196,8 +205,8 @@
 
   <!-- Step 1: Website Name -->
   <div class="step-wrapper">
-    <h2>Add your website</h2>
-    <p class="subtitle">Name your website to get started.</p>
+    <h2>Add website</h2>
+    <p class="subtitle">Give your website a name so you can find it later.</p>
     <div class="step-indicator">
       <div class="step-dot active">1</div>
       <div class="step-line future"></div>
@@ -211,15 +220,15 @@
     </div>
     <div class="card">
       <label for="s1-name">Website name</label>
-      <input type="text" id="s1-name" placeholder="My Blog" value="eSNipe">
-      <button type="button" class="btn-primary btn-full">Continue</button>
+      <input type="text" id="s1-name" placeholder="My Blog" value="eSnipe" oninput="updateStep1Btn()">
+      <button type="button" id="s1-continue" class="btn-primary btn-full">Continue</button>
     </div>
   </div>
 
   <!-- Step 2: Hostname -->
   <div class="step-wrapper">
-    <h2>Add your website</h2>
-    <p class="subtitle">Enter the hostname of your website.</p>
+    <h2>Add website</h2>
+    <p class="subtitle">The domain where your original website lives.</p>
     <div class="step-indicator">
       <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
       <div class="step-line done"></div>
@@ -233,19 +242,19 @@
     </div>
     <div class="card">
       <label for="s2-host">Hostname</label>
-      <input type="text" id="s2-host" placeholder="example.com" value="www.esnipe.com">
+      <input type="text" id="s2-host" placeholder="example.com" value="www.esnipe.com" oninput="updateStep2Btn()">
       <p class="helper">Enter without https:// (e.g., www.example.com)</p>
       <div class="btn-row">
         <button type="button" class="btn-secondary">Back</button>
-        <button type="button" class="btn-primary">Continue</button>
+        <button type="button" id="s2-continue" class="btn-primary">Continue</button>
       </div>
     </div>
   </div>
 
   <!-- Step 3: Source Language -->
   <div class="step-wrapper">
-    <h2>Add your website</h2>
-    <p class="subtitle">What language is your website currently in?</p>
+    <h2>Add website</h2>
+    <p class="subtitle">The language your website is written in today.</p>
     <div class="step-indicator">
       <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
       <div class="step-line done"></div>
@@ -271,15 +280,15 @@
       </div>
       <div class="btn-row">
         <button type="button" class="btn-secondary">Back</button>
-        <button type="button" class="btn-primary">Continue</button>
+        <button type="button" id="s3-continue" class="btn-primary" disabled>Continue</button>
       </div>
     </div>
   </div>
 
-  <!-- Step 4: Translation Language -->
+  <!-- Step 4: Translation Languages -->
   <div class="step-wrapper">
-    <h2>Add your website</h2>
-    <p class="subtitle">Choose the language you want to translate into.</p>
+    <h2>Add website</h2>
+    <p class="subtitle">The languages you'd like to translate into.</p>
     <div class="step-indicator">
       <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
       <div class="step-line done"></div>
@@ -292,28 +301,29 @@
       <div class="step-dot future">5</div>
     </div>
     <div class="card">
-      <label>Translation language</label>
-      <div class="dropdown" id="dd-target">
-        <button type="button" class="dropdown-trigger" onclick="toggleDropdown('dd-target')">
-          <span class="placeholder">Select a language</span>
+      <label>Translation languages</label>
+      <div class="dropdown" id="dd-multi-target">
+        <button type="button" class="dropdown-trigger" onclick="toggleDropdown('dd-multi-target')">
+          <span class="placeholder">Add a language</span>
           <svg class="chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="dropdown-panel">
-          <div class="dropdown-search"><input type="text" placeholder="Search languages..." oninput="filterDropdown('dd-target', this.value)"></div>
+          <div class="dropdown-search"><input type="text" placeholder="Search languages..." oninput="filterDropdown('dd-multi-target', this.value)"></div>
           <ul class="dropdown-list"></ul>
         </div>
       </div>
+      <div id="multi-pills" class="lang-pills"></div>
       <div class="btn-row">
         <button type="button" class="btn-secondary">Back</button>
-        <button type="button" class="btn-primary">Continue</button>
+        <button type="button" id="multi-continue-btn" class="btn-primary" disabled>Continue</button>
       </div>
     </div>
   </div>
 
   <!-- Step 5: Confirm & Create -->
   <div class="step-wrapper">
-    <h2>Add your website</h2>
-    <p class="subtitle">Review your details and create your website.</p>
+    <h2>Add website</h2>
+    <p class="subtitle">Make sure everything looks right, then create your website.</p>
     <div class="step-indicator">
       <div class="step-dot done"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
       <div class="step-line done"></div>
@@ -329,7 +339,7 @@
       <div class="confirm-panel">
         <div class="confirm-stacked-item">
           <span class="confirm-stacked-label">Website name</span>
-          <span class="confirm-stacked-value">eSNipe</span>
+          <span class="confirm-stacked-value">eSnipe</span>
         </div>
         <div class="confirm-stacked-item">
           <span class="confirm-stacked-label">Hostname</span>
@@ -340,8 +350,12 @@
           <span class="confirm-stacked-value">&#x1F1FA;&#x1F1F8; English (US)</span>
         </div>
         <div class="confirm-stacked-item">
-          <span class="confirm-stacked-label">Translation language</span>
-          <span class="confirm-stacked-value">&#x1F1F2;&#x1F1FD; Spanish (Mexico)</span>
+          <span class="confirm-stacked-label">Translation languages</span>
+          <div class="lang-pills" style="margin-top:4px">
+            <span class="lang-pill">&#x1F1F2;&#x1F1FD; Spanish (Mexico)</span>
+            <span class="lang-pill">&#x1F1EB;&#x1F1F7; French (France)</span>
+            <span class="lang-pill">&#x1F1E9;&#x1F1EA; German (Germany)</span>
+          </div>
         </div>
       </div>
       <div class="btn-row">
@@ -350,7 +364,6 @@
       </div>
     </div>
   </div>
-
 
 </div>
 
@@ -371,6 +384,20 @@ const LANGUAGES = [
 ];
 
 let selectedSourceCode = null;
+
+// --- Disabled-button helpers for Steps 1–3 ---
+function updateStep1Btn() {
+  document.getElementById('s1-continue').disabled = !document.getElementById('s1-name').value.trim();
+}
+function updateStep2Btn() {
+  document.getElementById('s2-continue').disabled = !document.getElementById('s2-host').value.trim();
+}
+function updateStep3Btn() {
+  document.getElementById('s3-continue').disabled = !selectedSourceCode;
+}
+// Init: run once so buttons reflect initial input values
+updateStep1Btn();
+updateStep2Btn();
 
 function populateDropdown(dd, langs) {
   const list = dd.querySelector('.dropdown-list');
@@ -423,11 +450,11 @@ function selectLang(ddId, code) {
 
   if (ddId === 'dd-source') {
     selectedSourceCode = code;
-    const targetDd = document.getElementById('dd-target');
-    const filtered = LANGUAGES.filter(l => l.code !== code);
-    populateDropdown(targetDd, filtered);
-    targetDd.querySelector('.dropdown-trigger').innerHTML = `<span class="placeholder">Select a language</span>
-      <svg class="chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
+    updateStep3Btn();
+    // Remove source language from multi-select if already picked
+    const idx = multiSelected.findIndex(l => l.code === code);
+    if (idx !== -1) multiSelected.splice(idx, 1);
+    refreshMultiDropdown();
   }
 }
 
@@ -439,6 +466,53 @@ document.addEventListener('mousedown', e => {
     }
   });
 });
+
+// --- Multi-select target language dropdown ---
+const multiSelected = [];
+const multiDd = document.getElementById('dd-multi-target');
+
+function refreshMultiDropdown() {
+  const available = LANGUAGES.filter(l => l.code !== selectedSourceCode && !multiSelected.find(s => s.code === l.code));
+  populateDropdown(multiDd, available);
+  // Re-wire onclick to use addMultiLang instead of selectLang
+  multiDd.querySelectorAll('.dropdown-list button').forEach(btn => {
+    const code = btn.getAttribute('data-code');
+    btn.setAttribute('onclick', `addMultiLang('${code}')`);
+  });
+
+  const pillsEl = document.getElementById('multi-pills');
+  const continueBtn = document.getElementById('multi-continue-btn');
+  pillsEl.innerHTML = '';
+  if (multiSelected.length === 0) {
+    continueBtn.disabled = true;
+  } else {
+    continueBtn.disabled = false;
+    multiSelected.forEach(lang => {
+      const pill = document.createElement('span');
+      pill.className = 'lang-pill';
+      pill.innerHTML = `${lang.flag} ${lang.name} <button type="button" class="remove-pill" onclick="removeMultiLang('${lang.code}')">&times;</button>`;
+      pillsEl.appendChild(pill);
+    });
+  }
+}
+
+function addMultiLang(code) {
+  const lang = LANGUAGES.find(l => l.code === code);
+  if (lang && !multiSelected.find(s => s.code === code)) {
+    multiSelected.push(lang);
+  }
+  multiDd.querySelector('.dropdown-panel').classList.remove('open');
+  multiDd.querySelector('.chevron').classList.remove('open');
+  refreshMultiDropdown();
+}
+
+function removeMultiLang(code) {
+  const idx = multiSelected.findIndex(l => l.code === code);
+  if (idx !== -1) multiSelected.splice(idx, 1);
+  refreshMultiDropdown();
+}
+
+refreshMultiDropdown();
 </script>
 
 </body>

@@ -7,7 +7,7 @@ const STEP_LABELS = [
 	'Website name',
 	'Hostname',
 	'Source language',
-	'Translation language',
+	'Translation languages',
 	'Review & create',
 ]
 

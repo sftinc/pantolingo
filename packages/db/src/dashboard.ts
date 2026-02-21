@@ -814,8 +814,8 @@ export async function isHostnameTaken(hostname: string, accountId: number): Prom
 }
 
 /**
- * Create a website with an initial language in a single transaction.
- * Used during the onboarding wizard to atomically create website + account_website + website_language.
+ * Create a website with one or more translation languages in a single transaction.
+ * Used during the onboarding wizard to atomically create website + account_website + website_language(s).
  *
  * @param accountId - Owner account ID
  * @param name - Display name for the website
@@ -823,8 +823,7 @@ export async function isHostnameTaken(hostname: string, accountId: number): Prom
  * @param sourceLang - Source language code
  * @param apex - Apex domain (e.g., "example.com")
  * @param publicCode - Pre-generated public code
- * @param targetLang - Target language code
- * @param translationHostname - Translation hostname (e.g., "es.example.com")
+ * @param targetLanguages - Array of target languages with their translation hostnames
  * @returns The public code
  */
 export async function createWebsiteWithLanguage(
@@ -834,8 +833,7 @@ export async function createWebsiteWithLanguage(
 	sourceLang: string,
 	apex: string,
 	publicCode: string,
-	targetLang: string,
-	translationHostname: string
+	targetLanguages: Array<{ targetLang: string; translationHostname: string }>
 ): Promise<string> {
 	const client = await pool.connect()
 	try {
@@ -851,11 +849,13 @@ export async function createWebsiteWithLanguage(
 			 VALUES ($1, $2, 'owner')`,
 			[accountId, websiteId]
 		)
-		await client.query(
-			`INSERT INTO website_language (website_id, hostname, target_lang)
-			 VALUES ($1, $2, $3)`,
-			[websiteId, translationHostname, targetLang]
-		)
+		for (const lang of targetLanguages) {
+			await client.query(
+				`INSERT INTO website_language (website_id, hostname, target_lang)
+				 VALUES ($1, $2, $3)`,
+				[websiteId, lang.translationHostname, lang.targetLang]
+			)
+		}
 		await client.query('COMMIT')
 		return publicCode
 	} catch (err) {

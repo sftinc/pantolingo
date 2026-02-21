@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Modal } from '@/components/ui/Modal'
 import { createWebsite } from '@/actions/onboard'
 import { validateHostname } from '@/actions/website'
+import { deriveTranslationSubdomain } from '@pantolingo/lang'
 
 export interface LanguageOption {
 	code: string
@@ -23,7 +24,7 @@ interface WizardState {
 	name: string
 	hostname: string
 	sourceLang: LanguageOption | null
-	targetLang: LanguageOption | null
+	targetLangs: LanguageOption[]
 	error: string
 	loading: boolean
 }
@@ -33,7 +34,7 @@ const INITIAL_STATE: WizardState = {
 	name: '',
 	hostname: '',
 	sourceLang: null,
-	targetLang: null,
+	targetLangs: [],
 	error: '',
 	loading: false,
 }
@@ -73,7 +74,7 @@ export function WebsiteWizardModal({ isOpen, onClose, languages }: WebsiteWizard
 	}
 
 	const handleStep4 = () => {
-		if (!state.targetLang) return set({ error: 'Select a translation language' })
+		if (state.targetLangs.length === 0) return set({ error: 'Add at least one translation language' })
 		set({ step: 5, error: '' })
 	}
 
@@ -83,7 +84,7 @@ export function WebsiteWizardModal({ isOpen, onClose, languages }: WebsiteWizard
 			name: state.name.trim(),
 			hostname: state.hostname.trim(),
 			sourceLang: state.sourceLang!.code,
-			targetLang: state.targetLang!.code,
+			targetLangs: state.targetLangs.map((l) => l.code),
 		})
 		if (result.success) {
 			onClose()
@@ -97,11 +98,19 @@ export function WebsiteWizardModal({ isOpen, onClose, languages }: WebsiteWizard
 		set({ error: '', step: (state.step - 1) as 1 | 2 | 3 | 4 })
 	}
 
+	const handleAddLang = (lang: LanguageOption) => {
+		set({ targetLangs: [...state.targetLangs, lang], error: '' })
+	}
+
+	const handleRemoveLang = (code: string) => {
+		set({ targetLangs: state.targetLangs.filter((l) => l.code !== code) })
+	}
+
 	const STEP_DESCRIPTIONS: Record<number, string> = {
 		1: 'Give your website a name so you can find it later.',
 		2: 'The domain where your original website lives.',
 		3: 'The language your website is written in today.',
-		4: 'The first language you\'d like to translate into.',
+		4: 'The languages you\'d like to translate into.',
 		5: 'Make sure everything looks right, then create your website.',
 	}
 
@@ -179,10 +188,12 @@ export function WebsiteWizardModal({ isOpen, onClose, languages }: WebsiteWizard
 
 			{state.step === 4 && (
 				<Step4
-					targetLang={state.targetLang}
-					languages={languages.filter((l) => l.code !== state.sourceLang?.code)}
+					targetLangs={state.targetLangs}
+					languages={languages}
+					sourceLangCode={state.sourceLang?.code ?? ''}
 					loading={state.loading}
-					onTargetLangChange={(targetLang) => set({ targetLang })}
+					onAddLang={handleAddLang}
+					onRemoveLang={handleRemoveLang}
 					onContinue={handleStep4}
 					onBack={goBack}
 				/>
@@ -193,7 +204,7 @@ export function WebsiteWizardModal({ isOpen, onClose, languages }: WebsiteWizard
 					name={state.name}
 					hostname={state.hostname}
 					sourceLang={state.sourceLang!}
-					targetLang={state.targetLang!}
+					targetLangs={state.targetLangs}
 					loading={state.loading}
 					onCreate={handleCreate}
 					onBack={goBack}
@@ -241,7 +252,7 @@ function Step1({
 				tabIndex={0}
 				type="button"
 				onClick={onContinue}
-				disabled={loading}
+				disabled={loading || !name.trim()}
 				className="w-full mt-8 py-3 bg-[var(--accent)] text-white rounded-md font-medium hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				Continue
@@ -298,7 +309,7 @@ function Step2({
 					tabIndex={0}
 					type="button"
 					onClick={onContinue}
-					disabled={loading}
+					disabled={loading || !hostname.trim()}
 					className="flex-1 py-3 bg-[var(--accent)] text-white rounded-md font-medium hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					{loading ? (
@@ -358,7 +369,7 @@ function Step3({
 					tabIndex={0}
 					type="button"
 					onClick={onContinue}
-					disabled={loading}
+					disabled={loading || !sourceLang}
 					className="flex-1 py-3 bg-[var(--accent)] text-white rounded-md font-medium hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					Continue
@@ -369,35 +380,73 @@ function Step3({
 }
 
 function Step4({
-	targetLang,
+	targetLangs,
 	languages,
+	sourceLangCode,
 	loading,
-	onTargetLangChange,
+	onAddLang,
+	onRemoveLang,
 	onContinue,
 	onBack,
 }: {
-	targetLang: LanguageOption | null
+	targetLangs: LanguageOption[]
 	languages: LanguageOption[]
+	sourceLangCode: string
 	loading: boolean
-	onTargetLangChange: (v: LanguageOption) => void
+	onAddLang: (lang: LanguageOption) => void
+	onRemoveLang: (code: string) => void
 	onContinue: () => void
 	onBack: () => void
 }) {
-	const continueRef = useRef<HTMLButtonElement>(null)
+	// Build set of subdomain prefixes already taken by selected languages
+	const takenSubdomains = new Set(targetLangs.map((l) => deriveTranslationSubdomain(l.code)))
+
+	// Filter: exclude source lang, already-selected, and same-subdomain-prefix languages
+	const availableLanguages = languages.filter((l) => {
+		if (l.code === sourceLangCode) return false
+		if (targetLangs.some((t) => t.code === l.code)) return false
+		if (takenSubdomains.has(deriveTranslationSubdomain(l.code))) return false
+		return true
+	})
+
 	return (
 		<div>
 			<label className="block text-sm font-medium text-[var(--text-body)] mb-2">
-				Translation language
+				Translation languages
 			</label>
 			<LanguageDropdown
-				selected={targetLang}
-				languages={languages}
+				selected={null}
+				languages={availableLanguages}
 				disabled={loading}
-				onSelect={(lang) => {
-					onTargetLangChange(lang)
-					setTimeout(() => continueRef.current?.focus(), 0)
-				}}
+				placeholder="Add a language"
+				onSelect={onAddLang}
 			/>
+
+			{/* Selected languages as removable pills */}
+			{targetLangs.length > 0 && (
+				<div className="flex flex-wrap gap-2 mt-4">
+					{targetLangs.map((lang) => (
+						<span
+							key={lang.code}
+							className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--accent)]/10 text-sm font-medium text-[var(--accent)]"
+						>
+							<span>{lang.flag}</span>
+							<span>{lang.name}</span>
+							<button
+								type="button"
+								onClick={() => onRemoveLang(lang.code)}
+								disabled={loading}
+								className="ml-0.5 hover:text-[var(--error)] transition-colors cursor-pointer disabled:opacity-50"
+								aria-label={`Remove ${lang.name}`}
+							>
+								<svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+									<path d="M18 6 6 18M6 6l12 12" />
+								</svg>
+							</button>
+						</span>
+					))}
+				</div>
+			)}
 
 			<div className="flex gap-3 mt-8">
 				<button
@@ -409,11 +458,10 @@ function Step4({
 					Back
 				</button>
 				<button
-					ref={continueRef}
 					tabIndex={0}
 					type="button"
 					onClick={onContinue}
-					disabled={loading}
+					disabled={loading || targetLangs.length === 0}
 					className="flex-1 py-3 bg-[var(--accent)] text-white rounded-md font-medium hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					Continue
@@ -427,7 +475,7 @@ function Step5({
 	name,
 	hostname,
 	sourceLang,
-	targetLang,
+	targetLangs,
 	loading,
 	onCreate,
 	onBack,
@@ -435,7 +483,7 @@ function Step5({
 	name: string
 	hostname: string
 	sourceLang: LanguageOption
-	targetLang: LanguageOption
+	targetLangs: LanguageOption[]
 	loading: boolean
 	onCreate: () => void
 	onBack: () => void
@@ -456,8 +504,18 @@ function Step5({
 					<p className="text-[15px] font-medium text-[var(--text-heading)] mt-0.5">{sourceLang.flag} {sourceLang.name}</p>
 				</div>
 				<div>
-					<span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">Translation language</span>
-					<p className="text-[15px] font-medium text-[var(--text-heading)] mt-0.5">{targetLang.flag} {targetLang.name}</p>
+					<span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">Translation languages</span>
+					<div className="flex flex-wrap gap-2 mt-1.5">
+						{targetLangs.map((lang) => (
+							<span
+								key={lang.code}
+								className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--accent)]/10 text-sm font-medium text-[var(--accent)]"
+							>
+								<span>{lang.flag}</span>
+								<span>{lang.name}</span>
+							</span>
+						))}
+					</div>
 				</div>
 			</div>
 
@@ -497,11 +555,13 @@ function LanguageDropdown({
 	selected,
 	languages,
 	disabled,
+	placeholder = 'Select a language',
 	onSelect,
 }: {
 	selected: LanguageOption | null
 	languages: LanguageOption[]
 	disabled: boolean
+	placeholder?: string
 	onSelect: (lang: LanguageOption) => void
 }) {
 	const [isOpen, setIsOpen] = useState(false)
@@ -553,7 +613,7 @@ function LanguageDropdown({
 						<span className="flex-1 text-left">{selected.name}</span>
 					</>
 				) : (
-					<span className="flex-1 text-left text-[var(--text-muted)] font-normal">Select a language</span>
+					<span className="flex-1 text-left text-[var(--text-muted)] font-normal">{placeholder}</span>
 				)}
 				<svg className={`w-4 h-4 text-[var(--text-subtle)] transition-transform ${isOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 					<path d="m6 9 6 6 6-6" />

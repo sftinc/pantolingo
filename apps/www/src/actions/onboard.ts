@@ -65,21 +65,21 @@ export async function completeProfile(
 }
 
 /**
- * Create a website with a single translation language.
+ * Create a website with one or more translation languages.
  * Validates hostname, checks DNS resolution, extracts apex, and creates records.
  */
 export async function createWebsite(data: {
 	name: string
 	hostname: string
 	sourceLang: string
-	targetLang: string
+	targetLangs: string[]
 }): Promise<{ success: boolean; error?: string; publicCode?: string }> {
 	const session = await auth()
 	if (!session?.user?.accountId) {
 		return { success: false, error: 'Unauthorized' }
 	}
 
-	const { name, hostname, sourceLang, targetLang } = data
+	const { name, hostname, sourceLang, targetLangs } = data
 
 	// Validate name
 	const trimmedName = name.trim()
@@ -87,15 +87,26 @@ export async function createWebsite(data: {
 		return { success: false, error: 'Website name must be 1-100 characters' }
 	}
 
-	// Validate languages
+	// Validate source language
 	if (!SUPPORTED_LANGUAGES.includes(sourceLang)) {
 		return { success: false, error: 'Invalid source language' }
 	}
-	if (!SUPPORTED_LANGUAGES.includes(targetLang)) {
-		return { success: false, error: 'Invalid target language' }
+
+	// Validate target languages
+	if (targetLangs.length === 0) {
+		return { success: false, error: 'At least one target language is required' }
 	}
-	if (sourceLang === targetLang) {
-		return { success: false, error: 'Source and target languages must be different' }
+	const uniqueLangs = new Set(targetLangs)
+	if (uniqueLangs.size !== targetLangs.length) {
+		return { success: false, error: 'Duplicate target languages are not allowed' }
+	}
+	for (const lang of targetLangs) {
+		if (!SUPPORTED_LANGUAGES.includes(lang)) {
+			return { success: false, error: `Invalid target language: ${lang}` }
+		}
+		if (lang === sourceLang) {
+			return { success: false, error: 'Target language cannot match source language' }
+		}
 	}
 
 	// Clean & validate hostname
@@ -125,10 +136,13 @@ export async function createWebsite(data: {
 	// Generate publicCode
 	const publicCode = crypto.randomBytes(8).toString('hex')
 
-	// Derive translation hostname
-	const translationHostname = deriveTranslationSubdomain(targetLang) + '.' + apex
+	// Map to target language objects with derived hostnames
+	const targetLanguages = targetLangs.map((lang) => ({
+		targetLang: lang,
+		translationHostname: deriveTranslationSubdomain(lang) + '.' + apex,
+	}))
 
-	// Create website + translation
+	// Create website + translations
 	try {
 		await createWebsiteWithLanguage(
 			session.user.accountId,
@@ -137,8 +151,7 @@ export async function createWebsite(data: {
 			sourceLang,
 			apex,
 			publicCode,
-			targetLang,
-			translationHostname
+			targetLanguages
 		)
 	} catch (error: unknown) {
 		if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
