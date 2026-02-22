@@ -839,8 +839,8 @@ export async function createWebsiteWithLanguage(
 	try {
 		await client.query('BEGIN')
 		const result = await client.query<{ id: number }>(
-			`INSERT INTO website (name, hostname, source_lang, public_code, apex, verified_at)
-			 VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING id`,
+			`INSERT INTO website (name, hostname, source_lang, public_code, apex)
+			 VALUES ($1, $2, $3, $4, $5) RETURNING id`,
 			[name, hostname, sourceLang, publicCode, apex]
 		)
 		const websiteId = result.rows[0].id
