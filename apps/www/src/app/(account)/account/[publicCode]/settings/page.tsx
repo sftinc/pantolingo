@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { canAccessWebsiteByPublicCode, getWebsiteByPublicCode } from '@pantolingo/db'
-import { WebsiteSettingsForm } from '@/components/account/WebsiteSettingsForm'
+import { canAccessWebsiteByPublicCode, getWebsiteByPublicCode, getLanguagesWithDnsStatus } from '@pantolingo/db'
+import { SettingsPage } from '@/components/account/SettingsPage'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,7 +9,7 @@ interface SettingsPageProps {
 	params: Promise<{ publicCode: string }>
 }
 
-export default async function SettingsPage({ params }: SettingsPageProps) {
+export default async function Settings({ params }: SettingsPageProps) {
 	const session = await auth()
 	if (!session) redirect('/login')
 
@@ -18,24 +18,30 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 	const access = await canAccessWebsiteByPublicCode(session.user.accountId, publicCode)
 	if (!access) redirect('/account')
 
-	const website = await getWebsiteByPublicCode(publicCode)
+	const [website, languages] = await Promise.all([
+		getWebsiteByPublicCode(publicCode),
+		getLanguagesWithDnsStatus(access.websiteId),
+	])
 	if (!website) redirect('/account')
 
 	return (
 		<div>
 			<h1 className="mb-6 text-2xl font-semibold text-[var(--text-heading)]">Settings</h1>
 
-			<WebsiteSettingsForm
+			<SettingsPage
 				websiteId={access.websiteId}
-				initialName={website.name}
-				hostname={website.hostname}
-				sourceLang={website.sourceLang}
-				initialUiColor={website.uiColor}
-				initialSkipWords={website.skipWords}
-				initialSkipPath={website.skipPath}
-				initialSkipSelectors={website.skipSelectors}
-				initialTranslatePath={website.translatePath}
-				devModeRemaining={website.cacheDisabledRemaining}
+				website={{
+					name: website.name,
+					hostname: website.hostname,
+					sourceLang: website.sourceLang,
+					uiColor: website.uiColor,
+					skipWords: website.skipWords,
+					skipPath: website.skipPath,
+					skipSelectors: website.skipSelectors,
+					translatePath: website.translatePath,
+					cacheDisabledRemaining: website.cacheDisabledRemaining,
+				}}
+				languages={languages}
 			/>
 		</div>
 	)

@@ -790,41 +790,50 @@ export async function updatePathTranslation(
 }
 
 /**
- * Update website settings
+ * Update general website settings (name, source language, accent color)
  * Note: Authorization should be checked separately with canAccessWebsite()
- * @param websiteId - Website ID
- * @param settings - Settings to update (skipWords, skipPath, translatePath)
- * @returns Success status
  */
-export async function updateWebsiteSettings(
+export async function updateGeneralSettings(
 	websiteId: number,
 	settings: {
 		name: string
 		sourceLang: string
-		skipWords: string[]
-		skipPath: string[]
-		skipSelectors: string[]
-		translatePath: boolean
 		uiColor: string | null
 	}
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		await pool.query(
-			`UPDATE website
-			 SET name = $2,
-			     source_lang = $3,
-			     skip_words = $4,
-			     skip_path = $5,
-			     skip_selectors = $6,
-			     translate_path = $7,
-			     ui_color = $8,
-			     updated_at = NOW()
-			 WHERE id = $1`,
-			[websiteId, settings.name, settings.sourceLang, settings.skipWords, settings.skipPath, settings.skipSelectors, settings.translatePath, settings.uiColor]
+			`UPDATE website SET name=$2, source_lang=$3, ui_color=$4, updated_at=NOW() WHERE id=$1`,
+			[websiteId, settings.name, settings.sourceLang, settings.uiColor]
 		)
 		return { success: true }
 	} catch (error) {
-		console.error('Failed to update website settings:', error)
+		console.error('Failed to update general settings:', error)
+		return { success: false, error: 'Failed to update settings' }
+	}
+}
+
+/**
+ * Update translation settings (skip words, skip paths, skip selectors, translate path)
+ * Note: Authorization should be checked separately with canAccessWebsite()
+ */
+export async function updateTranslationSettings(
+	websiteId: number,
+	settings: {
+		skipWords: string[]
+		skipPath: string[]
+		skipSelectors: string[]
+		translatePath: boolean
+	}
+): Promise<{ success: boolean; error?: string }> {
+	try {
+		await pool.query(
+			`UPDATE website SET skip_words=$2, skip_path=$3, skip_selectors=$4, translate_path=$5, updated_at=NOW() WHERE id=$1`,
+			[websiteId, settings.skipWords, settings.skipPath, settings.skipSelectors, settings.translatePath]
+		)
+		return { success: true }
+	} catch (error) {
+		console.error('Failed to update translation settings:', error)
 		return { success: false, error: 'Failed to update settings' }
 	}
 }

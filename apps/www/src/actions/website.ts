@@ -4,7 +4,8 @@ import dns from 'dns'
 import { requireAccountId } from '@/lib/auth'
 import {
 	canAccessWebsite,
-	updateWebsiteSettings as dbUpdateWebsiteSettings,
+	updateGeneralSettings as dbUpdateGeneralSettings,
+	updateTranslationSettings as dbUpdateTranslationSettings,
 	enableDevMode as dbEnableDevMode,
 	isHostnameTaken,
 	getLanguagesWithDnsStatus,
@@ -17,15 +18,11 @@ import { checkHostnameStatus } from '@/lib/perfprox'
 
 const HOSTNAME_REGEX = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/
 
-export async function saveWebsiteSettings(
+export async function saveGeneralSettings(
 	websiteId: number,
 	settings: {
 		name: string
 		sourceLang: string
-		skipWords: string[]
-		skipPath: string[]
-		skipSelectors: string[]
-		translatePath: boolean
 		uiColor: string | null
 	}
 ): Promise<{ success: boolean; error?: string }> {
@@ -44,6 +41,28 @@ export async function saveWebsiteSettings(
 			return { success: false, error: 'Invalid accent color' }
 		}
 
+		const accountId = await requireAccountId()
+
+		if (!(await canAccessWebsite(accountId, websiteId))) {
+			return { success: true } // Silent success - don't leak existence
+		}
+
+		return dbUpdateGeneralSettings(websiteId, { name, sourceLang: settings.sourceLang, uiColor: settings.uiColor })
+	} catch {
+		return { success: false, error: 'An error occurred' }
+	}
+}
+
+export async function saveTranslationSettings(
+	websiteId: number,
+	settings: {
+		skipWords: string[]
+		skipPath: string[]
+		skipSelectors: string[]
+		translatePath: boolean
+	}
+): Promise<{ success: boolean; error?: string }> {
+	try {
 		const skipWords = settings.skipWords.map(s => s.trim()).filter(Boolean)
 		const skipPath = settings.skipPath.map(s => s.trim()).filter(Boolean)
 		const skipSelectors = settings.skipSelectors.map(s => s.trim()).filter(Boolean)
@@ -67,12 +86,11 @@ export async function saveWebsiteSettings(
 			return { success: true } // Silent success - don't leak existence
 		}
 
-		return dbUpdateWebsiteSettings(websiteId, {
-			...settings,
-			name,
+		return dbUpdateTranslationSettings(websiteId, {
 			skipWords,
 			skipPath,
 			skipSelectors,
+			translatePath: settings.translatePath,
 		})
 	} catch {
 		return { success: false, error: 'An error occurred' }
