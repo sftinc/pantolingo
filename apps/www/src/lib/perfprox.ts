@@ -44,3 +44,53 @@ export function registerTranslationHostnames(hostnames: string[]): void {
 		})
 	}
 }
+
+/**
+ * Map Perfprox hostname status to our local dns_status values.
+ */
+function mapPerfproxStatus(perfproxStatus: string): string {
+	switch (perfproxStatus) {
+		case 'active':
+			return 'active'
+		case 'failed':
+		case 'disabled':
+			return 'failed'
+		case 'pending_dns':
+		case 'validating':
+		default:
+			return 'pending'
+	}
+}
+
+/**
+ * Check a hostname's status via Perfprox (triggers Cloudflare sync).
+ * @returns mapped local dns_status, or null on error
+ */
+export async function checkHostnameStatus(hostname: string): Promise<string | null> {
+	const token = process.env.PERFPROX_API_TOKEN
+	if (!token) {
+		console.error('[perfprox] PERFPROX_API_TOKEN is not set, skipping status check:', hostname)
+		return null
+	}
+
+	try {
+		const res = await fetch(`${PERFPROX_BASE_URL}/hostnames/${encodeURIComponent(hostname)}/status`, {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${token}`,
+			},
+		})
+
+		if (!res.ok) {
+			const body = await res.text()
+			console.error(`[perfprox] Status check failed for "${hostname}" (${res.status}): ${body}`)
+			return null
+		}
+
+		const data = await res.json() as { status: string }
+		return mapPerfproxStatus(data.status)
+	} catch (error) {
+		console.error(`[perfprox] Status check error for "${hostname}":`, error)
+		return null
+	}
+}

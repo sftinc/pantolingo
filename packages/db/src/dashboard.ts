@@ -27,6 +27,14 @@ export interface WebsiteWithStats {
 	pathCount: number
 }
 
+export interface LanguageWithDnsStatus {
+	id: number
+	hostname: string
+	targetLang: string
+	dnsStatus: string
+	dnsCheckedAt: Date | null
+}
+
 export interface LangWithStats {
 	targetLang: string
 	translatedSegmentCount: number
@@ -289,6 +297,34 @@ export async function getLangsForWebsite(websiteId: number): Promise<LangWithSta
 		unreviewedPathCount: parseInt(row.unreviewed_path_count, 10),
 		totalWordCount: parseInt(row.total_word_count, 10),
 		unreviewedWordCount: parseInt(row.unreviewed_word_count, 10),
+	}))
+}
+
+/**
+ * Get languages for a website with DNS status info
+ * Used by the settings Languages tab to show verification state
+ */
+export async function getLanguagesWithDnsStatus(websiteId: number): Promise<LanguageWithDnsStatus[]> {
+	const result = await pool.query<{
+		id: number
+		hostname: string
+		target_lang: string
+		dns_status: string
+		dns_checked_at: Date | null
+	}>(
+		`SELECT id, hostname, target_lang, dns_status, dns_checked_at
+		 FROM website_language
+		 WHERE website_id = $1
+		 ORDER BY target_lang`,
+		[websiteId]
+	)
+
+	return result.rows.map((row) => ({
+		id: row.id,
+		hostname: row.hostname,
+		targetLang: row.target_lang,
+		dnsStatus: row.dns_status,
+		dnsCheckedAt: row.dns_checked_at,
 	}))
 }
 
@@ -864,6 +900,47 @@ export async function createWebsiteWithLanguage(
 	} finally {
 		client.release()
 	}
+}
+
+/**
+ * Update the DNS status for a website language
+ * @param websiteLanguageId - website_language row ID
+ * @param status - new dns_status value (pending, active, failed)
+ */
+export async function updateDnsStatus(
+	websiteLanguageId: number,
+	status: string
+): Promise<{ success: boolean; error?: string }> {
+	try {
+		await pool.query(
+			`UPDATE website_language
+			 SET dns_status = $2, dns_checked_at = NOW(), updated_at = NOW()
+			 WHERE id = $1`,
+			[websiteLanguageId, status]
+		)
+		return { success: true }
+	} catch (error) {
+		console.error('Failed to update DNS status:', error)
+		return { success: false, error: 'Failed to update DNS status' }
+	}
+}
+
+/**
+ * Auto-verify a website if it has at least one active language.
+ * Idempotent — no-op if already verified.
+ */
+export async function checkAndSetWebsiteVerified(websiteId: number): Promise<void> {
+	await pool.query(
+		`UPDATE website
+		 SET verified_at = NOW()
+		 WHERE id = $1
+		   AND verified_at IS NULL
+		   AND EXISTS (
+		     SELECT 1 FROM website_language
+		     WHERE website_id = $1 AND dns_status = 'active'
+		   )`,
+		[websiteId]
+	)
 }
 
 /**

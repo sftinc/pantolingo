@@ -2,9 +2,18 @@
 
 import dns from 'dns'
 import { requireAccountId } from '@/lib/auth'
-import { canAccessWebsite, updateWebsiteSettings as dbUpdateWebsiteSettings, enableDevMode as dbEnableDevMode, isHostnameTaken } from '@pantolingo/db'
+import {
+	canAccessWebsite,
+	updateWebsiteSettings as dbUpdateWebsiteSettings,
+	enableDevMode as dbEnableDevMode,
+	isHostnameTaken,
+	getLanguagesWithDnsStatus,
+	updateDnsStatus,
+	checkAndSetWebsiteVerified,
+} from '@pantolingo/db'
 import { SUPPORTED_LANGUAGES } from '@pantolingo/lang'
 import { VALID_UI_COLORS } from '@/lib/ui-colors'
+import { checkHostnameStatus } from '@/lib/perfprox'
 
 const HOSTNAME_REGEX = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/
 
@@ -113,5 +122,50 @@ export async function validateHostname(hostname: string): Promise<{ valid: boole
 		return { valid: true }
 	} catch {
 		return { valid: false, error: 'An error occurred' }
+	}
+}
+
+/**
+ * Check DNS status for a website language via Perfprox and persist the result.
+ * Auto-verifies the website if any language becomes active.
+ */
+export async function checkDnsStatus(
+	websiteId: number,
+	websiteLanguageId: number
+): Promise<{ success: boolean; dnsStatus?: string; error?: string }> {
+	try {
+		const accountId = await requireAccountId()
+
+		if (!(await canAccessWebsite(accountId, websiteId))) {
+			return { success: false, error: 'Access denied' }
+		}
+
+		// Look up the hostname for this language
+		const languages = await getLanguagesWithDnsStatus(websiteId)
+		const language = languages.find((l) => l.id === websiteLanguageId)
+		if (!language) {
+			return { success: false, error: 'Language not found' }
+		}
+
+		// Check status via Perfprox
+		const newStatus = await checkHostnameStatus(language.hostname)
+		if (!newStatus) {
+			return { success: false, error: 'Unable to check DNS status' }
+		}
+
+		// Persist the new status
+		const updateResult = await updateDnsStatus(websiteLanguageId, newStatus)
+		if (!updateResult.success) {
+			return { success: false, error: updateResult.error }
+		}
+
+		// Auto-verify website if language is now active
+		if (newStatus === 'active') {
+			await checkAndSetWebsiteVerified(websiteId)
+		}
+
+		return { success: true, dnsStatus: newStatus }
+	} catch {
+		return { success: false, error: 'An error occurred' }
 	}
 }
