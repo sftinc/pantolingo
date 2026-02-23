@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { Modal } from '@/components/ui/Modal'
 import { createWebsite } from '@/actions/onboard'
 import { validateHostname } from '@/actions/website'
-import { deriveTranslationSubdomain } from '@pantolingo/lang'
 
 export interface LanguageOption {
 	code: string
@@ -398,14 +397,10 @@ function Step4({
 	onContinue: () => void
 	onBack: () => void
 }) {
-	// Build set of subdomain prefixes already taken by selected languages
-	const takenSubdomains = new Set(targetLangs.map((l) => deriveTranslationSubdomain(l.code)))
-
-	// Filter: exclude source lang, already-selected, and same-subdomain-prefix languages
+	// Filter: exclude source lang and already-selected languages
 	const availableLanguages = languages.filter((l) => {
 		if (l.code === sourceLangCode) return false
 		if (targetLangs.some((t) => t.code === l.code)) return false
-		if (takenSubdomains.has(deriveTranslationSubdomain(l.code))) return false
 		return true
 	})
 
