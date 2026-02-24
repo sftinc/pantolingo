@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="en" class="h-full">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Settings v2 - Pantolingo</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script>
+			tailwind.config = {
+				darkMode: 'class',
+				theme: {
+					extend: {
+						colors: {
+							sidebar: {
+								light: '#ffffff',
+								dark: '#1a1a1a',
+							},
+							content: {
+								light: '#f5f5f5',
+								dark: '#111111',
+							},
+							card: {
+								light: '#ffffff',
+								dark: '#222222',
+							},
+						},
+					},
+				},
+			}
+		</script>
+		<style>
+			.nav-item-active {
+				background-color: #e5e7eb;
+			}
+			.dark .nav-item-active {
+				background-color: #374151;
+			}
+			.tag {
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+				padding: 4px 8px;
+				border-radius: 6px;
+				font-size: 0.8125rem;
+				line-height: 1;
+			}
+			.tag-blue {
+				background: rgba(37, 99, 235, 0.1);
+				color: #2563eb;
+			}
+			.dark .tag-blue {
+				background: rgba(59, 130, 246, 0.15);
+				color: #60a5fa;
+			}
+			.tag-remove {
+				padding: 2px;
+				border-radius: 4px;
+				cursor: pointer;
+				display: inline-flex;
+			}
+			.tag-remove:hover {
+				background: rgba(37, 99, 235, 0.15);
+			}
+			.dark .tag-remove:hover {
+				background: rgba(59, 130, 246, 0.2);
+			}
+			/* Badge variants */
+			.badge {
+				display: inline-flex;
+				align-items: center;
+				border-radius: 9999px;
+				padding: 2px 8px;
+				font-size: 0.75rem;
+				font-weight: 500;
+			}
+			.badge-success {
+				background: rgba(34, 197, 94, 0.1);
+				color: #16a34a;
+			}
+			.dark .badge-success {
+				background: rgba(34, 197, 94, 0.15);
+				color: #4ade80;
+			}
+			.badge-warning {
+				background: rgba(234, 179, 8, 0.1);
+				color: #ca8a04;
+			}
+			.dark .badge-warning {
+				background: rgba(234, 179, 8, 0.15);
+				color: #facc15;
+			}
+			.badge-error {
+				background: rgba(239, 68, 68, 0.1);
+				color: #dc2626;
+			}
+			.dark .badge-error {
+				background: rgba(239, 68, 68, 0.15);
+				color: #f87171;
+			}
+			.badge-neutral {
+				background: rgba(107, 114, 128, 0.1);
+				color: #6b7280;
+			}
+			.dark .badge-neutral {
+				background: rgba(107, 114, 128, 0.15);
+				color: #9ca3af;
+			}
+			/* Tab panel visibility */
+			.tab-panel { display: none; }
+			.tab-panel.active { display: block; }
+		</style>
+		<script>
+			;(function () {
+				var t = localStorage.getItem('theme') || 'system'
+				if (t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+					document.documentElement.classList.add('dark')
+				}
+			})()
+		</script>
+	</head>
+	<body class="h-full bg-content-light dark:bg-content-dark text-gray-900 dark:text-gray-100">
+		<!-- Top Bar -->
+		<header class="sticky top-0 z-30 flex items-center px-4 md:px-6 md:ml-60 h-14 bg-white dark:bg-sidebar-dark border-b border-gray-200 dark:border-gray-700 md:bg-content-light md:dark:bg-content-dark md:border-b-0 md:shadow-none">
+			<div class="flex items-center gap-2 mr-auto">
+				<button id="mobile-menu-btn" aria-label="Open menu" class="p-1 text-gray-600 dark:text-gray-300 md:hidden">
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+					</svg>
+				</button>
+				<div class="relative">
+					<button
+						id="website-switcher-btn"
+						class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+					>
+						<span class="w-4 h-4 rounded bg-blue-700/20 dark:bg-blue-200/20 text-blue-700 dark:text-blue-200 flex items-center justify-center text-[10px] font-semibold flex-shrink-0">S</span>
+						<span class="font-semibold truncate max-w-[60px] sm:max-w-none">See Fusion Tech</span>
+						<svg class="w-4 h-4 text-blue-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+						</svg>
+					</button>
+				</div>
+			</div>
+			<div>
+				<div class="relative">
+					<button
+						id="profile-btn"
+						class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+					>
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<circle cx="12" cy="8" r="4" stroke-width="1.5" />
+							<path stroke-width="1.5" d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+						</svg>
+						<span class="hidden sm:inline">W. Williams</span>
+						<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+						</svg>
+					</button>
+					<div
+						id="profile-dropdown"
+						class="hidden absolute right-0 top-full mt-1 w-48 bg-white dark:bg-sidebar-dark border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-1 z-50"
+					>
+						<button
+							id="theme-cycle-btn"
+							class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+						>
+							<svg class="theme-icon theme-icon-light w-5 h-5 text-gray-500 dark:text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<circle cx="12" cy="12" r="5" stroke-width="1.5" />
+								<path stroke-linecap="round" stroke-width="1.5" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+							</svg>
+							<svg class="theme-icon theme-icon-dark w-5 h-5 text-gray-500 dark:text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z" />
+							</svg>
+							<svg class="theme-icon theme-icon-system w-5 h-5 text-gray-500 dark:text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5" />
+								<path stroke-linecap="round" stroke-width="1.5" d="M8 21h8m-4-4v4" />
+							</svg>
+							<span id="theme-label"></span>
+						</button>
+						<div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+						<a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+							<svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+							</svg>
+							Sign out
+						</a>
+					</div>
+				</div>
+			</div>
+		</header>
+
+		<!-- Mobile Sidebar Overlay -->
+		<div id="mobile-overlay" class="md:hidden fixed inset-0 bg-black/40 z-40 hidden"></div>
+
+		<!-- Sidebar -->
+		<aside
+			id="sidebar"
+			class="fixed top-0 left-0 z-50 h-full w-60 bg-sidebar-light dark:bg-sidebar-dark border-r border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden md:overflow-visible transition-transform -translate-x-full md:translate-x-0"
+		>
+			<div class="h-14 flex items-center px-5 flex-shrink-0">
+				<span class="text-base font-bold text-gray-900 dark:text-white">Pantolingo</span>
+			</div>
+			<nav class="px-2 pt-9 space-y-1">
+				<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+					<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5h8M7 5V3m2.5 7.5L7 9m0 0L5 12m2-3l2 3m5-3h6m-3 0v8m-2-4h4" />
+						<text x="14" y="9" font-size="7" fill="currentColor" stroke="none" font-weight="600">A</text>
+					</svg>
+					<span>Languages</span>
+				</a>
+				<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+					<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h12M4 14h16M4 18h8" />
+					</svg>
+					<span>Segments</span>
+				</a>
+				<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+					<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+					</svg>
+					<span>Paths</span>
+				</a>
+				<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+					<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3v18h18M7 16v-3m4 3v-6m4 6v-4m4 4V7" />
+					</svg>
+					<span>Stats</span>
+				</a>
+				<div class="pt-6 space-y-1">
+					<a href="#" class="nav-item-active flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-900 dark:text-white transition-colors">
+						<svg class="w-5 h-5 flex-shrink-0 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+							<circle cx="12" cy="12" r="3" stroke-width="1.5" />
+						</svg>
+						<span>Settings</span>
+					</a>
+				</div>
+			</nav>
+		</aside>
+
+		<!-- Main Content Area -->
+		<div class="md:ml-60 min-h-[calc(100%-3.5rem)] flex flex-col mt-0">
+			<main class="flex-1 p-6 max-w-3xl">
+				<!-- Page Title -->
+				<h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Settings</h1>
+				<!-- Tab Selector -->
+				<div class="flex items-center justify-between mb-5">
+				<div class="flex items-center gap-1 bg-card-light dark:bg-card-dark border border-gray-200 dark:border-gray-700 rounded-lg p-1 w-fit">
+					<button data-tab="general" class="tab-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer bg-blue-600 text-white">General</button>
+					<button data-tab="languages" class="tab-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700">Languages</button>
+					<button data-tab="skip" class="tab-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700">Translations</button>
+				</div>
+				<button id="add-lang-btn" class="px-3 py-1.5 text-xs font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer hidden">
+					Add Language
+				</button>
+				</div>
+
+				<!-- ==================== GENERAL TAB ==================== -->
+				<div id="tab-general" class="tab-panel active space-y-5">
+					<div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+						<div class="space-y-5">
+							<!-- Name -->
+							<div>
+								<label class="block mb-1.5 text-sm font-medium text-gray-600 dark:text-gray-400">Name</label>
+								<input
+									type="text"
+									value="See Fusion Tech"
+									class="w-full px-3 py-2 text-sm rounded-md bg-content-light dark:bg-content-dark border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400"
+									maxlength="20"
+								/>
+							</div>
+							<!-- Hostname -->
+							<div>
+								<label class="block mb-1.5 text-sm font-medium text-gray-600 dark:text-gray-400">Hostname</label>
+								<input
+									type="text"
+									value="seefusion.tech"
+									readonly
+									class="w-full px-3 py-2 text-sm rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+								/>
+							</div>
+							<!-- Source Language -->
+							<div>
+								<label class="block mb-1.5 text-sm font-medium text-gray-600 dark:text-gray-400">Source Language</label>
+								<div class="relative">
+									<button
+										type="button"
+										class="w-full flex items-center gap-2 px-3 py-2 rounded-md bg-content-light dark:bg-content-dark border border-gray-300 dark:border-gray-600 text-sm text-gray-900 dark:text-gray-100 hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer"
+									>
+										<span>&#127482;&#127480;</span>
+										<span class="flex-1 text-left">English (United States)</span>
+										<svg class="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+											<path d="m6 9 6 6 6-6" />
+										</svg>
+									</button>
+								</div>
+							</div>
+							<!-- Theme Color -->
+							<div>
+								<label class="block mb-1.5 text-sm font-medium text-gray-600 dark:text-gray-400">Theme Color</label>
+								<div class="flex flex-wrap gap-2">
+									<button title="Auto" class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 cursor-pointer transition-transform ring-2 ring-purple-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-800 scale-110"></button>
+									<button title="Red" class="w-7 h-7 rounded-full bg-red-500 cursor-pointer transition-transform hover:scale-105"></button>
+									<button title="Orange" class="w-7 h-7 rounded-full bg-orange-500 cursor-pointer transition-transform hover:scale-105"></button>
+									<button title="Amber" class="w-7 h-7 rounded-full bg-amber-500 cursor-pointer transition-transform hover:scale-105"></button>
+									<button title="Emerald" class="w-7 h-7 rounded-full bg-emerald-500 cursor-pointer transition-transform hover:scale-105"></button>
+									<button title="Teal" class="w-7 h-7 rounded-full bg-teal-500 cursor-pointer transition-transform hover:scale-105"></button>
+									<button title="Blue" class="w-7 h-7 rounded-full bg-blue-500 cursor-pointer transition-transform hover:scale-105"></button>
+									<button title="Violet" class="w-7 h-7 rounded-full bg-violet-500 cursor-pointer transition-transform hover:scale-105"></button>
+									<button title="Pink" class="w-7 h-7 rounded-full bg-pink-500 cursor-pointer transition-transform hover:scale-105"></button>
+									<button title="Slate" class="w-7 h-7 rounded-full bg-slate-500 cursor-pointer transition-transform hover:scale-105"></button>
+								</div>
+								<p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5">Accent color for navigation and website switcher</p>
+							</div>
+						</div>
+					</div>
+
+					<!-- Dev Mode -->
+					<div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+						<div class="flex items-center justify-between gap-4">
+							<div>
+								<label class="block text-sm font-medium text-gray-600 dark:text-gray-400">Dev Mode: <span id="cache-status">Disabled</span></label>
+								<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Bypass static asset caching for development and testing</p>
+							</div>
+							<div>
+								<button
+									type="button"
+									id="cache-btn"
+									class="px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+								>
+									Enable for 15 mins
+								</button>
+								<span id="cache-timer" class="text-xs font-medium text-orange-600 dark:text-orange-400 hidden"></span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Save Button -->
+					<div class="flex justify-end">
+						<button type="button" class="px-5 py-2.5 text-sm font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer">
+							Save Settings
+						</button>
+					</div>
+				</div>
+
+				<!-- ==================== LANGUAGES TAB ==================== -->
+				<div id="tab-languages" class="tab-panel space-y-5">
+					<!-- Spanish - Active -->
+					<div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-5">
+						<div class="flex items-center justify-between">
+							<div class="flex items-center gap-2">
+								<span class="text-base">&#127474;&#127485;</span>
+								<span class="text-sm font-medium text-gray-900 dark:text-gray-100">Spanish (Mexico)</span>
+								<span class="badge badge-success">Active</span>
+								<span class="text-xs text-gray-500 dark:text-gray-400">02:30 PM</span>
+							</div>
+							<button class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer" title="Remove language">
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+								</svg>
+							</button>
+						</div>
+					</div>
+
+					<!-- French - Pending -->
+					<div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-5">
+						<div class="flex items-center justify-between mb-3">
+							<div class="flex items-center gap-2">
+								<span class="text-base">&#127467;&#127479;</span>
+								<span class="text-sm font-medium text-gray-900 dark:text-gray-100">French (France)</span>
+								<span class="badge badge-warning">Pending</span>
+							</div>
+							<div class="flex items-center gap-2">
+								<button class="px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-card-light dark:bg-card-dark hover:bg-content-light dark:hover:bg-content-dark transition-colors cursor-pointer">
+									Check DNS
+								</button>
+								<button class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer" title="Remove language">
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+									</svg>
+								</button>
+							</div>
+						</div>
+						<div class="rounded-md bg-content-light dark:bg-content-dark border border-gray-300 dark:border-gray-600 p-3">
+							<p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Add CNAME DNS Record</p>
+							<div class="flex items-center gap-2 font-mono text-sm">
+								<span class="text-gray-900 dark:text-gray-100">fr.seefusion.tech</span>
+								<button onclick="copyToClipboard('fr', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer" title="Copy name">
+									<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+									</svg>
+								</button>
+								<span class="text-gray-400">&rarr;</span>
+								<span class="text-gray-900 dark:text-gray-100">cname.pantolingo.com</span>
+								<button onclick="copyToClipboard('cname.pantolingo.com', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer" title="Copy value">
+									<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+									</svg>
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<!-- German - Failed -->
+					<div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-5">
+						<div class="flex items-center justify-between mb-3">
+							<div class="flex items-center gap-2">
+								<span class="text-base">&#127465;&#127466;</span>
+								<span class="text-sm font-medium text-gray-900 dark:text-gray-100">German (Germany)</span>
+								<span class="badge badge-error">Failed</span>
+								<span class="text-xs text-gray-500 dark:text-gray-400">03:00 PM</span>
+							</div>
+							<div class="flex items-center gap-2">
+								<button class="px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-card-light dark:bg-card-dark hover:bg-content-light dark:hover:bg-content-dark transition-colors cursor-pointer">
+									Check DNS
+								</button>
+								<button class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer" title="Remove language">
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+									</svg>
+								</button>
+							</div>
+						</div>
+						<div class="rounded-md bg-content-light dark:bg-content-dark border border-gray-300 dark:border-gray-600 p-3">
+							<p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Add CNAME DNS Record</p>
+							<div class="flex items-center gap-2 font-mono text-sm">
+								<span class="text-gray-900 dark:text-gray-100">de.seefusion.tech</span>
+								<button onclick="copyToClipboard('de', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer" title="Copy name">
+									<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+									</svg>
+								</button>
+								<span class="text-gray-400">&rarr;</span>
+								<span class="text-gray-900 dark:text-gray-100">cname.pantolingo.com</span>
+								<button onclick="copyToClipboard('cname.pantolingo.com', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer" title="Copy value">
+									<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+									</svg>
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- ==================== TRANSLATION TAB ==================== -->
+				<div id="tab-skip" class="tab-panel space-y-5">
+					<!-- Translate URL Paths -->
+					<div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+						<div class="flex items-center justify-between gap-4">
+							<div>
+								<label class="block text-sm font-medium text-gray-600 dark:text-gray-400">Translate URL Paths</label>
+								<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">When enabled, URL paths will be translated (e.g., /about becomes /acerca-de)</p>
+							</div>
+							<button
+								type="button"
+								role="switch"
+								aria-checked="true"
+								id="translate-path-toggle"
+								class="relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent bg-blue-600 transition-colors duration-200 ease-in-out cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+							>
+								<span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-5"></span>
+							</button>
+						</div>
+					</div>
+
+					<!-- Exclude Paths -->
+					<div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+						<div class="flex items-center justify-between mb-1">
+							<h2 class="text-sm font-semibold text-gray-800 dark:text-gray-200">Exclude Paths</h2>
+							<button class="px-2.5 py-1 text-xs font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer">
+								Add Rule
+							</button>
+						</div>
+						<p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Paths matching these rules will not be translated</p>
+						<div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+							<table class="w-full text-left text-sm">
+								<thead class="bg-content-light dark:bg-content-dark text-gray-500 dark:text-gray-400">
+									<tr>
+										<th class="px-4 py-2.5 font-medium w-36">Type</th>
+										<th class="px-4 py-2.5 font-medium">Pattern</th>
+										<th class="px-4 py-2.5 font-medium w-16 text-right"></th>
+									</tr>
+								</thead>
+								<tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+									<tr class="bg-card-light dark:bg-card-dark">
+										<td class="px-4 py-2.5">
+											<span class="badge badge-neutral">includes</span>
+										</td>
+										<td class="px-4 py-2.5 font-mono text-gray-900 dark:text-gray-100">/admin</td>
+										<td class="px-4 py-2.5 text-right">
+											<button class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer" title="Remove">
+												<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+												</svg>
+											</button>
+										</td>
+									</tr>
+									<tr class="bg-card-light dark:bg-card-dark">
+										<td class="px-4 py-2.5">
+											<span class="badge badge-neutral">includes</span>
+										</td>
+										<td class="px-4 py-2.5 font-mono text-gray-900 dark:text-gray-100">/api</td>
+										<td class="px-4 py-2.5 text-right">
+											<button class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer" title="Remove">
+												<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+												</svg>
+											</button>
+										</td>
+									</tr>
+									<tr class="bg-card-light dark:bg-card-dark">
+										<td class="px-4 py-2.5">
+											<span class="badge badge-neutral">startsWith</span>
+										</td>
+										<td class="px-4 py-2.5 font-mono text-gray-900 dark:text-gray-100">/internal/</td>
+										<td class="px-4 py-2.5 text-right">
+											<button class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer" title="Remove">
+												<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+												</svg>
+											</button>
+										</td>
+									</tr>
+									<tr class="bg-card-light dark:bg-card-dark">
+										<td class="px-4 py-2.5">
+											<span class="badge badge-neutral">endsWith</span>
+										</td>
+										<td class="px-4 py-2.5 font-mono text-gray-900 dark:text-gray-100">.pdf</td>
+										<td class="px-4 py-2.5 text-right">
+											<button class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer" title="Remove">
+												<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+												</svg>
+											</button>
+										</td>
+									</tr>
+									<tr class="bg-card-light dark:bg-card-dark">
+										<td class="px-4 py-2.5">
+											<span class="badge badge-neutral">regex</span>
+										</td>
+										<td class="px-4 py-2.5 font-mono text-gray-900 dark:text-gray-100">^/internal/.*</td>
+										<td class="px-4 py-2.5 text-right">
+											<button class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer" title="Remove">
+												<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+												</svg>
+											</button>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					<!-- Exclude Selectors -->
+					<div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+						<h2 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">Exclude Selectors</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400 mb-4">CSS selectors for elements that should not be translated</p>
+						<div class="flex flex-wrap gap-2 p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-content-light dark:bg-content-dark min-h-[44px]">
+							<span class="tag tag-blue">
+								[translate="no"]
+								<button class="tag-remove" aria-label="Remove">
+									<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+									</svg>
+								</button>
+							</span>
+							<span class="tag tag-blue">
+								.notranslate
+								<button class="tag-remove" aria-label="Remove">
+									<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+									</svg>
+								</button>
+							</span>
+							<span class="tag tag-blue">
+								[notranslate]
+								<button class="tag-remove" aria-label="Remove">
+									<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+									</svg>
+								</button>
+							</span>
+							<input
+								type="text"
+								placeholder=""
+								class="flex-1 min-w-[120px] bg-transparent outline-none text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400"
+							/>
+						</div>
+					</div>
+
+					<!-- Exclude Words -->
+					<div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+						<h2 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">Exclude Words</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Words that should not be translated (e.g., brand names, product names)</p>
+						<div class="flex flex-wrap gap-2 p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-content-light dark:bg-content-dark min-h-[44px]">
+							<span class="tag tag-blue">
+								SeeFusion
+								<button class="tag-remove" aria-label="Remove">
+									<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+									</svg>
+								</button>
+							</span>
+							<span class="tag tag-blue">
+								TechCorp
+								<button class="tag-remove" aria-label="Remove">
+									<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+									</svg>
+								</button>
+							</span>
+							<input
+								type="text"
+								placeholder=""
+								class="flex-1 min-w-[120px] bg-transparent outline-none text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400"
+							/>
+						</div>
+					</div>
+
+					<!-- Save Button -->
+					<div class="flex justify-end">
+						<button type="button" class="px-5 py-2.5 text-sm font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer">
+							Save Settings
+						</button>
+					</div>
+				</div>
+
+			</main>
+		</div>
+
+		<script>
+			// Tab switching
+			const tabBtns = document.querySelectorAll('.tab-btn')
+			const tabPanels = document.querySelectorAll('.tab-panel')
+
+			const addLangBtn = document.getElementById('add-lang-btn')
+
+			tabBtns.forEach((btn) => {
+				btn.addEventListener('click', () => {
+					const target = btn.getAttribute('data-tab')
+
+					// Update buttons
+					tabBtns.forEach((b) => {
+						b.classList.remove('bg-blue-600', 'text-white')
+						b.classList.add('text-gray-500', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-gray-700')
+					})
+					btn.classList.add('bg-blue-600', 'text-white')
+					btn.classList.remove('text-gray-500', 'dark:text-gray-400', 'hover:bg-gray-200', 'dark:hover:bg-gray-700')
+
+					// Update panels
+					tabPanels.forEach((p) => p.classList.remove('active'))
+					document.getElementById('tab-' + target).classList.add('active')
+
+					// Show Add Language button only on languages tab
+					addLangBtn.classList.toggle('hidden', target !== 'languages')
+				})
+			})
+
+			// Mobile sidebar
+			const sidebar = document.getElementById('sidebar')
+			const mobileOverlay = document.getElementById('mobile-overlay')
+			document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+				sidebar.classList.remove('-translate-x-full')
+				mobileOverlay.classList.remove('hidden')
+			})
+			mobileOverlay.addEventListener('click', () => {
+				sidebar.classList.add('-translate-x-full')
+				mobileOverlay.classList.add('hidden')
+			})
+
+			// Copy to clipboard
+			function copyToClipboard(text, btn) {
+				navigator.clipboard.writeText(text).then(() => {
+					const svg = btn.querySelector('svg')
+					const original = svg.innerHTML
+					svg.innerHTML = '<polyline points="20 6 9 17 4 12" />'
+					btn.classList.add('text-green-500', 'dark:text-green-400')
+					setTimeout(() => {
+						svg.innerHTML = original
+						btn.classList.remove('text-green-500', 'dark:text-green-400')
+					}, 1500)
+				})
+			}
+
+			// Theme cycle
+			const themeModes = ['light', 'dark', 'system']
+			const themeLabels = { light: 'Light mode', dark: 'Dark mode', system: 'System' }
+
+			function applyTheme(theme) {
+				localStorage.setItem('theme', theme)
+				if (theme === 'system') {
+					document.documentElement.classList.toggle('dark', window.matchMedia('(prefers-color-scheme: dark)').matches)
+				} else {
+					document.documentElement.classList.toggle('dark', theme === 'dark')
+				}
+				document.querySelectorAll('.theme-icon').forEach((el) => el.classList.add('hidden'))
+				document.querySelector('.theme-icon-' + theme).classList.remove('hidden')
+				document.getElementById('theme-label').textContent = themeLabels[theme]
+			}
+
+			document.getElementById('theme-cycle-btn').addEventListener('click', (e) => {
+				e.stopPropagation()
+				const current = localStorage.getItem('theme') || 'system'
+				const next = themeModes[(themeModes.indexOf(current) + 1) % themeModes.length]
+				applyTheme(next)
+			})
+
+			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+				if (localStorage.getItem('theme') === 'system') applyTheme('system')
+			})
+
+			applyTheme(localStorage.getItem('theme') || 'system')
+
+			// Toggle switches
+			function setupToggle(id) {
+				const el = document.getElementById(id)
+				if (!el) return
+				el.addEventListener('click', () => {
+					const isOn = el.getAttribute('aria-checked') === 'true'
+					el.setAttribute('aria-checked', !isOn)
+					el.classList.toggle('bg-blue-600', !isOn)
+					el.classList.toggle('bg-gray-300', isOn)
+					el.classList.toggle('dark:bg-gray-600', isOn)
+					el.firstElementChild.classList.toggle('translate-x-5', !isOn)
+					el.firstElementChild.classList.toggle('translate-x-0', isOn)
+				})
+			}
+			setupToggle('translate-path-toggle')
+
+			// Cache disable with countdown
+			const cacheBtn = document.getElementById('cache-btn')
+			const cacheTimer = document.getElementById('cache-timer')
+			const cacheStatus = document.getElementById('cache-status')
+			let cacheInterval = null
+
+			function startCacheTimer() {
+				const expiresAt = Date.now() + 15 * 60 * 1000
+				cacheStatus.textContent = 'Enabled'
+				cacheStatus.classList.add('text-orange-600', 'dark:text-orange-400')
+				cacheBtn.classList.add('hidden')
+				cacheTimer.classList.remove('hidden')
+
+				function tick() {
+					const remaining = Math.max(0, expiresAt - Date.now())
+					if (remaining === 0) {
+						clearInterval(cacheInterval)
+						resetCache()
+						return
+					}
+					const mins = Math.floor(remaining / 60000)
+					const secs = Math.floor((remaining % 60000) / 1000)
+					cacheTimer.textContent = mins + ':' + String(secs).padStart(2, '0') + ' remaining'
+				}
+				tick()
+				cacheInterval = setInterval(tick, 1000)
+			}
+
+			function resetCache() {
+				cacheStatus.textContent = 'Disabled'
+				cacheStatus.classList.remove('text-orange-600', 'dark:text-orange-400')
+				cacheBtn.classList.remove('hidden')
+				cacheTimer.classList.add('hidden')
+			}
+
+			cacheBtn.addEventListener('click', startCacheTimer)
+
+			// Profile dropdown
+			const profileBtn = document.getElementById('profile-btn')
+			const profileDropdown = document.getElementById('profile-dropdown')
+			profileBtn.addEventListener('click', (e) => {
+				e.stopPropagation()
+				profileDropdown.classList.toggle('hidden')
+			})
+			document.addEventListener('click', () => {
+				profileDropdown.classList.add('hidden')
+			})
+		</script>
+	</body>
+</html>

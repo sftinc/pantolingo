@@ -87,8 +87,8 @@ export async function checkHostnameStatus(hostname: string): Promise<string | nu
 			return null
 		}
 
-		const data = await res.json() as { status: string }
-		return mapPerfproxStatus(data.status)
+		const json = await res.json() as { data: { status: string } }
+		return mapPerfproxStatus(json.data.status)
 	} catch (error) {
 		console.error(`[perfprox] Status check error for "${hostname}":`, error)
 		return null

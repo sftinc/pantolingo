@@ -27,7 +27,7 @@ interface SettingsPageProps {
 const TABS: { key: Tab; label: string }[] = [
 	{ key: 'general', label: 'General' },
 	{ key: 'languages', label: 'Languages' },
-	{ key: 'translation', label: 'Translation' },
+	{ key: 'translation', label: 'Translations' },
 ]
 
 export function SettingsPage({ websiteId, website, languages }: SettingsPageProps) {

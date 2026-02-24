@@ -31,9 +31,6 @@ const NAV_ITEMS = [
 	{ label: 'Stats', path: 'stats', icon: StatsIcon },
 ]
 
-const SECONDARY_NAV = [
-	{ label: 'Setup', path: 'setup', icon: ClipboardCheckIcon },
-]
 
 export function AccountShell({ currentWebsite, websites, languages, userName, userProfile, signOutAction, children }: AccountShellProps) {
 	const pathname = usePathname()
@@ -273,24 +270,6 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 							<SettingsIcon className="w-5 h-5 shrink-0 text-[var(--text-subtle)]" />
 							<span>Settings</span>
 						</Link>
-						{SECONDARY_NAV.map((item) => {
-							const active = isActive(item.path)
-							return (
-								<Link
-									key={item.path}
-									href={`${basePath}/${item.path}`}
-									onClick={() => setMobileOpen(false)}
-									className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-										active
-											? `font-semibold ${currentColor.text}`
-											: 'font-medium text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] hover:text-[var(--text-heading)]'
-									}`}
-								>
-									<item.icon className="w-5 h-5 shrink-0 text-[var(--text-subtle)]" />
-									<span>{item.label}</span>
-								</Link>
-							)
-						})}
 					</div>
 				</nav>
 			</aside>
@@ -339,14 +318,6 @@ function StatsIcon({ className }: { className?: string }) {
 	return (
 		<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 3v18h18M7 16v-3m4 3v-6m4 6v-4m4 4V7" />
-		</svg>
-	)
-}
-
-function ClipboardCheckIcon({ className }: { className?: string }) {
-	return (
-		<svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
 		</svg>
 	)
 }
