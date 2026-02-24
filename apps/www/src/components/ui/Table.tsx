@@ -69,11 +69,12 @@ export function TableHead({ children, className }: TableHeadProps) {
 interface TableCellProps {
 	children: React.ReactNode
 	className?: string
+	colSpan?: number
 }
 
-export function TableCell({ children, className }: TableCellProps) {
+export function TableCell({ children, className, colSpan }: TableCellProps) {
 	return (
-		<td className={cn('px-4 py-3 text-[var(--text-heading)]', className)}>
+		<td className={cn('px-4 py-3 text-[var(--text-heading)]', className)} colSpan={colSpan}>
 			{children}
 		</td>
 	)

@@ -297,17 +297,17 @@ export function SettingsTranslationTab({
 				)}
 
 				{/* Rules table */}
-				{skipPathRules.length > 0 ? (
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead className="w-36">Type</TableHead>
-								<TableHead>Pattern</TableHead>
-								<TableHead className="w-16 text-right">{''}</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{skipPathRules.map((rule, index) => (
+				<Table>
+					<TableHeader className="[&_tr]:bg-[var(--page-bg)]">
+						<TableRow>
+							<TableHead className="w-36">Type</TableHead>
+							<TableHead>Pattern</TableHead>
+							<TableHead className="w-16 text-right">{''}</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{skipPathRules.length > 0 ? (
+							skipPathRules.map((rule, index) => (
 								<TableRow key={`${rule.type}-${rule.pattern}-${index}`}>
 									<TableCell>
 										<Badge variant="neutral">{rule.type}</Badge>
@@ -329,14 +329,16 @@ export function SettingsTranslationTab({
 										</button>
 									</TableCell>
 								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				) : (
-					<div className="py-8 text-center text-sm text-[var(--text-muted)]">
-						No exclude path rules configured
-					</div>
-				)}
+							))
+						) : (
+							<TableRow>
+								<TableCell className="text-center text-[var(--text-muted)]" colSpan={3}>
+									No exclude path rules configured
+								</TableCell>
+							</TableRow>
+						)}
+					</TableBody>
+				</Table>
 			</div>
 
 			{/* Exclude Selectors */}
