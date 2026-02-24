@@ -173,24 +173,9 @@ export function SettingsTranslationTab({
 				</div>
 			</div>
 
-			{/* Skip Selectors */}
+			{/* Exclude Paths */}
 			<div className={cardClass}>
-				<h2 className="text-sm font-semibold text-[var(--text-heading)] mb-1">Skip Selectors</h2>
-				<p className="text-xs text-[var(--text-muted)] mb-4">
-					CSS selectors for elements that should not be translated
-				</p>
-				<TagInput
-					value={skipSelectors}
-					onChange={setSkipSelectors}
-					placeholder="Add CSS selectors..."
-					disabled={isPending}
-					validate={validateSelector}
-				/>
-			</div>
-
-			{/* Skip Paths */}
-			<div className={cardClass}>
-				<h2 className="text-sm font-semibold text-[var(--text-heading)] mb-5">Skip Paths</h2>
+				<h2 className="text-sm font-semibold text-[var(--text-heading)] mb-5">Exclude Paths</h2>
 				<div className="space-y-5">
 					{/* Contains */}
 					<div>
@@ -223,9 +208,24 @@ export function SettingsTranslationTab({
 				</div>
 			</div>
 
-			{/* Skip Words */}
+			{/* Exclude Selectors */}
 			<div className={cardClass}>
-				<h2 className="text-sm font-semibold text-[var(--text-heading)] mb-1">Skip Words</h2>
+				<h2 className="text-sm font-semibold text-[var(--text-heading)] mb-1">Exclude Selectors</h2>
+				<p className="text-xs text-[var(--text-muted)] mb-4">
+					CSS selectors for elements that should not be translated
+				</p>
+				<TagInput
+					value={skipSelectors}
+					onChange={setSkipSelectors}
+					placeholder="Add CSS selectors..."
+					disabled={isPending}
+					validate={validateSelector}
+				/>
+			</div>
+
+			{/* Exclude Words */}
+			<div className={cardClass}>
+				<h2 className="text-sm font-semibold text-[var(--text-heading)] mb-1">Exclude Words</h2>
 				<p className="text-xs text-[var(--text-muted)] mb-4">
 					Words that should not be translated (e.g., brand names, product names)
 				</p>

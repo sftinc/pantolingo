@@ -209,9 +209,7 @@ export function SettingsGeneralTab({
 
 			{error && <div className="p-3 rounded-lg bg-[var(--error)]/10 text-[var(--error)] text-sm">{error}</div>}
 
-			{/* General */}
 			<div className={cardClass}>
-				<h2 className="text-sm font-semibold text-[var(--text-heading)] mb-5">General</h2>
 				<div className="space-y-5">
 					{/* Name */}
 					<div>
