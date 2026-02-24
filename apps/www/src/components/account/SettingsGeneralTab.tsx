@@ -14,6 +14,7 @@ interface SettingsGeneralTabProps {
 	sourceLang: string
 	initialUiColor: string | null
 	devModeRemaining: number | null
+	onDirtyChange?: (dirty: boolean) => void
 }
 
 function SourceLanguageDropdown({
@@ -163,6 +164,7 @@ export function SettingsGeneralTab({
 	sourceLang,
 	initialUiColor,
 	devModeRemaining,
+	onDirtyChange,
 }: SettingsGeneralTabProps) {
 	const router = useRouter()
 	const [isPending, startTransition] = useTransition()
@@ -172,6 +174,11 @@ export function SettingsGeneralTab({
 	const [name, setName] = useState(initialName)
 	const [selectedSourceLang, setSelectedSourceLang] = useState(sourceLang)
 	const [uiColor, setUiColor] = useState<string | null>(initialUiColor)
+
+	useEffect(() => {
+		const dirty = name !== initialName || selectedSourceLang !== sourceLang || uiColor !== initialUiColor
+		onDirtyChange?.(dirty)
+	}, [name, initialName, selectedSourceLang, sourceLang, uiColor, initialUiColor, onDirtyChange])
 
 	const handleSave = () => {
 		setError(null)

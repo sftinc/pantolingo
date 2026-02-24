@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { SettingsGeneralTab } from './SettingsGeneralTab'
 import { SettingsLanguagesTab } from './SettingsLanguagesTab'
 import { SettingsTranslationTab } from './SettingsTranslationTab'
+import { Modal, ModalFooter, Button } from '@/components/ui/Modal'
 import type { LanguageWithDnsStatus } from '@pantolingo/db'
 
 type Tab = 'general' | 'languages' | 'translation'
@@ -32,6 +33,37 @@ const TABS: { key: Tab; label: string }[] = [
 
 export function SettingsPage({ websiteId, website, languages }: SettingsPageProps) {
 	const [activeTab, setActiveTab] = useState<Tab>('general')
+	const [dirtyTabs, setDirtyTabs] = useState<Record<Tab, boolean>>({ general: false, languages: false, translation: false })
+	const [pendingTab, setPendingTab] = useState<Tab | null>(null)
+
+	const handleTabClick = (tab: Tab) => {
+		if (tab === activeTab) return
+		if (dirtyTabs[activeTab]) {
+			setPendingTab(tab)
+		} else {
+			setActiveTab(tab)
+		}
+	}
+
+	const handleDiscard = () => {
+		if (pendingTab) {
+			setDirtyTabs((prev) => ({ ...prev, [activeTab]: false }))
+			setActiveTab(pendingTab)
+			setPendingTab(null)
+		}
+	}
+
+	const handleStay = () => {
+		setPendingTab(null)
+	}
+
+	const handleGeneralDirty = useCallback((dirty: boolean) => {
+		setDirtyTabs((prev) => ({ ...prev, general: dirty }))
+	}, [])
+
+	const handleTranslationDirty = useCallback((dirty: boolean) => {
+		setDirtyTabs((prev) => ({ ...prev, translation: dirty }))
+	}, [])
 
 	return (
 		<div>
@@ -40,7 +72,7 @@ export function SettingsPage({ websiteId, website, languages }: SettingsPageProp
 					{TABS.map((tab) => (
 						<button
 							key={tab.key}
-							onClick={() => setActiveTab(tab.key)}
+							onClick={() => handleTabClick(tab.key)}
 							className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${
 								activeTab === tab.key
 									? 'bg-[var(--accent)] text-white'
@@ -70,6 +102,7 @@ export function SettingsPage({ websiteId, website, languages }: SettingsPageProp
 					sourceLang={website.sourceLang}
 					initialUiColor={website.uiColor}
 					devModeRemaining={website.cacheDisabledRemaining}
+					onDirtyChange={handleGeneralDirty}
 				/>
 			)}
 
@@ -87,8 +120,19 @@ export function SettingsPage({ websiteId, website, languages }: SettingsPageProp
 					initialSkipPath={website.skipPath}
 					initialSkipSelectors={website.skipSelectors}
 					initialTranslatePath={website.translatePath}
+					onDirtyChange={handleTranslationDirty}
 				/>
 			)}
+
+			<Modal isOpen={pendingTab !== null} onClose={handleStay} title="Unsaved Changes" hideClose className="max-w-lg">
+				<p className="text-sm text-[var(--text-muted)]">
+					You have unsaved changes that will be lost. <span className="font-semibold">Do you want to discard your changes?</span>
+				</p>
+				<ModalFooter>
+					<Button variant="secondary" onClick={handleStay}>Stay</Button>
+					<Button variant="primary" onClick={handleDiscard}>Discard</Button>
+				</ModalFooter>
+			</Modal>
 		</div>
 	)
 }

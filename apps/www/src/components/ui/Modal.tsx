@@ -14,9 +14,10 @@ interface ModalProps {
 	contentClassName?: string
 	badge?: React.ReactNode
 	closeOnBackdropClick?: boolean
+	hideClose?: boolean
 }
 
-export function Modal({ isOpen, onClose, title, description, children, className, contentClassName, badge, closeOnBackdropClick = true }: ModalProps) {
+export function Modal({ isOpen, onClose, title, description, children, className, contentClassName, badge, closeOnBackdropClick = true, hideClose = false }: ModalProps) {
 	const dialogRef = useRef<HTMLDialogElement>(null)
 
 	useEffect(() => {
@@ -72,30 +73,34 @@ export function Modal({ isOpen, onClose, title, description, children, className
 						<h2 className="text-lg font-semibold text-[var(--text-heading)]">{title}</h2>
 						{description && <p className="text-sm text-[var(--text-muted)] mt-0.5">{description}</p>}
 					</div>
+					{(!hideClose || badge) && (
 					<div className="flex items-center gap-3">
 						{badge}
-						<button
-							onClick={onClose}
-							tabIndex={0}
-							className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--border)] transition-colors focus:outline-none"
-							aria-label="Close"
-						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="20"
-								height="20"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								strokeWidth="2"
-								strokeLinecap="round"
-								strokeLinejoin="round"
+						{!hideClose && (
+							<button
+								onClick={onClose}
+								tabIndex={0}
+								className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--border)] transition-colors focus:outline-none"
+								aria-label="Close"
 							>
-								<line x1="18" y1="6" x2="6" y2="18" />
-								<line x1="6" y1="6" x2="18" y2="18" />
-							</svg>
-						</button>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="20"
+									height="20"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+								>
+									<line x1="18" y1="6" x2="6" y2="18" />
+									<line x1="6" y1="6" x2="18" y2="18" />
+								</svg>
+							</button>
+						)}
 					</div>
+				)}
 				</div>
 				<div className={cn('flex-1 overflow-auto p-6', contentClassName)}>{children}</div>
 			</div>

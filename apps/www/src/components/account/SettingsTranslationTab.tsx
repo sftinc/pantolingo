@@ -15,6 +15,7 @@ interface SettingsTranslationTabProps {
 	initialSkipPath: string[]
 	initialSkipSelectors: string[]
 	initialTranslatePath: boolean
+	onDirtyChange?: (dirty: boolean) => void
 }
 
 type ExcludePathRuleType = 'includes' | 'startsWith' | 'endsWith' | 'regex'
@@ -105,6 +106,7 @@ export function SettingsTranslationTab({
 	initialSkipPath,
 	initialSkipSelectors,
 	initialTranslatePath,
+	onDirtyChange,
 }: SettingsTranslationTabProps) {
 	const router = useRouter()
 	const [isPending, startTransition] = useTransition()
@@ -115,6 +117,15 @@ export function SettingsTranslationTab({
 	const [skipPathRules, setSkipPathRules] = useState<ExcludePathRule[]>(() => parseSkipPath(initialSkipPath))
 	const [skipSelectors, setSkipSelectors] = useState(initialSkipSelectors)
 	const [translatePath, setTranslatePath] = useState(initialTranslatePath)
+
+	useEffect(() => {
+		const dirty =
+			translatePath !== initialTranslatePath ||
+			JSON.stringify(skipWords) !== JSON.stringify(initialSkipWords) ||
+			JSON.stringify(combineSkipPath(skipPathRules)) !== JSON.stringify(initialSkipPath) ||
+			JSON.stringify(skipSelectors) !== JSON.stringify(initialSkipSelectors)
+		onDirtyChange?.(dirty)
+	}, [skipWords, initialSkipWords, skipPathRules, initialSkipPath, skipSelectors, initialSkipSelectors, translatePath, initialTranslatePath, onDirtyChange])
 
 	// Add Rule form state
 	const [showAddForm, setShowAddForm] = useState(false)
