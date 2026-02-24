@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { TagInput } from '@/components/ui/TagInput'
 import { Switch } from '@/components/ui/Switch'
-import { Button } from '@/components/ui/Modal'
+import { Modal, ModalFooter, Button } from '@/components/ui/Modal'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table'
 import { Badge } from '@/components/ui/Badge'
 import { saveTranslationSettings } from '@/actions/website'
@@ -222,36 +222,38 @@ export function SettingsTranslationTab({
 			<div className={cardClass}>
 				<div className="flex items-center justify-between mb-1">
 					<h2 className="text-sm font-semibold text-[var(--text-heading)]">Exclude Paths</h2>
-					{!showAddForm && (
-						<button
-							type="button"
-							onClick={() => setShowAddForm(true)}
-							disabled={isPending}
-							className="px-3 py-1 text-xs font-medium rounded-md bg-[var(--accent)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
-						>
-							Add Rule
-						</button>
-					)}
+					<button
+						type="button"
+						onClick={() => setShowAddForm(true)}
+						disabled={isPending}
+						className="px-3 py-1 text-xs font-medium rounded-md bg-[var(--accent)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+					>
+						Add Rule
+					</button>
 				</div>
 				<p className="text-xs text-[var(--text-muted)] mb-4">
 					Paths matching these rules will not be translated
 				</p>
 
-				{/* Add Rule inline form */}
-				{showAddForm && (
-					<div className="mb-4 p-3 rounded-lg border border-[var(--border)] bg-[var(--page-bg)]">
-						<div className="flex items-start gap-2">
-							<select
-								value={newRuleType}
-								onChange={(e) => setNewRuleType(e.target.value as ExcludePathRuleType)}
-								className="shrink-0 w-32 px-2 py-1.5 text-sm rounded-md border border-[var(--border)] bg-[var(--card-bg)] text-[var(--text-heading)]"
-							>
-								{RULE_TYPES.map((t) => (
-									<option key={t} value={t}>
-										{t}
-									</option>
-								))}
-							</select>
+				{/* Add Rule modal */}
+				<Modal
+					isOpen={showAddForm}
+					onClose={() => {
+						setShowAddForm(false)
+						setAddRuleError(null)
+						setNewRulePattern('')
+					}}
+					title="Add Exclude Path Rule"
+					className="max-w-md overflow-visible [&>div]:overflow-visible"
+					contentClassName="overflow-visible"
+				>
+					<div className="space-y-4">
+						<div>
+							<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">Type</label>
+							<RuleTypeDropdown selected={newRuleType} onSelect={setNewRuleType} />
+						</div>
+						<div>
+							<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">Pattern</label>
 							<input
 								type="text"
 								value={newRulePattern}
@@ -261,40 +263,32 @@ export function SettingsTranslationTab({
 								}}
 								onKeyDown={(e) => {
 									if (e.key === 'Enter') handleAddRule()
-									if (e.key === 'Escape') {
-										setShowAddForm(false)
-										setAddRuleError(null)
-										setNewRulePattern('')
-									}
 								}}
 								placeholder="Enter pattern..."
 								autoFocus
-								className="flex-1 min-w-0 px-2 py-1.5 text-sm rounded-md border border-[var(--border)] bg-[var(--card-bg)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] font-mono"
+								className="w-full px-3 py-2 text-sm rounded-md border border-[var(--border)] bg-[var(--page-bg)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] font-mono"
 							/>
-							<button
-								type="button"
-								onClick={handleAddRule}
-								className="shrink-0 px-3 py-1.5 text-xs font-medium rounded-md bg-[var(--accent)] text-white hover:opacity-90 transition-opacity"
-							>
-								Add
-							</button>
-							<button
-								type="button"
-								onClick={() => {
-									setShowAddForm(false)
-									setAddRuleError(null)
-									setNewRulePattern('')
-								}}
-								className="shrink-0 px-3 py-1.5 text-xs font-medium rounded-md border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors"
-							>
-								Cancel
-							</button>
+							{addRuleError && (
+								<p className="mt-1.5 text-xs text-[var(--error)]">{addRuleError}</p>
+							)}
 						</div>
-						{addRuleError && (
-							<p className="mt-2 text-xs text-[var(--error)]">{addRuleError}</p>
-						)}
 					</div>
-				)}
+					<ModalFooter>
+						<Button
+							variant="secondary"
+							onClick={() => {
+								setShowAddForm(false)
+								setAddRuleError(null)
+								setNewRulePattern('')
+							}}
+						>
+							Cancel
+						</Button>
+						<Button variant="primary" onClick={handleAddRule}>
+							Add Rule
+						</Button>
+					</ModalFooter>
+				</Modal>
 
 				{/* Rules table */}
 				<Table>
@@ -377,6 +371,88 @@ export function SettingsTranslationTab({
 					Save Settings
 				</Button>
 			</div>
+		</div>
+	)
+}
+
+const RULE_TYPE_DESCRIPTIONS: Record<ExcludePathRuleType, string> = {
+	includes: 'Path contains the pattern',
+	startsWith: 'Path starts with the pattern',
+	endsWith: 'Path ends with the pattern',
+	regex: 'Path matches the regular expression',
+}
+
+function RuleTypeDropdown({
+	selected,
+	onSelect,
+}: {
+	selected: ExcludePathRuleType
+	onSelect: (type: ExcludePathRuleType) => void
+}) {
+	const [isOpen, setIsOpen] = useState(false)
+	const dropdownRef = useRef<HTMLDivElement>(null)
+
+	useEffect(() => {
+		const handler = (e: MouseEvent) => {
+			if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+				setIsOpen(false)
+			}
+		}
+		document.addEventListener('mousedown', handler)
+		return () => document.removeEventListener('mousedown', handler)
+	}, [])
+
+	const handleSelect = (type: ExcludePathRuleType) => {
+		onSelect(type)
+		setIsOpen(false)
+	}
+
+	return (
+		<div ref={dropdownRef} className="relative">
+			<button
+				type="button"
+				onClick={() => setIsOpen(!isOpen)}
+				className="w-full flex items-center gap-2 px-4 py-3 rounded-md bg-[var(--input-bg)] border border-[var(--border)] text-sm font-medium text-[var(--text-heading)] hover:border-[var(--border-hover)] transition-colors cursor-pointer"
+			>
+				<span className="flex-1 text-left">{selected}</span>
+				<svg
+					className={`w-4 h-4 text-[var(--text-subtle)] transition-transform ${isOpen ? 'rotate-180' : ''}`}
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					strokeWidth="2"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				>
+					<path d="m6 9 6 6 6-6" />
+				</svg>
+			</button>
+
+			{isOpen && (
+				<div className="absolute left-0 top-full z-50 mt-1 w-full rounded-lg bg-[var(--card-bg)] border border-[var(--border)] shadow-lg">
+					<ul>
+						{RULE_TYPES.map((type) => (
+							<li key={type}>
+								<button
+									type="button"
+									onClick={() => handleSelect(type)}
+									className={`w-full text-left px-3 py-2.5 text-sm flex items-center justify-between hover:bg-[var(--accent)] hover:text-white transition-colors cursor-pointer ${
+										selected === type
+											? 'bg-[var(--accent)]/10 text-[var(--accent)] font-medium'
+											: 'text-[var(--text-muted)]'
+									}`}
+								>
+									<span>{type}</span>
+									<span className={`text-xs ${selected === type ? 'opacity-70' : 'opacity-50'}`}>
+										{RULE_TYPE_DESCRIPTIONS[type]}
+									</span>
+								</button>
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
 		</div>
 	)
 }
