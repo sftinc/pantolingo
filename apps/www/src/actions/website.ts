@@ -53,6 +53,44 @@ export async function saveGeneralSettings(
 	}
 }
 
+const VALID_SKIP_PATH_TYPES = new Set(['includes', 'startsWith', 'endsWith', 'regex'])
+
+function validateSkipPathEntry(entry: string): string | null {
+	const colonIndex = entry.indexOf(':')
+	if (colonIndex === -1) {
+		return 'Invalid rule format (missing type prefix)'
+	}
+
+	const type = entry.slice(0, colonIndex)
+	const pattern = entry.slice(colonIndex + 1)
+
+	if (!VALID_SKIP_PATH_TYPES.has(type)) {
+		return `Unknown rule type: ${type}`
+	}
+	if (!pattern) {
+		return 'Empty pattern'
+	}
+	if (pattern.length > 200) {
+		return 'Pattern too long (max 200 characters)'
+	}
+
+	if (type === 'regex') {
+		if (pattern.length > 100) {
+			return 'Regex pattern too long (max 100 characters)'
+		}
+		try {
+			new RegExp(pattern)
+		} catch {
+			return 'Invalid regular expression'
+		}
+		if (/(\+|\*|\})\)?(\+|\*|\{)/.test(pattern)) {
+			return 'Regex pattern may cause performance issues'
+		}
+	}
+
+	return null
+}
+
 export async function saveTranslationSettings(
 	websiteId: number,
 	settings: {
@@ -78,6 +116,14 @@ export async function saveTranslationSettings(
 		}
 		if (skipSelectors.some(s => s.length > 200)) {
 			return { success: false, error: 'Skip selector too long (max 200 characters)' }
+		}
+
+		// Validate each skip path entry has valid type prefix and pattern
+		for (const entry of skipPath) {
+			const error = validateSkipPathEntry(entry)
+			if (error) {
+				return { success: false, error: `Invalid skip path rule: ${error}` }
+			}
 		}
 
 		const accountId = await requireAccountId()

@@ -5,7 +5,7 @@
  * Example: /products/item-123 → /products/item-[N1] → translate → /productos/articulo-[N1] → /productos/articulo-123
  */
 
-import type { TokenUsage } from '@pantolingo/db'
+import type { TokenUsage, SkipPathRule } from '@pantolingo/db'
 import type { PatternReplacement, Content, PathnameMapping } from '../types.js'
 import { applyPatterns, restorePatterns } from './skip-patterns.js'
 import { toAsciiPathname } from '../utils/ascii-pathname.js'
@@ -77,25 +77,28 @@ function lookupCachedPathname(
  * Check if a pathname should be skipped from translation
  *
  * @param pathname - The pathname to check
- * @param skipPath - Array of patterns (string or regex) to skip
+ * @param skipPath - Array of SkipPathRule objects to match against
  * @returns true if pathname matches any skip pattern, false otherwise
  */
-export function shouldSkipPath(pathname: string, skipPath: (string | RegExp)[] | undefined): boolean {
+export function shouldSkipPath(pathname: string, skipPath: SkipPathRule[] | undefined): boolean {
 	if (!skipPath || skipPath.length === 0) {
 		return false
 	}
 
-	for (const pattern of skipPath) {
-		if (typeof pattern === 'string') {
-			// String pattern: check if substring is found anywhere in pathname
-			if (pathname.includes(pattern)) {
-				return true
-			}
-		} else if (pattern instanceof RegExp) {
-			// Regex pattern: test against pathname
-			if (pattern.test(pathname)) {
-				return true
-			}
+	for (const rule of skipPath) {
+		switch (rule.type) {
+			case 'includes':
+				if (pathname.includes(rule.pattern)) return true
+				break
+			case 'startsWith':
+				if (pathname.startsWith(rule.pattern)) return true
+				break
+			case 'endsWith':
+				if (pathname.endsWith(rule.pattern)) return true
+				break
+			case 'regex':
+				if (rule.regex && rule.regex.test(pathname)) return true
+				break
 		}
 	}
 
@@ -117,7 +120,7 @@ export async function translatePathname(
 	_targetLang: string,
 	pathnameMapping: PathnameMapping | null,
 	translateFn: (text: string) => Promise<string>,
-	skipPath: (string | RegExp)[] | undefined
+	skipPath: SkipPathRule[] | undefined
 ): Promise<{
 	translated: string
 	segment: Content | null
@@ -182,7 +185,7 @@ export async function translatePathnamesBatch(
 	pathnames: Set<string>,
 	pathnameMapping: PathnameMapping | null,
 	translateFn: (segments: Content[]) => Promise<TranslateFnResult>,
-	skipPath: (string | RegExp)[] | undefined
+	skipPath: SkipPathRule[] | undefined
 ): Promise<{
 	pathnameMap: Map<string, string>
 	newSegments: Content[]

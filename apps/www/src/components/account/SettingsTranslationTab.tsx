@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { TagInput } from '@/components/ui/TagInput'
 import { Switch } from '@/components/ui/Switch'
 import { Button } from '@/components/ui/Modal'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table'
+import { Badge } from '@/components/ui/Badge'
 import { saveTranslationSettings } from '@/actions/website'
 
 interface SettingsTranslationTabProps {
@@ -15,35 +17,38 @@ interface SettingsTranslationTabProps {
 	initialTranslatePath: boolean
 }
 
-function parseSkipPath(skipPath: string[]): { contains: string[]; regex: string[] } {
-	const contains: string[] = []
-	const regex: string[] = []
+type ExcludePathRuleType = 'includes' | 'startsWith' | 'endsWith' | 'regex'
+
+interface ExcludePathRule {
+	type: ExcludePathRuleType
+	pattern: string
+}
+
+const RULE_TYPES: ExcludePathRuleType[] = ['includes', 'startsWith', 'endsWith', 'regex']
+
+function parseSkipPath(skipPath: string[]): ExcludePathRule[] {
+	const rules: ExcludePathRule[] = []
 
 	for (const item of skipPath) {
 		if (item.startsWith('regex:')) {
-			regex.push(item.slice(6))
+			rules.push({ type: 'regex', pattern: item.slice(6) })
+		} else if (item.startsWith('startsWith:')) {
+			rules.push({ type: 'startsWith', pattern: item.slice(11) })
+		} else if (item.startsWith('endsWith:')) {
+			rules.push({ type: 'endsWith', pattern: item.slice(9) })
 		} else if (item.startsWith('includes:')) {
-			contains.push(item.slice(9))
+			rules.push({ type: 'includes', pattern: item.slice(9) })
 		} else {
-			contains.push(item)
+			// Legacy plain strings → includes
+			rules.push({ type: 'includes', pattern: item })
 		}
 	}
 
-	return { contains, regex }
+	return rules
 }
 
-function combineSkipPath(contains: string[], regex: string[]): string[] {
-	const result: string[] = []
-
-	for (const item of contains) {
-		result.push(`includes:${item}`)
-	}
-
-	for (const item of regex) {
-		result.push(`regex:${item}`)
-	}
-
-	return result
+function combineSkipPath(rules: ExcludePathRule[]): string[] {
+	return rules.map((rule) => `${rule.type}:${rule.pattern}`)
 }
 
 function validateRegex(pattern: string): string | null {
@@ -106,13 +111,54 @@ export function SettingsTranslationTab({
 	const [success, setSuccess] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 
-	const { contains: initialContains, regex: initialRegex } = parseSkipPath(initialSkipPath)
-
 	const [skipWords, setSkipWords] = useState(initialSkipWords)
-	const [skipPathContains, setSkipPathContains] = useState(initialContains)
-	const [skipPathRegex, setSkipPathRegex] = useState(initialRegex)
+	const [skipPathRules, setSkipPathRules] = useState<ExcludePathRule[]>(() => parseSkipPath(initialSkipPath))
 	const [skipSelectors, setSkipSelectors] = useState(initialSkipSelectors)
 	const [translatePath, setTranslatePath] = useState(initialTranslatePath)
+
+	// Add Rule form state
+	const [showAddForm, setShowAddForm] = useState(false)
+	const [newRuleType, setNewRuleType] = useState<ExcludePathRuleType>('includes')
+	const [newRulePattern, setNewRulePattern] = useState('')
+	const [addRuleError, setAddRuleError] = useState<string | null>(null)
+
+	const handleAddRule = () => {
+		setAddRuleError(null)
+		const pattern = newRulePattern.trim()
+
+		if (!pattern) {
+			setAddRuleError('Pattern is required')
+			return
+		}
+		if (pattern.length > 200) {
+			setAddRuleError('Pattern too long (max 200 characters)')
+			return
+		}
+		if (newRuleType === 'regex') {
+			const regexError = validateRegex(pattern)
+			if (regexError) {
+				setAddRuleError(regexError)
+				return
+			}
+		}
+		if (skipPathRules.some((r) => r.type === newRuleType && r.pattern === pattern)) {
+			setAddRuleError('Duplicate rule')
+			return
+		}
+		if (skipPathRules.length >= 25) {
+			setAddRuleError('Maximum 25 rules allowed')
+			return
+		}
+
+		setSkipPathRules([...skipPathRules, { type: newRuleType, pattern }])
+		setNewRulePattern('')
+		setNewRuleType('includes')
+		setShowAddForm(false)
+	}
+
+	const handleRemoveRule = (index: number) => {
+		setSkipPathRules(skipPathRules.filter((_, i) => i !== index))
+	}
 
 	const handleSave = () => {
 		setError(null)
@@ -121,11 +167,10 @@ export function SettingsTranslationTab({
 		const trimmedSkipWords = skipWords.map((s) => s.trim()).filter(Boolean)
 		setSkipWords(trimmedSkipWords)
 
-		const trimmedContains = skipPathContains.map((s) => s.trim()).filter(Boolean)
-		setSkipPathContains(trimmedContains)
-
-		const trimmedRegex = skipPathRegex.map((s) => s.trim()).filter(Boolean)
-		setSkipPathRegex(trimmedRegex)
+		const trimmedRules = skipPathRules
+			.map((r) => ({ ...r, pattern: r.pattern.trim() }))
+			.filter((r) => r.pattern)
+		setSkipPathRules(trimmedRules)
 
 		const trimmedSelectors = skipSelectors.map((s) => s.trim()).filter(Boolean)
 		setSkipSelectors(trimmedSelectors)
@@ -133,7 +178,7 @@ export function SettingsTranslationTab({
 		startTransition(async () => {
 			const result = await saveTranslationSettings(websiteId, {
 				skipWords: trimmedSkipWords,
-				skipPath: combineSkipPath(trimmedContains, trimmedRegex),
+				skipPath: combineSkipPath(trimmedRules),
 				skipSelectors: trimmedSelectors,
 				translatePath,
 			})
@@ -175,37 +220,123 @@ export function SettingsTranslationTab({
 
 			{/* Exclude Paths */}
 			<div className={cardClass}>
-				<h2 className="text-sm font-semibold text-[var(--text-heading)] mb-5">Exclude Paths</h2>
-				<div className="space-y-5">
-					{/* Contains */}
-					<div>
-						<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">Contains</label>
-						<p className="text-xs text-[var(--text-muted)] mb-2">
-							Paths containing these strings will not be translated
-						</p>
-						<TagInput
-							value={skipPathContains}
-							onChange={setSkipPathContains}
-							placeholder="Add path patterns..."
+				<div className="flex items-center justify-between mb-1">
+					<h2 className="text-sm font-semibold text-[var(--text-heading)]">Exclude Paths</h2>
+					{!showAddForm && (
+						<button
+							type="button"
+							onClick={() => setShowAddForm(true)}
 							disabled={isPending}
-						/>
-					</div>
-
-					{/* Regex */}
-					<div>
-						<label className="block mb-1.5 text-sm font-medium text-[var(--text-muted)]">Regex</label>
-						<p className="text-xs text-[var(--text-muted)] mb-2">
-							Paths matching these regular expressions will not be translated
-						</p>
-						<TagInput
-							value={skipPathRegex}
-							onChange={setSkipPathRegex}
-							placeholder="Add regex patterns..."
-							disabled={isPending}
-							validate={validateRegex}
-						/>
-					</div>
+							className="px-3 py-1 text-xs font-medium rounded-md bg-[var(--accent)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+						>
+							Add Rule
+						</button>
+					)}
 				</div>
+				<p className="text-xs text-[var(--text-muted)] mb-4">
+					Paths matching these rules will not be translated
+				</p>
+
+				{/* Add Rule inline form */}
+				{showAddForm && (
+					<div className="mb-4 p-3 rounded-lg border border-[var(--border)] bg-[var(--page-bg)]">
+						<div className="flex items-start gap-2">
+							<select
+								value={newRuleType}
+								onChange={(e) => setNewRuleType(e.target.value as ExcludePathRuleType)}
+								className="shrink-0 w-32 px-2 py-1.5 text-sm rounded-md border border-[var(--border)] bg-[var(--card-bg)] text-[var(--text-heading)]"
+							>
+								{RULE_TYPES.map((t) => (
+									<option key={t} value={t}>
+										{t}
+									</option>
+								))}
+							</select>
+							<input
+								type="text"
+								value={newRulePattern}
+								onChange={(e) => {
+									setNewRulePattern(e.target.value)
+									setAddRuleError(null)
+								}}
+								onKeyDown={(e) => {
+									if (e.key === 'Enter') handleAddRule()
+									if (e.key === 'Escape') {
+										setShowAddForm(false)
+										setAddRuleError(null)
+										setNewRulePattern('')
+									}
+								}}
+								placeholder="Enter pattern..."
+								autoFocus
+								className="flex-1 min-w-0 px-2 py-1.5 text-sm rounded-md border border-[var(--border)] bg-[var(--card-bg)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] font-mono"
+							/>
+							<button
+								type="button"
+								onClick={handleAddRule}
+								className="shrink-0 px-3 py-1.5 text-xs font-medium rounded-md bg-[var(--accent)] text-white hover:opacity-90 transition-opacity"
+							>
+								Add
+							</button>
+							<button
+								type="button"
+								onClick={() => {
+									setShowAddForm(false)
+									setAddRuleError(null)
+									setNewRulePattern('')
+								}}
+								className="shrink-0 px-3 py-1.5 text-xs font-medium rounded-md border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-heading)] transition-colors"
+							>
+								Cancel
+							</button>
+						</div>
+						{addRuleError && (
+							<p className="mt-2 text-xs text-[var(--error)]">{addRuleError}</p>
+						)}
+					</div>
+				)}
+
+				{/* Rules table */}
+				{skipPathRules.length > 0 ? (
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead className="w-36">Type</TableHead>
+								<TableHead>Pattern</TableHead>
+								<TableHead className="w-16 text-right">{''}</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{skipPathRules.map((rule, index) => (
+								<TableRow key={`${rule.type}-${rule.pattern}-${index}`}>
+									<TableCell>
+										<Badge variant="neutral">{rule.type}</Badge>
+									</TableCell>
+									<TableCell>
+										<code className="text-xs font-mono">{rule.pattern}</code>
+									</TableCell>
+									<TableCell className="text-right">
+										<button
+											type="button"
+											onClick={() => handleRemoveRule(index)}
+											disabled={isPending}
+											className="text-[var(--text-muted)] hover:text-[var(--error)] transition-colors disabled:opacity-50"
+											title="Remove rule"
+										>
+											<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+												<path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+											</svg>
+										</button>
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				) : (
+					<div className="py-8 text-center text-sm text-[var(--text-muted)]">
+						No exclude path rules configured
+					</div>
+				)}
 			</div>
 
 			{/* Exclude Selectors */}

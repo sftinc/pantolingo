@@ -6,6 +6,15 @@
 import { pool } from './pool.js'
 
 /**
+ * A parsed skip-path rule with type discriminator
+ */
+export interface SkipPathRule {
+	type: 'includes' | 'startsWith' | 'endsWith' | 'regex'
+	pattern: string
+	regex?: RegExp
+}
+
+/**
  * Website language configuration from database
  * Matches structure needed by the translate app pipeline
  */
@@ -16,7 +25,7 @@ export interface WebsiteLanguageConfig {
 	sourceLang: string // website.source_lang
 	targetLang: string // website_language.target_lang
 	skipWords: string[]
-	skipPath: (string | RegExp)[]
+	skipPath: SkipPathRule[]
 	skipSelectors: string[] // CSS selectors for elements to skip during translation
 	translatePath: boolean
 	cacheDisabledUntil: Date | null // website.cache_disabled_until - dev override for caching
@@ -27,28 +36,32 @@ const websiteLanguageCache = new Map<string, { config: WebsiteLanguageConfig | n
 const WEBSITE_LANGUAGE_CACHE_TTL = 60_000 // 60 seconds
 
 /**
- * Parse skip_path array from database format
- * Database stores: ['includes:/api/', 'regex:^/admin']
- * Returns: ['/api/', /^\/admin/]
+ * Parse skip_path array from database format into SkipPathRule objects
+ * Database stores: ['includes:/api/', 'regex:^/admin', 'startsWith:/blog', 'endsWith:.pdf']
  */
-function parseSkipPath(dbArray: string[] | null): (string | RegExp)[] {
+function parseSkipPath(dbArray: string[] | null): SkipPathRule[] {
 	if (!dbArray || dbArray.length === 0) return []
 
 	return dbArray
-		.map((pattern) => {
-			if (pattern.startsWith('regex:')) {
+		.map((entry): SkipPathRule | null => {
+			if (entry.startsWith('regex:')) {
+				const pat = entry.slice(6)
 				try {
-					return new RegExp(pattern.slice(6))
+					return { type: 'regex', pattern: pat, regex: new RegExp(pat) }
 				} catch {
 					return null // Skip invalid patterns
 				}
-			} else if (pattern.startsWith('includes:')) {
-				return pattern.slice(9)
+			} else if (entry.startsWith('startsWith:')) {
+				return { type: 'startsWith', pattern: entry.slice(11) }
+			} else if (entry.startsWith('endsWith:')) {
+				return { type: 'endsWith', pattern: entry.slice(9) }
+			} else if (entry.startsWith('includes:')) {
+				return { type: 'includes', pattern: entry.slice(9) }
 			}
-			// Plain string (legacy format)
-			return pattern
+			// Plain string (legacy format) → treat as includes
+			return { type: 'includes', pattern: entry }
 		})
-		.filter((p): p is string | RegExp => p !== null)
+		.filter((p): p is SkipPathRule => p !== null)
 }
 
 /**
