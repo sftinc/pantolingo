@@ -78,7 +78,7 @@ export function SettingsPage({ websiteId, publicCode, initialTab, website, langu
 	}, [])
 
 	return (
-		<div>
+		<div className="max-w-2xl">
 			<div className="flex items-center justify-between mb-5">
 				<div className="flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg p-1 w-fit">
 					{TABS.map((tab) => (

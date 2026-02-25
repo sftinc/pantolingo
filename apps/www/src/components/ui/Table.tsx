@@ -60,7 +60,7 @@ interface TableHeadProps {
 
 export function TableHead({ children, className }: TableHeadProps) {
 	return (
-		<th className={cn('px-4 py-3 font-medium text-[var(--text-muted)]', className)}>
+		<th className={cn('px-4 py-3 text-xs font-medium text-[var(--text-muted)] uppercase', className)}>
 			{children}
 		</th>
 	)
