@@ -44,6 +44,8 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 	const [wizardOpen, setWizardOpen] = useState(false)
 	const switcherRef = useRef<HTMLDivElement>(null)
 	const profileRef = useRef<HTMLDivElement>(null)
+	const mobileSwitcherRef = useRef<HTMLDivElement>(null)
+	const mobileProfileRef = useRef<HTMLDivElement>(null)
 
 	const basePath = `/account/${currentWebsite.publicCode}`
 	const otherWebsites = websites.filter((w) => w.publicCode !== currentWebsite.publicCode)
@@ -62,12 +64,11 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 	// Click-outside handler for dropdowns
 	useEffect(() => {
 		const handler = (e: MouseEvent) => {
-			if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) {
-				setSwitcherOpen(false)
-			}
-			if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
-				setProfileOpen(false)
-			}
+			const target = e.target as Node
+			const inSwitcher = switcherRef.current?.contains(target) || mobileSwitcherRef.current?.contains(target)
+			const inProfile = profileRef.current?.contains(target) || mobileProfileRef.current?.contains(target)
+			if (!inSwitcher) setSwitcherOpen(false)
+			if (!inProfile) setProfileOpen(false)
 		}
 		document.addEventListener('mousedown', handler)
 		return () => document.removeEventListener('mousedown', handler)
@@ -91,7 +92,7 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 						<HamburgerIcon className="w-6 h-6" />
 					</button>
 					{/* Website switcher */}
-					<div ref={switcherRef} className="relative">
+					<div ref={mobileSwitcherRef} className="relative">
 						<button
 							onClick={() => {
 								setSwitcherOpen(!switcherOpen)
@@ -153,7 +154,7 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 				{/* Right: profile */}
 				<div className="flex items-center">
 					{/* Profile */}
-					<div ref={profileRef} className="relative">
+					<div ref={mobileProfileRef} className="relative">
 						<button
 							onClick={() => {
 								setProfileOpen(!profileOpen)
@@ -236,6 +237,65 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 					<span className="text-base font-bold text-[var(--text-heading)]">Pantolingo</span>
 				</div>
 
+				{/* Website picker (desktop only) */}
+				<div ref={switcherRef} className="relative px-2 pt-3 hidden md:block">
+					<button
+						onClick={() => {
+							setSwitcherOpen(!switcherOpen)
+							setProfileOpen(false)
+						}}
+						className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium ${currentColor.btn} ${currentColor.hover} transition-colors cursor-pointer`}
+					>
+						<span className={`w-5 h-5 rounded ${currentColor.avatar} flex items-center justify-center text-[11px] font-semibold shrink-0`}>
+							{currentWebsite.name[0].toUpperCase()}
+						</span>
+						<span className="font-semibold truncate">{currentWebsite.name}</span>
+						<ChevronIcon className={`w-4 h-4 ml-auto ${currentColor.chevron} transition-transform ${switcherOpen ? 'rotate-180' : ''}`} />
+					</button>
+
+					{switcherOpen && (
+						<div className="absolute left-2 top-full mt-1 w-64 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg shadow-lg overflow-hidden z-50">
+							{/* Add website */}
+							<button
+								onClick={() => {
+									setSwitcherOpen(false)
+									setWizardOpen(true)
+								}}
+								className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
+							>
+								<PlusIcon className="w-5 h-5 text-[var(--text-subtle)]" />
+								Add website
+							</button>
+
+							{otherWebsites.length > 0 && (
+								<>
+									<div className="border-t border-[var(--border)] my-1" />
+									{otherWebsites.map((site) => {
+										const siteColorKey = (site.uiColor as UiColor) || getWebsiteColor(site.name)
+										const siteColor = COLOR_CLASSES[siteColorKey] || COLOR_CLASSES[getWebsiteColor(site.name)]
+										return (
+											<button
+												key={site.publicCode}
+												onClick={() => {
+													setSwitcherOpen(false)
+													const subPath = pathname.replace(`${basePath}/`, '').split('?')[0]
+													router.push(`/account/${site.publicCode}/${subPath}`)
+												}}
+												className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
+											>
+												<span className={`w-6 h-6 rounded flex items-center justify-center text-xs font-semibold ${siteColor.btn}`}>
+													{site.name[0].toUpperCase()}
+												</span>
+												{site.name}
+											</button>
+										)
+									})}
+								</>
+							)}
+						</div>
+					)}
+				</div>
+
 				{/* Primary nav */}
 				<nav className="px-2 pt-4 space-y-1">
 					{NAV_ITEMS.map((item) => {
@@ -273,6 +333,76 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 						</Link>
 					</div>
 				</nav>
+
+				{/* Spacer to push profile to bottom */}
+				<div className="flex-grow hidden md:block" />
+
+				{/* Profile menu (desktop only) */}
+				<div ref={profileRef} className="relative px-2 pb-4 hidden md:block border-t border-[var(--sidebar-border)] pt-3">
+					<button
+						onClick={() => {
+							setProfileOpen(!profileOpen)
+							setSwitcherOpen(false)
+						}}
+						className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
+					>
+						<span className="w-8 h-8 rounded-full bg-[var(--nav-hover-bg)] flex items-center justify-center text-xs font-semibold text-[var(--text-heading)] shrink-0">
+							{userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+						</span>
+						<span className="truncate">{userName}</span>
+						<ChevronIcon className={`w-4 h-4 ml-auto text-[var(--text-subtle)] transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+					</button>
+
+					{profileOpen && (
+						<div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 w-48 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg shadow-lg py-1 z-50">
+							{/* Profile link */}
+							<button
+								onClick={() => { setProfileOpen(false); setProfileModalOpen(true) }}
+								className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
+							>
+								<UserIcon className="w-5 h-5 text-[var(--text-subtle)]" />
+								Profile
+							</button>
+
+							{/* Billing link */}
+							<Link
+								href="/account/billing"
+								onClick={() => setProfileOpen(false)}
+								className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
+							>
+								<BillingIcon className="w-5 h-5 text-[var(--text-subtle)]" />
+								Billing
+							</Link>
+
+							<div className="border-t border-[var(--border)] my-1" />
+
+							{/* Theme cycle */}
+							<button
+								onClick={(e) => {
+									e.stopPropagation()
+									cycleTheme()
+								}}
+								className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
+							>
+								{mounted && <ThemeIcon className="w-5 h-5 text-[var(--text-subtle)]" />}
+								{!mounted && <span className="w-5 h-5" />}
+								{mounted ? themeLabel : ''}
+							</button>
+
+							{/* Sign out */}
+							<form action={signOutAction}>
+								<button
+									type="submit"
+									tabIndex={0}
+									className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
+								>
+									<SignOutIcon className="w-5 h-5 text-[var(--text-subtle)]" />
+									Sign out
+								</button>
+							</form>
+						</div>
+					)}
+				</div>
 			</aside>
 
 			{/* Main content */}
