@@ -79,7 +79,7 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 	return (
 		<div className="min-h-screen bg-[var(--content-bg)]">
 			{/* Top header bar */}
-			<header className="sticky top-0 z-30 md:ml-60 h-14 bg-white dark:bg-[var(--sidebar-bg)] md:bg-[var(--content-bg)] md:dark:bg-[var(--content-bg)]">
+			<header className="sticky top-0 z-30 h-14 bg-white dark:bg-[var(--sidebar-bg)] md:hidden">
 				<div className="mx-auto max-w-6xl flex items-center justify-between h-full px-4 sm:px-6 lg:px-8">
 				{/* Left: hamburger (mobile) + website switcher */}
 				<div className="flex items-center gap-3">
