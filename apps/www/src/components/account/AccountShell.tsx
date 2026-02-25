@@ -131,7 +131,8 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 													key={site.publicCode}
 													onClick={() => {
 														setSwitcherOpen(false)
-														router.push(`/account/${site.publicCode}/languages`)
+														const subPath = pathname.replace(`${basePath}/`, '').split('?')[0]
+														router.push(`/account/${site.publicCode}/${subPath}`)
 													}}
 													className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
 												>

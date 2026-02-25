@@ -11,6 +11,8 @@ type Tab = 'general' | 'languages' | 'translation'
 
 interface SettingsPageProps {
 	websiteId: number
+	publicCode: string
+	initialTab: Tab
 	website: {
 		name: string
 		hostname: string
@@ -31,24 +33,34 @@ const TABS: { key: Tab; label: string }[] = [
 	{ key: 'translation', label: 'Translations' },
 ]
 
-export function SettingsPage({ websiteId, website, languages }: SettingsPageProps) {
-	const [activeTab, setActiveTab] = useState<Tab>('general')
+function getTabUrl(publicCode: string, tab: Tab): string {
+	if (tab === 'general') return `/account/${publicCode}/settings`
+	return `/account/${publicCode}/settings/${tab}`
+}
+
+export function SettingsPage({ websiteId, publicCode, initialTab, website, languages }: SettingsPageProps) {
+	const [activeTab, setActiveTab] = useState<Tab>(initialTab)
 	const [dirtyTabs, setDirtyTabs] = useState<Record<Tab, boolean>>({ general: false, languages: false, translation: false })
 	const [pendingTab, setPendingTab] = useState<Tab | null>(null)
+
+	const switchTab = (tab: Tab) => {
+		setActiveTab(tab)
+		window.history.pushState(null, '', getTabUrl(publicCode, tab))
+	}
 
 	const handleTabClick = (tab: Tab) => {
 		if (tab === activeTab) return
 		if (dirtyTabs[activeTab]) {
 			setPendingTab(tab)
 		} else {
-			setActiveTab(tab)
+			switchTab(tab)
 		}
 	}
 
 	const handleDiscard = () => {
 		if (pendingTab) {
 			setDirtyTabs((prev) => ({ ...prev, [activeTab]: false }))
-			setActiveTab(pendingTab)
+			switchTab(pendingTab)
 			setPendingTab(null)
 		}
 	}
