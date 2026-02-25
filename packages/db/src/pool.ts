@@ -30,15 +30,42 @@ function getPool(): Pool {
 	return _pool
 }
 
+function queryLabel(sql: string): string {
+	const match = sql.match(/\b(SELECT|INSERT|UPDATE|DELETE)\b.*?\b(?:FROM|INTO|UPDATE|TABLE)\s+(\w+)/is)
+	return match ? `${match[1].toUpperCase()} ${match[2]}` : sql.substring(0, 40)
+}
+
 // Export pool as a Proxy that lazily initializes the real pool
 // This ensures env vars are loaded before pool creation
 export const pool: Pool = new Proxy({} as Pool, {
 	get(_, prop: keyof Pool) {
 		const realPool = getPool()
-		const value = realPool[prop]
-		if (typeof value === 'function') {
-			return value.bind(realPool)
+
+		if (prop === 'query') {
+			return async (...args: any[]) => {
+				const start = performance.now()
+				const result = await (realPool.query as Function)(...args)
+				console.log(`[DB] ${(performance.now() - start).toFixed(1)}ms | ${queryLabel(args[0])}`)
+				return result
+			}
 		}
+
+		if (prop === 'connect') {
+			return async () => {
+				const client = await realPool.connect()
+				const origQuery = client.query.bind(client)
+				client.query = (async (...args: any[]) => {
+					const start = performance.now()
+					const result = await (origQuery as Function)(...args)
+					console.log(`[DB] ${(performance.now() - start).toFixed(1)}ms | ${queryLabel(args[0])}`)
+					return result
+				}) as typeof client.query
+				return client
+			}
+		}
+
+		const value = realPool[prop]
+		if (typeof value === 'function') return value.bind(realPool)
 		return value
 	},
 })
