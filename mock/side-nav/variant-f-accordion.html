@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en" class="h-full">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Variant F: Accordion - Pantolingo</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script>
+			tailwind.config = {
+				darkMode: 'class',
+				theme: {
+					extend: {
+						colors: {
+							sidebar: { light: '#ffffff', dark: '#1a1a1a' },
+							content: { light: '#f5f5f5', dark: '#111111' },
+							card: { light: '#ffffff', dark: '#222222' },
+						},
+					},
+				},
+			}
+		</script>
+		<style>
+			.nav-item-active svg { color: #2563eb; }
+			.dark .nav-item-active svg { color: #60a5fa; }
+			.nav-item-active span { color: #1d4ed8; }
+			.dark .nav-item-active span { color: #93c5fd; }
+			.accordion-panel {
+				display: grid;
+				grid-template-rows: 0fr;
+				transition: grid-template-rows 200ms ease;
+			}
+			.accordion-panel.open {
+				grid-template-rows: 1fr;
+			}
+			.accordion-panel > div {
+				overflow: hidden;
+			}
+		</style>
+		<script>
+			;(function () {
+				var t = localStorage.getItem('theme') || 'system'
+				if (t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+					document.documentElement.classList.add('dark')
+				}
+			})()
+		</script>
+	</head>
+	<body class="h-full bg-content-light dark:bg-content-dark text-gray-900 dark:text-gray-100">
+
+		<!-- ================================================================
+		     NO TOP HEADER on desktop — mobile gets a thin bar
+		     ================================================================ -->
+		<div class="md:hidden sticky top-0 z-30 h-14 bg-white dark:bg-sidebar-dark border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4">
+			<!-- Left: hamburger + website switcher -->
+			<div class="flex items-center gap-2">
+				<button id="mobile-menu-btn" aria-label="Open menu" class="p-1 text-gray-600 dark:text-gray-300">
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+					</svg>
+				</button>
+				<div class="relative">
+					<button id="mobile-switcher-btn" class="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors cursor-pointer">
+						<span class="w-5 h-5 rounded bg-blue-700/20 dark:bg-blue-200/20 flex items-center justify-center text-[10px] font-semibold">E</span>
+						<span class="font-semibold">eSnipe</span>
+						<svg id="mobile-switcher-chevron" class="w-3 h-3 text-blue-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+					</button>
+					<div id="mobile-switcher-dropdown" class="hidden absolute top-full left-0 mt-1 w-60 bg-white dark:bg-sidebar-dark border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg overflow-hidden z-50">
+						<button disabled class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 opacity-50 cursor-not-allowed">
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
+							Add website
+						</button>
+						<div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+						<button class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
+							<span class="w-6 h-6 rounded bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 flex items-center justify-center text-xs font-semibold">M</span>
+							MyShop
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Right: profile -->
+			<div class="relative">
+				<button id="mobile-profile-btn" class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+					<span class="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-semibold text-gray-900 dark:text-white">W</span>
+					<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+					</svg>
+				</button>
+				<div id="mobile-profile-dropdown" class="hidden absolute right-0 top-full mt-1 w-48 bg-white dark:bg-sidebar-dark border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-1 z-50">
+					<button class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
+						<svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" stroke-width="1.5"/><path stroke-width="1.5" d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+						Profile
+					</button>
+					<div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+					<button id="mobile-theme-cycle-btn" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
+						<svg class="mobile-theme-icon mobile-theme-icon-light w-5 h-5 text-gray-500 dark:text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" stroke-width="1.5"/><path stroke-linecap="round" stroke-width="1.5" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+						<svg class="mobile-theme-icon mobile-theme-icon-dark w-5 h-5 text-gray-500 dark:text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
+						<svg class="mobile-theme-icon mobile-theme-icon-system w-5 h-5 text-gray-500 dark:text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5"/><path stroke-linecap="round" stroke-width="1.5" d="M8 21h8m-4-4v4"/></svg>
+						<span class="mobile-theme-label"></span>
+					</button>
+					<a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+						<svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/></svg>
+						Sign out
+					</a>
+				</div>
+			</div>
+		</div>
+
+		<!-- Mobile Sidebar Overlay -->
+		<div id="mobile-overlay" class="md:hidden fixed inset-0 bg-black/40 z-40 hidden"></div>
+
+		<!-- ================================================================
+		     SIDEBAR — website switcher at top, profile at bottom
+		     ================================================================ -->
+		<aside id="sidebar" class="fixed top-0 left-0 z-50 h-full w-60 bg-sidebar-light dark:bg-sidebar-dark border-r border-gray-200 dark:border-gray-700 flex flex-col transition-transform -translate-x-full md:translate-x-0 overflow-visible">
+			<!-- Logo -->
+			<div class="h-14 flex items-center px-5 flex-shrink-0">
+				<span class="text-base font-bold text-gray-900 dark:text-white">Pantolingo</span>
+			</div>
+
+			<!-- Accordion website list + nav (desktop only) -->
+			<div id="accordion-nav" class="hidden md:block px-2 pt-4 flex-1 overflow-y-auto"></div>
+
+			<!-- Primary nav (mobile only — shown inside mobile sidebar) -->
+			<nav class="md:hidden px-2 space-y-1 flex-1 overflow-y-auto">
+				<a href="#" class="nav-item-active flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-900 dark:text-white transition-colors">
+					<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5h8M7 5V3m2.5 7.5L7 9m0 0L5 12m2-3l2 3m5-3h6m-3 0v8m-2-4h4"/><text x="14" y="9" font-size="7" fill="currentColor" stroke="none" font-weight="600">A</text></svg>
+					<span>Languages</span>
+				</a>
+				<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+					<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h12M4 14h16M4 18h8"/></svg>
+					<span>Segments</span>
+				</a>
+				<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+					<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+					<span>Paths</span>
+				</a>
+				<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+					<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3v18h18M7 16v-3m4 3v-6m4 6v-4m4 4V7"/></svg>
+					<span>Stats</span>
+				</a>
+				<div class="pt-6 space-y-1">
+					<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+						<svg class="w-5 h-5 flex-shrink-0 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="1.5"/></svg>
+						<span>Settings</span>
+					</a>
+				</div>
+			</nav>
+
+			<!-- ================================================================
+			     PROFILE — pinned to sidebar bottom
+			     ================================================================ -->
+			<div class="border-t border-gray-200 dark:border-gray-700 p-3 flex-shrink-0 relative">
+				<button
+					id="profile-btn"
+					class="w-full flex items-center gap-3 px-2 py-2 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+				>
+					<span class="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-semibold text-gray-900 dark:text-white">W</span>
+					<span class="font-medium truncate">W. Williams</span>
+					<svg class="w-4 h-4 ml-auto text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+					</svg>
+				</button>
+
+				<div id="profile-dropdown" class="hidden absolute bottom-full left-3 right-3 mb-2 bg-white dark:bg-sidebar-dark border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-1 z-50">
+					<button class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
+						<svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" stroke-width="1.5"/><path stroke-width="1.5" d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+						Profile
+					</button>
+					<div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+					<button id="theme-cycle-btn" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
+						<svg class="theme-icon theme-icon-light w-5 h-5 text-gray-500 dark:text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" stroke-width="1.5"/><path stroke-linecap="round" stroke-width="1.5" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+						<svg class="theme-icon theme-icon-dark w-5 h-5 text-gray-500 dark:text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
+						<svg class="theme-icon theme-icon-system w-5 h-5 text-gray-500 dark:text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5"/><path stroke-linecap="round" stroke-width="1.5" d="M8 21h8m-4-4v4"/></svg>
+						<span id="theme-label"></span>
+					</button>
+					<a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+						<svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/></svg>
+						Sign out
+					</a>
+				</div>
+			</div>
+		</aside>
+
+		<!-- ================================================================
+		     MAIN CONTENT — full height, no top header
+		     ================================================================ -->
+		<div class="md:ml-60 min-h-screen flex flex-col">
+			<main class="flex-1 p-6">
+				<div class="mx-auto max-w-6xl">
+					<div class="px-0 py-3 mb-4 min-h-[52px] flex items-center">
+						<h1 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Languages</h1>
+					</div>
+					<p class="text-xs text-gray-500 dark:text-gray-400 mb-6 -mt-4">Variant F: Accordion sidebar navigation.</p>
+
+					<div class="space-y-4" id="lang-cards"></div>
+				</div>
+			</main>
+		</div>
+
+		<script>
+			// Generate language cards
+			const languages = [
+				{ name: 'Spanish', code: 'es', flag: '\u{1F1EA}\u{1F1F8}', status: 'Active', pct: 89, segments: '1,247', words: '24,891' },
+				{ name: 'French', code: 'fr', flag: '\u{1F1EB}\u{1F1F7}', status: 'Active', pct: 72, segments: '1,247', words: '22,103' },
+				{ name: 'German', code: 'de', flag: '\u{1F1E9}\u{1F1EA}', status: 'Draft', pct: 31, segments: '1,247', words: '8,442' },
+				{ name: 'Japanese', code: 'ja', flag: '\u{1F1EF}\u{1F1F5}', status: 'Active', pct: 95, segments: '1,247', words: '26,120' },
+				{ name: 'Portuguese', code: 'pt', flag: '\u{1F1E7}\u{1F1F7}', status: 'Draft', pct: 15, segments: '1,247', words: '4,201' },
+				{ name: 'Italian', code: 'it', flag: '\u{1F1EE}\u{1F1F9}', status: 'Active', pct: 68, segments: '1,247', words: '18,903' },
+				{ name: 'Korean', code: 'ko', flag: '\u{1F1F0}\u{1F1F7}', status: 'Active', pct: 54, segments: '1,247', words: '14,562' },
+				{ name: 'Chinese', code: 'zh', flag: '\u{1F1E8}\u{1F1F3}', status: 'Draft', pct: 8, segments: '1,247', words: '2,100' },
+			]
+			const container = document.getElementById('lang-cards')
+			languages.forEach(lang => {
+				const statusColor = lang.status === 'Active' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
+				container.innerHTML += `
+					<div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+						<div class="flex items-center justify-between mb-4">
+							<h3 class="font-semibold text-gray-800 dark:text-gray-200">${lang.flag} ${lang.name} (${lang.code})</h3>
+							<span class="text-xs px-2 py-1 rounded-full ${statusColor}">${lang.status}</span>
+						</div>
+						<div class="grid grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400">
+							<div><span class="block text-xs uppercase tracking-wide mb-1 text-gray-400 dark:text-gray-500">Segments</span>${lang.segments}</div>
+							<div><span class="block text-xs uppercase tracking-wide mb-1 text-gray-400 dark:text-gray-500">Translated</span>${lang.pct}%</div>
+							<div><span class="block text-xs uppercase tracking-wide mb-1 text-gray-400 dark:text-gray-500">Words</span>${lang.words}</div>
+						</div>
+					</div>`
+			})
+
+			// Mobile sidebar
+			const sidebar = document.getElementById('sidebar')
+			const mobileOverlay = document.getElementById('mobile-overlay')
+			document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+				sidebar.classList.remove('-translate-x-full')
+				mobileOverlay.classList.remove('hidden')
+			})
+			mobileOverlay.addEventListener('click', () => {
+				sidebar.classList.add('-translate-x-full')
+				mobileOverlay.classList.add('hidden')
+			})
+
+			// Accordion sidebar (desktop)
+			const websites = [
+				{ name: 'eSnipe', code: 'E', color: 'blue' },
+				{ name: 'MyShop', code: 'M', color: 'purple' },
+				{ name: 'BlogCo', code: 'B', color: 'emerald' },
+			]
+			let activeWebsiteIndex = 0
+
+			const navLinks = [
+				{ label: 'Languages', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5h8M7 5V3m2.5 7.5L7 9m0 0L5 12m2-3l2 3m5-3h6m-3 0v8m-2-4h4"/><text x="14" y="9" font-size="7" fill="currentColor" stroke="none" font-weight="600">A</text>', active: true },
+				{ label: 'Segments', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h12M4 14h16M4 18h8"/>' },
+				{ label: 'Paths', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>' },
+				{ label: 'Stats', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3v18h18M7 16v-3m4 3v-6m4 6v-4m4 4V7"/>' },
+			]
+			const secondaryLinks = [
+				{ label: 'Settings', icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="1.5"/>' },
+			]
+
+			const colorMap = {
+				blue:    { bg: 'bg-blue-100 dark:bg-blue-900', text: 'text-blue-700 dark:text-blue-300', badge: 'bg-blue-700/20 dark:bg-blue-200/20' },
+				purple:  { bg: 'bg-purple-100 dark:bg-purple-900', text: 'text-purple-700 dark:text-purple-300', badge: 'bg-purple-700/20 dark:bg-purple-200/20' },
+				emerald: { bg: 'bg-emerald-100 dark:bg-emerald-900', text: 'text-emerald-700 dark:text-emerald-300', badge: 'bg-emerald-700/20 dark:bg-emerald-200/20' },
+			}
+
+			function renderNavLink(link, isSecondary) {
+				const iconColor = isSecondary ? 'text-gray-500 dark:text-gray-400' : ''
+				const activeClass = link.active
+					? 'nav-item-active text-gray-900 dark:text-white'
+					: 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+				return `<a href="#" class="flex items-center gap-3 pl-8 pr-3 py-2 rounded-md text-sm font-medium ${activeClass} transition-colors">
+					<svg class="w-4 h-4 flex-shrink-0 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24">${link.icon}</svg>
+					<span>${link.label}</span>
+				</a>`
+			}
+
+			function buildAccordion() {
+				const accordionEl = document.getElementById('accordion-nav')
+				let html = ''
+				websites.forEach((site, idx) => {
+					const c = colorMap[site.color]
+					const isActive = idx === activeWebsiteIndex
+					const headerBg = isActive
+						? `${c.bg} ${c.text}`
+						: 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+					const fontWeight = isActive ? 'font-semibold' : ''
+					html += `<div class="accordion-item mt-0.5" data-index="${idx}">
+						<button class="accordion-header w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium ${headerBg} transition-colors cursor-pointer">
+							<span class="w-5 h-5 rounded ${c.badge} ${c.text} flex items-center justify-center text-[10px] font-semibold flex-shrink-0">${site.code}</span>
+							<span class="${fontWeight} truncate">${site.name}</span>
+						</button>
+						<div class="accordion-panel ${isActive ? 'open' : ''}">
+							<div>
+								<div class="mt-1 space-y-0.5">`
+					navLinks.forEach(link => { html += renderNavLink(link, false) })
+					html += `<div class="pt-4 space-y-0.5">`
+					secondaryLinks.forEach(link => { html += renderNavLink(link, true) })
+					html += `</div></div></div></div></div>`
+				})
+				accordionEl.innerHTML = html
+
+				accordionEl.querySelectorAll('.accordion-header').forEach(btn => {
+					btn.addEventListener('click', () => {
+						const idx = parseInt(btn.closest('.accordion-item').dataset.index, 10)
+						if (idx === activeWebsiteIndex) return
+						activeWebsiteIndex = idx
+						updateAccordion()
+					})
+				})
+			}
+
+			function updateAccordion() {
+				const items = document.querySelectorAll('#accordion-nav .accordion-item')
+				items.forEach((item, idx) => {
+					const isActive = parseInt(item.dataset.index, 10) === activeWebsiteIndex
+					const site = websites[item.dataset.index]
+					const c = colorMap[site.color]
+					const header = item.querySelector('.accordion-header')
+					const panel = item.querySelector('.accordion-panel')
+					const nameSpan = header.querySelector('span:last-child')
+
+					// Update header styling
+					header.className = `accordion-header w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors cursor-pointer ${
+						isActive
+							? `${c.bg} ${c.text}`
+							: 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+					}`
+					nameSpan.className = `${isActive ? 'font-semibold' : ''} truncate`
+
+					// Toggle panel
+					if (isActive) {
+						panel.classList.add('open')
+					} else {
+						panel.classList.remove('open')
+					}
+				})
+			}
+
+			buildAccordion()
+
+			// Website switcher dropdown (mobile)
+			const mobileSwitcherBtn = document.getElementById('mobile-switcher-btn')
+			const mobileSwitcherDropdown = document.getElementById('mobile-switcher-dropdown')
+			const mobileSwitcherChevron = document.getElementById('mobile-switcher-chevron')
+			mobileSwitcherBtn.addEventListener('click', e => {
+				e.stopPropagation()
+				mobileSwitcherDropdown.classList.toggle('hidden')
+				mobileSwitcherChevron.classList.toggle('rotate-180')
+			})
+
+			// Profile dropdown (desktop — sidebar bottom)
+			const profileBtn = document.getElementById('profile-btn')
+			const profileDropdown = document.getElementById('profile-dropdown')
+			profileBtn.addEventListener('click', e => {
+				e.stopPropagation()
+				profileDropdown.classList.toggle('hidden')
+			})
+
+			// Profile dropdown (mobile — top bar)
+			const mobileProfileBtn = document.getElementById('mobile-profile-btn')
+			const mobileProfileDropdown = document.getElementById('mobile-profile-dropdown')
+			mobileProfileBtn.addEventListener('click', e => {
+				e.stopPropagation()
+				mobileProfileDropdown.classList.toggle('hidden')
+			})
+
+			document.addEventListener('click', () => {
+				profileDropdown.classList.add('hidden')
+				mobileProfileDropdown.classList.add('hidden')
+				mobileSwitcherDropdown.classList.add('hidden')
+				mobileSwitcherChevron.classList.remove('rotate-180')
+			})
+
+			// Theme cycle
+			const themeModes = ['light', 'dark', 'system']
+			const themeLabels = { light: 'Light mode', dark: 'Dark mode', system: 'System' }
+			function applyTheme(theme) {
+				localStorage.setItem('theme', theme)
+				if (theme === 'system') {
+					document.documentElement.classList.toggle('dark', window.matchMedia('(prefers-color-scheme: dark)').matches)
+				} else {
+					document.documentElement.classList.toggle('dark', theme === 'dark')
+				}
+				document.querySelectorAll('.theme-icon').forEach(el => el.classList.add('hidden'))
+				document.querySelector('.theme-icon-' + theme).classList.remove('hidden')
+				document.getElementById('theme-label').textContent = themeLabels[theme]
+				document.querySelectorAll('.mobile-theme-icon').forEach(el => el.classList.add('hidden'))
+				document.querySelector('.mobile-theme-icon-' + theme).classList.remove('hidden')
+				document.querySelector('.mobile-theme-label').textContent = themeLabels[theme]
+			}
+			document.getElementById('theme-cycle-btn').addEventListener('click', e => {
+				e.stopPropagation()
+				const current = localStorage.getItem('theme') || 'system'
+				const next = themeModes[(themeModes.indexOf(current) + 1) % themeModes.length]
+				applyTheme(next)
+			})
+			document.getElementById('mobile-theme-cycle-btn').addEventListener('click', e => {
+				e.stopPropagation()
+				const current = localStorage.getItem('theme') || 'system'
+				const next = themeModes[(themeModes.indexOf(current) + 1) % themeModes.length]
+				applyTheme(next)
+			})
+			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+				if (localStorage.getItem('theme') === 'system') applyTheme('system')
+			})
+			applyTheme(localStorage.getItem('theme') || 'system')
+		</script>
+	</body>
+</html>
