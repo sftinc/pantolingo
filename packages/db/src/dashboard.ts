@@ -154,7 +154,7 @@ export async function getWebsitesWithStats(accountId: number): Promise<WebsiteWi
 		FROM account_website aw
 		JOIN website w ON w.id = aw.website_id
 		WHERE aw.account_id = $1
-		ORDER BY w.hostname
+		ORDER BY w.name
 	`,
 		[accountId]
 	)
