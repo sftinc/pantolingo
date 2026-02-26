@@ -80,13 +80,13 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 	return (
 		<div className="min-h-screen bg-[var(--content-bg)]">
 			{/* Top header bar */}
-			<header className="sticky top-0 z-30 h-14 bg-white dark:bg-[var(--sidebar-bg)] md:hidden">
+			<header className="sticky top-0 z-30 h-14 bg-white dark:bg-[var(--sidebar-bg)] md:hidden border-b border-[var(--sidebar-border)]">
 				<div className="mx-auto max-w-6xl flex items-center justify-between h-full px-4 sm:px-6 lg:px-8">
 				{/* Left: hamburger (mobile) + website switcher */}
 				<div className="flex items-center gap-3">
 					<button
 						onClick={() => setMobileOpen(true)}
-						className="p-1 text-[var(--text-muted)] cursor-pointer md:hidden"
+						className="p-1 -ml-1 text-[var(--text-muted)] cursor-pointer md:hidden"
 						aria-label="Open menu"
 					>
 						<HamburgerIcon className="w-6 h-6" />
@@ -100,10 +100,10 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 							}}
 							className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium ${currentColor.btn} ${currentColor.hover} transition-colors cursor-pointer`}
 						>
-							<span className={`w-4 h-4 rounded ${currentColor.avatar} flex items-center justify-center text-[10px] font-semibold shrink-0`}>
+							<span className={`w-5 h-5 rounded ${currentColor.avatar} flex items-center justify-center text-[11px] font-semibold shrink-0`}>
 								{currentWebsite.name[0].toUpperCase()}
 							</span>
-							<span className="font-semibold truncate max-w-[60px] sm:max-w-none">{currentWebsite.name}</span>
+							<span className="font-semibold truncate max-w-[120px] sm:max-w-none">{currentWebsite.name}</span>
 							<ChevronIcon className={`w-4 h-4 ${currentColor.chevron} transition-transform ${switcherOpen ? 'rotate-180' : ''}`} />
 						</button>
 
@@ -162,7 +162,10 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 							}}
 							className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
 						>
-							<UserIcon className="w-5 h-5" />
+							<span className="sm:hidden w-7 h-7 rounded-full bg-[var(--nav-hover-bg)] flex items-center justify-center text-xs font-bold text-[var(--text-heading)]">
+								{userName.charAt(0).toUpperCase()}
+							</span>
+							<UserIcon className="w-5 h-5 hidden sm:block" />
 							<span className="hidden sm:inline">{userName}</span>
 							<ChevronIcon className={`w-4 h-4 text-[var(--text-subtle)] transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
 						</button>
@@ -261,7 +264,7 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 									setSwitcherOpen(false)
 									setWizardOpen(true)
 								}}
-								className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
+								className="w-full flex items-center gap-3 pl-3 pr-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
 							>
 								<PlusIcon className="w-5 h-5 text-[var(--text-subtle)]" />
 								Add website
@@ -281,9 +284,9 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 													const subPath = pathname.replace(`${basePath}/`, '').split('?')[0]
 													router.push(`/account/${site.publicCode}/${subPath}`)
 												}}
-												className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
+												className="w-full flex items-center gap-3 pl-3 pr-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
 											>
-												<span className={`w-6 h-6 rounded flex items-center justify-center text-xs font-semibold ${siteColor.btn}`}>
+												<span className={`w-5 h-5 rounded ${siteColor.avatar} flex items-center justify-center text-[11px] font-semibold shrink-0`}>
 													{site.name[0].toUpperCase()}
 												</span>
 												{site.name}
@@ -338,27 +341,25 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 				<div className="flex-grow hidden md:block" />
 
 				{/* Profile menu (desktop only) */}
-				<div ref={profileRef} className="relative px-2 pb-4 hidden md:block border-t border-[var(--sidebar-border)] pt-3">
+				<div ref={profileRef} className="relative hidden md:block border-t border-[var(--sidebar-border)]">
 					<button
 						onClick={() => {
 							setProfileOpen(!profileOpen)
 							setSwitcherOpen(false)
 						}}
-						className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
+						className="w-full flex items-center gap-3 pl-5 pr-3 py-4 text-sm font-medium text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
 					>
-						<span className="w-8 h-8 rounded-full bg-[var(--nav-hover-bg)] flex items-center justify-center text-xs font-semibold text-[var(--text-heading)] shrink-0">
-							{userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-						</span>
+						<UserIcon className="w-5 h-5 shrink-0" />
 						<span className="truncate">{userName}</span>
 						<ChevronIcon className={`w-4 h-4 ml-auto text-[var(--text-subtle)] transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
 					</button>
 
 					{profileOpen && (
-						<div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 w-48 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg shadow-lg py-1 z-50">
+						<div className="absolute bottom-full mb-1 left-2 right-2 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg shadow-lg py-1 z-50">
 							{/* Profile link */}
 							<button
 								onClick={() => { setProfileOpen(false); setProfileModalOpen(true) }}
-								className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
+								className="w-full flex items-center gap-3 pl-3 pr-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
 							>
 								<UserIcon className="w-5 h-5 text-[var(--text-subtle)]" />
 								Profile
@@ -368,7 +369,7 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 							<Link
 								href="/account/billing"
 								onClick={() => setProfileOpen(false)}
-								className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
+								className="w-full flex items-center gap-3 pl-3 pr-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
 							>
 								<BillingIcon className="w-5 h-5 text-[var(--text-subtle)]" />
 								Billing
@@ -382,7 +383,7 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 									e.stopPropagation()
 									cycleTheme()
 								}}
-								className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
+								className="w-full flex items-center gap-3 pl-3 pr-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
 							>
 								{mounted && <ThemeIcon className="w-5 h-5 text-[var(--text-subtle)]" />}
 								{!mounted && <span className="w-5 h-5" />}
@@ -394,7 +395,7 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 								<button
 									type="submit"
 									tabIndex={0}
-									className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
+									className="w-full flex items-center gap-3 pl-3 pr-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
 								>
 									<SignOutIcon className="w-5 h-5 text-[var(--text-subtle)]" />
 									Sign out
