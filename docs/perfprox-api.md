@@ -14,6 +14,69 @@ Authorization: Bearer <PERFPROX_API_TOKEN>
 
 ## Endpoints
 
+### List Cloudflare Hostnames
+
+**GET** `/cf/hostnames`
+
+List all custom hostnames registered directly in Cloudflare. This queries the Cloudflare API and returns all hostnames regardless of what is stored in KV. Useful for auditing and detecting drift.
+
+**Success Response (200):**
+
+```json
+{
+	"success": true,
+	"data": {
+		"hostnames": [
+			{
+				"hostname": "custom.example.com",
+				"status": "active",
+				"cfId": "cf-hostname-id",
+				"sslMethod": "http",
+				"createdAt": "2025-01-15T12:00:00.000000Z"
+			}
+		]
+	}
+}
+```
+
+**Error Responses:**
+
+| Status | Description                              |
+| ------ | ---------------------------------------- |
+| 502    | Failed to list hostnames from Cloudflare |
+
+---
+
+### List Hostnames
+
+**GET** `/hostnames`
+
+List all registered hostnames from KV storage.
+
+**Success Response (200):**
+
+```json
+{
+	"success": true,
+	"data": {
+		"hostnames": [
+			{
+				"hostname": "custom.example.com",
+				"origin": "https://your-origin.com",
+				"enabled": true,
+				"status": "active",
+				"cfId": "cf-hostname-id",
+				"sslMethod": "http",
+				"createdAt": "2025-01-15T12:00:00.000Z",
+				"updatedAt": "2025-01-15T12:30:00.000Z"
+			}
+		]
+	}
+}
+```
+
+---
+
 ### Create Hostname
 
 **POST** `/hostnames`

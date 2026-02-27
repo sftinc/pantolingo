@@ -7,7 +7,7 @@ import { SettingsTranslationTab } from './SettingsTranslationTab'
 import { Modal, ModalFooter, Button } from '@/components/ui/Modal'
 import type { LanguageWithDnsStatus } from '@pantolingo/db'
 
-type Tab = 'general' | 'languages' | 'translation'
+type Tab = 'general' | 'setup' | 'translation'
 
 interface SettingsPageProps {
 	websiteId: number
@@ -28,19 +28,18 @@ interface SettingsPageProps {
 }
 
 const TABS: { key: Tab; label: string }[] = [
-	{ key: 'general', label: 'General' },
-	{ key: 'languages', label: 'Languages' },
+	{ key: 'setup', label: 'Setup' },
+	{ key: 'general', label: 'Website' },
 	{ key: 'translation', label: 'Translations' },
 ]
 
 function getTabUrl(publicCode: string, tab: Tab): string {
-	if (tab === 'general') return `/account/${publicCode}/settings`
 	return `/account/${publicCode}/settings/${tab}`
 }
 
 export function SettingsPage({ websiteId, publicCode, initialTab, website, languages }: SettingsPageProps) {
 	const [activeTab, setActiveTab] = useState<Tab>(initialTab)
-	const [dirtyTabs, setDirtyTabs] = useState<Record<Tab, boolean>>({ general: false, languages: false, translation: false })
+	const [dirtyTabs, setDirtyTabs] = useState<Record<Tab, boolean>>({ general: false, setup: false, translation: false })
 	const [pendingTab, setPendingTab] = useState<Tab | null>(null)
 
 	const switchTab = (tab: Tab) => {
@@ -95,15 +94,6 @@ export function SettingsPage({ websiteId, publicCode, initialTab, website, langu
 						</button>
 					))}
 				</div>
-				{activeTab === 'languages' && (
-					<button
-						disabled
-						title="Coming soon"
-						className="px-3 py-1.5 text-xs font-medium rounded-md bg-[var(--accent)] text-white opacity-50 cursor-not-allowed"
-					>
-						Add Language
-					</button>
-				)}
 			</div>
 
 			{activeTab === 'general' && (
@@ -118,10 +108,12 @@ export function SettingsPage({ websiteId, publicCode, initialTab, website, langu
 				/>
 			)}
 
-			{activeTab === 'languages' && (
+			{activeTab === 'setup' && (
 				<SettingsLanguagesTab
 					websiteId={websiteId}
 					initialLanguages={languages}
+					hostname={website.hostname}
+					sourceLang={website.sourceLang}
 				/>
 			)}
 

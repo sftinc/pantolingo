@@ -239,23 +239,20 @@
 
 		<!-- Main Content Area -->
 		<div class="md:ml-60 min-h-[calc(100%-3.5rem)] flex flex-col mt-0">
-			<main class="flex-1 p-6 max-w-3xl">
+			<main class="flex-1 p-6 max-w-2xl">
 				<!-- Page Title -->
 				<h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Settings</h1>
 				<!-- Tab Selector -->
 				<div class="flex items-center justify-between mb-5">
 				<div class="flex items-center gap-1 bg-card-light dark:bg-card-dark border border-gray-200 dark:border-gray-700 rounded-lg p-1 w-fit">
-					<button data-tab="general" class="tab-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer bg-blue-600 text-white">General</button>
-					<button data-tab="languages" class="tab-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700">Languages</button>
+					<button data-tab="languages" class="tab-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer bg-blue-600 text-white">Setup</button>
+					<button data-tab="general" class="tab-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700">Website</button>
 					<button data-tab="skip" class="tab-btn px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700">Translations</button>
 				</div>
-				<button id="add-lang-btn" class="px-3 py-1.5 text-xs font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer hidden">
-					Add Language
-				</button>
 				</div>
 
 				<!-- ==================== GENERAL TAB ==================== -->
-				<div id="tab-general" class="tab-panel active space-y-5">
+				<div id="tab-general" class="tab-panel space-y-5">
 					<div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-6">
 						<div class="space-y-5">
 							<!-- Name -->
@@ -342,101 +339,130 @@
 					</div>
 				</div>
 
-				<!-- ==================== LANGUAGES TAB ==================== -->
-				<div id="tab-languages" class="tab-panel space-y-5">
-					<!-- Spanish - Active -->
-					<div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-						<div class="flex items-center justify-between">
-							<div class="flex items-center gap-2">
-								<span class="text-base">&#127474;&#127485;</span>
-								<span class="text-sm font-medium text-gray-900 dark:text-gray-100">Spanish (Mexico)</span>
-								<span class="badge badge-success">Active</span>
-								<span class="text-xs text-gray-500 dark:text-gray-400">02:30 PM</span>
-							</div>
-							<button class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer" title="Remove language">
-								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-									<path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-								</svg>
+				<!-- ==================== SETUP TAB ==================== -->
+				<div id="tab-languages" class="tab-panel active space-y-5">
+					<!-- Section 1: Languages -->
+					<div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+						<div class="flex items-center justify-between mb-1">
+							<h2 class="text-sm font-semibold text-gray-800 dark:text-gray-200">Languages</h2>
+							<button class="px-2.5 py-1 text-xs font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer">
+								Add Language
 							</button>
 						</div>
+						<p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Configure target languages and DNS records</p>
+
+						<div class="space-y-3">
+							<!-- Spanish - Active -->
+							<div class="rounded-md border p-4" style="background: rgba(34, 197, 94, 0.05); border-color: rgba(34, 197, 94, 0.2);">
+								<div class="flex items-center justify-between">
+									<div class="flex items-center gap-2">
+										<span class="badge badge-success">Active</span>
+										<span class="text-base">&#127474;&#127485;</span>
+										<span class="text-sm font-medium text-gray-900 dark:text-gray-100">Spanish (Mexico)</span>
+									</div>
+									<button class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer" title="Remove language">
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+											<path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+										</svg>
+									</button>
+								</div>
+							</div>
+
+							<!-- French - Pending -->
+							<div class="rounded-md border p-4" style="background: rgba(234, 179, 8, 0.05); border-color: rgba(234, 179, 8, 0.2);">
+								<div class="flex items-center justify-between mb-3">
+									<div class="flex items-center gap-2">
+										<span class="badge badge-warning">Pending</span>
+										<span class="text-base">&#127467;&#127479;</span>
+										<span class="text-sm font-medium text-gray-900 dark:text-gray-100">French (France)</span>
+									</div>
+									<div class="flex items-center gap-2">
+										<button class="px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-card-light dark:bg-card-dark hover:bg-content-light dark:hover:bg-content-dark transition-colors cursor-pointer">
+											Check DNS
+										</button>
+										<button class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer" title="Remove language">
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+											</svg>
+										</button>
+									</div>
+								</div>
+								<div class="rounded-md bg-card-light dark:bg-card-dark border border-gray-200 dark:border-gray-700 p-3">
+									<p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Add CNAME DNS Record</p>
+									<div class="flex items-center gap-2 font-mono text-sm">
+										<span class="text-gray-900 dark:text-gray-100">fr.seefusion.tech</span>
+										<button onclick="copyToClipboard('fr.seefusion.tech', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer" title="Copy name">
+											<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+											</svg>
+										</button>
+										<span class="text-gray-400">&rarr;</span>
+										<span class="text-gray-900 dark:text-gray-100">cname.pantolingo.com</span>
+										<button onclick="copyToClipboard('cname.pantolingo.com', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer" title="Copy value">
+											<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+											</svg>
+										</button>
+									</div>
+								</div>
+							</div>
+
+							<!-- German - Failed -->
+							<div class="rounded-md border p-4" style="background: rgba(239, 68, 68, 0.05); border-color: rgba(239, 68, 68, 0.2);">
+								<div class="flex items-center justify-between mb-3">
+									<div class="flex items-center gap-2">
+										<span class="badge badge-error">Failed</span>
+										<span class="text-base">&#127465;&#127466;</span>
+										<span class="text-sm font-medium text-gray-900 dark:text-gray-100">German (Germany)</span>
+											</div>
+									<div class="flex items-center gap-2">
+										<button class="px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-card-light dark:bg-card-dark hover:bg-content-light dark:hover:bg-content-dark transition-colors cursor-pointer">
+											Check DNS
+										</button>
+										<button class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer" title="Remove language">
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+											</svg>
+										</button>
+									</div>
+								</div>
+								<div class="rounded-md bg-card-light dark:bg-card-dark border border-gray-200 dark:border-gray-700 p-3">
+									<p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Add CNAME DNS Record</p>
+									<div class="flex items-center gap-2 font-mono text-sm">
+										<span class="text-gray-900 dark:text-gray-100">de.seefusion.tech</span>
+										<button onclick="copyToClipboard('de.seefusion.tech', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer" title="Copy name">
+											<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+											</svg>
+										</button>
+										<span class="text-gray-400">&rarr;</span>
+										<span class="text-gray-900 dark:text-gray-100">cname.pantolingo.com</span>
+										<button onclick="copyToClipboard('cname.pantolingo.com', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer" title="Copy value">
+											<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+											</svg>
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 
-					<!-- French - Pending -->
-					<div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-						<div class="flex items-center justify-between mb-3">
-							<div class="flex items-center gap-2">
-								<span class="text-base">&#127467;&#127479;</span>
-								<span class="text-sm font-medium text-gray-900 dark:text-gray-100">French (France)</span>
-								<span class="badge badge-warning">Pending</span>
-							</div>
-							<div class="flex items-center gap-2">
-								<button class="px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-card-light dark:bg-card-dark hover:bg-content-light dark:hover:bg-content-dark transition-colors cursor-pointer">
-									Check DNS
-								</button>
-								<button class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer" title="Remove language">
-									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-										<path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-									</svg>
-								</button>
-							</div>
+					<!-- Section 2: HTML / SEO Code -->
+					<div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+						<div class="flex items-center justify-between mb-1">
+							<h2 class="text-sm font-semibold text-gray-800 dark:text-gray-200">HTML / SEO Code</h2>
+							<button onclick="copyHtmlCode(this)" class="px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-card-light dark:bg-card-dark hover:bg-content-light dark:hover:bg-content-dark transition-colors cursor-pointer">
+								Copy
+							</button>
 						</div>
-						<div class="rounded-md bg-content-light dark:bg-content-dark border border-gray-300 dark:border-gray-600 p-3">
-							<p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Add CNAME DNS Record</p>
-							<div class="flex items-center gap-2 font-mono text-sm">
-								<span class="text-gray-900 dark:text-gray-100">fr.seefusion.tech</span>
-								<button onclick="copyToClipboard('fr', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer" title="Copy name">
-									<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-										<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-									</svg>
-								</button>
-								<span class="text-gray-400">&rarr;</span>
-								<span class="text-gray-900 dark:text-gray-100">cname.pantolingo.com</span>
-								<button onclick="copyToClipboard('cname.pantolingo.com', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer" title="Copy value">
-									<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-										<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-									</svg>
-								</button>
-							</div>
-						</div>
-					</div>
-
-					<!-- German - Failed -->
-					<div class="bg-card-light dark:bg-card-dark rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-						<div class="flex items-center justify-between mb-3">
-							<div class="flex items-center gap-2">
-								<span class="text-base">&#127465;&#127466;</span>
-								<span class="text-sm font-medium text-gray-900 dark:text-gray-100">German (Germany)</span>
-								<span class="badge badge-error">Failed</span>
-								<span class="text-xs text-gray-500 dark:text-gray-400">03:00 PM</span>
-							</div>
-							<div class="flex items-center gap-2">
-								<button class="px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-card-light dark:bg-card-dark hover:bg-content-light dark:hover:bg-content-dark transition-colors cursor-pointer">
-									Check DNS
-								</button>
-								<button class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer" title="Remove language">
-									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-										<path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-									</svg>
-								</button>
-							</div>
-						</div>
-						<div class="rounded-md bg-content-light dark:bg-content-dark border border-gray-300 dark:border-gray-600 p-3">
-							<p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Add CNAME DNS Record</p>
-							<div class="flex items-center gap-2 font-mono text-sm">
-								<span class="text-gray-900 dark:text-gray-100">de.seefusion.tech</span>
-								<button onclick="copyToClipboard('de', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer" title="Copy name">
-									<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-										<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-									</svg>
-								</button>
-								<span class="text-gray-400">&rarr;</span>
-								<span class="text-gray-900 dark:text-gray-100">cname.pantolingo.com</span>
-								<button onclick="copyToClipboard('cname.pantolingo.com', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer" title="Copy value">
-									<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-										<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-									</svg>
-								</button>
-							</div>
+						<p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Add this code to the <code class="text-xs bg-content-light dark:bg-content-dark px-1 py-0.5 rounded">&lt;head&gt;</code> of your website</p>
+						<div class="rounded-md bg-content-light dark:bg-content-dark border border-gray-300 dark:border-gray-600 p-4">
+<pre class="text-xs font-mono text-gray-900 dark:text-gray-100 whitespace-pre-wrap leading-relaxed" id="html-seo-code">&lt;link rel="alternate" hreflang="en" href="https://seefusion.tech"&gt;
+&lt;link rel="alternate" hreflang="es" href="https://es.seefusion.tech"&gt;
+&lt;link rel="alternate" hreflang="fr" href="https://fr.seefusion.tech"&gt;
+&lt;link rel="alternate" hreflang="de" href="https://de.seefusion.tech"&gt;
+&lt;script type="text/javascript" src="https://cdn.pantolingo.com/somescript.min.js"&gt;&lt;/script&gt;</pre>
 						</div>
 					</div>
 				</div>
@@ -633,8 +659,6 @@
 			const tabBtns = document.querySelectorAll('.tab-btn')
 			const tabPanels = document.querySelectorAll('.tab-panel')
 
-			const addLangBtn = document.getElementById('add-lang-btn')
-
 			tabBtns.forEach((btn) => {
 				btn.addEventListener('click', () => {
 					const target = btn.getAttribute('data-tab')
@@ -650,9 +674,6 @@
 					// Update panels
 					tabPanels.forEach((p) => p.classList.remove('active'))
 					document.getElementById('tab-' + target).classList.add('active')
-
-					// Show Add Language button only on languages tab
-					addLangBtn.classList.toggle('hidden', target !== 'languages')
 				})
 			})
 
@@ -678,6 +699,20 @@
 					setTimeout(() => {
 						svg.innerHTML = original
 						btn.classList.remove('text-green-500', 'dark:text-green-400')
+					}, 1500)
+				})
+			}
+
+			// Copy HTML/SEO code block
+			function copyHtmlCode(btn) {
+				const code = document.getElementById('html-seo-code').textContent
+				navigator.clipboard.writeText(code).then(() => {
+					const original = btn.textContent
+					btn.textContent = 'Copied!'
+					btn.classList.add('text-green-600', 'dark:text-green-400', 'border-green-300', 'dark:border-green-600')
+					setTimeout(() => {
+						btn.textContent = original
+						btn.classList.remove('text-green-600', 'dark:text-green-400', 'border-green-300', 'dark:border-green-600')
 					}, 1500)
 				})
 			}

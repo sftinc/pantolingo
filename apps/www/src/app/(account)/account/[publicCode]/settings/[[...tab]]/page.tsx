@@ -5,7 +5,7 @@ import { SettingsPage } from '@/components/account/SettingsPage'
 
 export const dynamic = 'force-dynamic'
 
-const VALID_TABS = ['general', 'languages', 'translation'] as const
+const VALID_TABS = ['general', 'setup', 'translation'] as const
 type Tab = (typeof VALID_TABS)[number]
 
 interface SettingsPageProps {
@@ -19,7 +19,7 @@ export default async function Settings({ params }: SettingsPageProps) {
 	const { publicCode, tab } = await params
 
 	// Validate tab parameter
-	let initialTab: Tab = 'general'
+	let initialTab: Tab = 'setup'
 	if (tab && tab.length > 0) {
 		if (tab.length > 1 || !VALID_TABS.includes(tab[0] as Tab)) {
 			redirect(`/account/${publicCode}/settings`)

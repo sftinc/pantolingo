@@ -18,13 +18,25 @@ const STATUS_LABEL: Record<string, string> = {
 	failed: 'Failed',
 }
 
+const STATUS_BG: Record<string, string> = {
+	active: 'rgba(34, 197, 94, 0.05)',
+	pending: 'rgba(234, 179, 8, 0.05)',
+	failed: 'rgba(239, 68, 68, 0.05)',
+}
+
+const STATUS_BORDER: Record<string, string> = {
+	active: 'rgba(34, 197, 94, 0.2)',
+	pending: 'rgba(234, 179, 8, 0.2)',
+	failed: 'rgba(239, 68, 68, 0.2)',
+}
+
 interface LanguageCardProps {
 	websiteId: number
 	language: LanguageWithDnsStatus
 	onDnsCheckComplete: (languageId: number, newStatus: string) => void
 }
 
-function CopyButton({ text }: { text: string }) {
+export function CopyButton({ text }: { text: string }) {
 	const [copied, setCopied] = useState(false)
 
 	const handleCopy = () => {
@@ -67,24 +79,23 @@ export function LanguageCard({ websiteId, language, onDnsCheckComplete }: Langua
 		})
 	}
 
-	const timestamp = language.dnsCheckedAt
-		? new Date(language.dnsCheckedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-		: null
-
 	return (
-		<div className="bg-[var(--card-bg)] rounded-lg border border-[var(--border)] p-5">
+		<div
+			className="rounded-lg p-5"
+			style={{
+				backgroundColor: STATUS_BG[language.dnsStatus] ?? 'var(--card-bg)',
+				border: `1px solid ${STATUS_BORDER[language.dnsStatus] ?? 'var(--border)'}`,
+			}}
+		>
 			<div className={`flex items-center justify-between ${!isActive ? 'mb-3' : ''}`}>
 				<div className="flex items-center gap-2">
+					<Badge variant={STATUS_BADGE[language.dnsStatus] ?? 'neutral'}>
+						{STATUS_LABEL[language.dnsStatus] ?? language.dnsStatus}
+					</Badge>
 					<span className="text-base">{langData?.flag}</span>
 					<span className="text-sm font-medium text-[var(--text-heading)]">
 						{langData?.englishName ?? language.targetLang}
 					</span>
-					<Badge variant={STATUS_BADGE[language.dnsStatus] ?? 'neutral'}>
-						{STATUS_LABEL[language.dnsStatus] ?? language.dnsStatus}
-					</Badge>
-					{timestamp && (
-						<span className="text-xs text-[var(--text-subtle)]">{timestamp}</span>
-					)}
 				</div>
 				<div className="flex items-center gap-2">
 					{!isActive && (
