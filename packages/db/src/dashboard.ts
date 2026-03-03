@@ -33,6 +33,7 @@ export interface LanguageWithDnsStatus {
 	targetLang: string
 	dnsStatus: string
 	dnsCheckedAt: Date | null
+	verifiedAt: Date | null
 }
 
 export interface LangWithStats {
@@ -311,8 +312,9 @@ export async function getLanguagesWithDnsStatus(websiteId: number): Promise<Lang
 		target_lang: string
 		dns_status: string
 		dns_checked_at: Date | null
+		verified_at: Date | null
 	}>(
-		`SELECT id, hostname, target_lang, dns_status, dns_checked_at
+		`SELECT id, hostname, target_lang, dns_status, dns_checked_at, verified_at
 		 FROM website_language
 		 WHERE website_id = $1
 		 ORDER BY target_lang`,
@@ -325,6 +327,7 @@ export async function getLanguagesWithDnsStatus(websiteId: number): Promise<Lang
 		targetLang: row.target_lang,
 		dnsStatus: row.dns_status,
 		dnsCheckedAt: row.dns_checked_at,
+		verifiedAt: row.verified_at,
 	}))
 }
 
