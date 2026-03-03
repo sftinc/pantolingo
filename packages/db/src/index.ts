@@ -46,6 +46,8 @@ export {
 	checkAndSetWebsiteVerified,
 	isHostnameTaken,
 	createWebsiteWithLanguage,
+	isTranslationHostnameClaimed,
+	updateWebsiteLanguageHostname,
 	enableDevMode,
 	getAccountProfile,
 	updateAccountProfile,

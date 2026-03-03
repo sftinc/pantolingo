@@ -911,7 +911,11 @@ export async function createWebsiteWithLanguage(
 }
 
 /**
- * Update the DNS status for a website language
+ * Update the DNS status for a website language.
+ * When status is 'active', also sets verified_at to activate the
+ * partial unique index on hostname (website_language_hostname_active_unique).
+ * Catches PG 23505 (unique violation) when another website already owns that hostname.
+ *
  * @param websiteLanguageId - website_language row ID
  * @param status - new dns_status value (pending, active, failed)
  */
@@ -922,14 +926,69 @@ export async function updateDnsStatus(
 	try {
 		await pool.query(
 			`UPDATE website_language
-			 SET dns_status = $2, dns_checked_at = NOW(), updated_at = NOW()
+			 SET dns_status = $2,
+			     dns_checked_at = NOW(),
+			     updated_at = NOW()
+			     ${status === 'active' ? ', verified_at = NOW()' : ''}
 			 WHERE id = $1`,
 			[websiteLanguageId, status]
 		)
 		return { success: true }
-	} catch (error) {
+	} catch (error: unknown) {
+		if (error && typeof error === 'object' && 'code' in error && (error as { code: string }).code === '23505') {
+			return { success: false, error: 'This hostname is already claimed by another website' }
+		}
 		console.error('Failed to update DNS status:', error)
 		return { success: false, error: 'Failed to update DNS status' }
+	}
+}
+
+/**
+ * Check which translation hostnames are already claimed (verified + active).
+ * Used by the wizard to warn users about potential conflicts.
+ *
+ * @param hostnames - Array of translation hostnames to check
+ * @returns Array of hostnames that are already claimed
+ */
+export async function isTranslationHostnameClaimed(hostnames: string[]): Promise<string[]> {
+	if (hostnames.length === 0) return []
+
+	const result = await pool.query<{ hostname: string }>(
+		`SELECT DISTINCT hostname FROM website_language
+		 WHERE hostname = ANY($1)
+		   AND verified_at IS NOT NULL
+		   AND removed_at IS NULL`,
+		[hostnames]
+	)
+	return result.rows.map((r) => r.hostname)
+}
+
+/**
+ * Update the hostname for an unverified website language.
+ * Only allows editing when verified_at IS NULL (not yet claimed).
+ *
+ * @param websiteLanguageId - website_language row ID
+ * @param newHostname - New hostname value
+ * @returns Success or error if row is already verified
+ */
+export async function updateWebsiteLanguageHostname(
+	websiteLanguageId: number,
+	newHostname: string
+): Promise<{ success: boolean; error?: string }> {
+	try {
+		const result = await pool.query(
+			`UPDATE website_language
+			 SET hostname = $2, updated_at = NOW()
+			 WHERE id = $1 AND verified_at IS NULL`,
+			[websiteLanguageId, newHostname]
+		)
+		if (result.rowCount === 0) {
+			return { success: false, error: 'Cannot edit a verified hostname' }
+		}
+		return { success: true }
+	} catch (error) {
+		console.error('Failed to update hostname:', error)
+		return { success: false, error: 'Failed to update hostname' }
 	}
 }
 
