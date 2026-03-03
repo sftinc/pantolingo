@@ -25,6 +25,16 @@ export function SettingsLanguagesTab({ websiteId, initialLanguages, hostname, so
 		)
 	}
 
+	const handleHostnameChange = (languageId: number, newHostname: string) => {
+		setLanguages((prev) =>
+			prev.map((lang) =>
+				lang.id === languageId
+					? { ...lang, hostname: newHostname }
+					: lang
+			)
+		)
+	}
+
 	const sourceLangShort = sourceLang.split('-')[0]
 
 	const hreflangLines = [
@@ -70,6 +80,7 @@ export function SettingsLanguagesTab({ websiteId, initialLanguages, hostname, so
 								websiteId={websiteId}
 								language={lang}
 								onDnsCheckComplete={handleDnsCheckComplete}
+								onHostnameChange={handleHostnameChange}
 							/>
 						))}
 					</div>

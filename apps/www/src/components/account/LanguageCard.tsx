@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Badge } from '@/components/ui/Badge'
 import { LANGUAGE_DATA } from '@pantolingo/lang'
-import { checkDnsStatus } from '@/actions/website'
+import { checkDnsStatus, updateLanguageHostname } from '@/actions/website'
 import type { LanguageWithDnsStatus } from '@pantolingo/db'
 
 const STATUS_BADGE: Record<string, 'success' | 'warning' | 'error'> = {
@@ -34,6 +34,7 @@ interface LanguageCardProps {
 	websiteId: number
 	language: LanguageWithDnsStatus
 	onDnsCheckComplete: (languageId: number, newStatus: string) => void
+	onHostnameChange?: (languageId: number, newHostname: string) => void
 }
 
 export function CopyButton({ text }: { text: string }) {
@@ -65,10 +66,28 @@ export function CopyButton({ text }: { text: string }) {
 	)
 }
 
-export function LanguageCard({ websiteId, language, onDnsCheckComplete }: LanguageCardProps) {
+export function LanguageCard({ websiteId, language, onDnsCheckComplete, onHostnameChange }: LanguageCardProps) {
 	const [isPending, startTransition] = useTransition()
 	const langData = LANGUAGE_DATA.find((l) => l.code === language.targetLang)
 	const isActive = language.dnsStatus === 'active'
+
+	const [editingHostname, setEditingHostname] = useState(false)
+	const [hostnameValue, setHostnameValue] = useState(language.hostname)
+	const [hostnameError, setHostnameError] = useState('')
+	const [isSaving, startSaveTransition] = useTransition()
+
+	const handleSaveHostname = () => {
+		startSaveTransition(async () => {
+			setHostnameError('')
+			const result = await updateLanguageHostname(websiteId, language.id, hostnameValue)
+			if (result.success) {
+				setEditingHostname(false)
+				onHostnameChange?.(language.id, hostnameValue.trim().toLowerCase())
+			} else {
+				setHostnameError(result.error || 'Failed to update hostname')
+			}
+		})
+	}
 
 	const handleCheckDns = () => {
 		startTransition(async () => {
@@ -123,12 +142,54 @@ export function LanguageCard({ websiteId, language, onDnsCheckComplete }: Langua
 				<div className="rounded-md bg-[var(--page-bg)] border border-[var(--border)] p-3">
 					<p className="text-xs font-medium text-[var(--text-subtle)] mb-2">Add CNAME DNS Record</p>
 					<div className="flex items-center gap-2 font-mono text-sm">
-						<span className="text-[var(--text-heading)]">{language.hostname}</span>
-						<CopyButton text={language.hostname} />
+						{!language.verifiedAt && editingHostname ? (
+							<>
+								<input
+									type="text"
+									value={hostnameValue}
+									onChange={(e) => setHostnameValue(e.target.value)}
+									disabled={isSaving}
+									className="flex-1 px-2 py-1 rounded border border-[var(--border)] bg-[var(--input-bg)] text-[var(--text-heading)] text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent disabled:opacity-50"
+								/>
+								<button
+									onClick={handleSaveHostname}
+									disabled={isSaving || !hostnameValue.trim()}
+									className="px-2 py-1 text-xs font-medium rounded-md bg-[var(--accent)] text-white hover:opacity-90 transition cursor-pointer disabled:opacity-50"
+								>
+									{isSaving ? 'Saving...' : 'Save'}
+								</button>
+								<button
+									onClick={() => { setEditingHostname(false); setHostnameValue(language.hostname); setHostnameError('') }}
+									disabled={isSaving}
+									className="px-2 py-1 text-xs font-medium rounded-md border border-[var(--border)] text-[var(--text-body)] hover:bg-[var(--border)]/30 transition cursor-pointer disabled:opacity-50"
+								>
+									Cancel
+								</button>
+							</>
+						) : (
+							<>
+								<span className="text-[var(--text-heading)]">{language.hostname}</span>
+								<CopyButton text={language.hostname} />
+								{!language.verifiedAt && (
+									<button
+										onClick={() => setEditingHostname(true)}
+										className="p-1 rounded text-[var(--text-subtle)] hover:text-[var(--text-muted)] hover:bg-[var(--border)] transition-colors cursor-pointer"
+										title="Edit hostname"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+											<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+										</svg>
+									</button>
+								)}
+							</>
+						)}
 						<span className="text-[var(--text-subtle)]">&rarr;</span>
 						<span className="text-[var(--text-heading)]">cname.pantolingo.com</span>
 						<CopyButton text="cname.pantolingo.com" />
 					</div>
+					{hostnameError && (
+						<p className="text-xs text-[var(--error)] mt-1">{hostnameError}</p>
+					)}
 				</div>
 			)}
 		</div>
