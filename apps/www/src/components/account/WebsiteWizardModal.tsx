@@ -53,7 +53,7 @@ export function WebsiteWizardModal({ isOpen, onClose, languages }: WebsiteWizard
 
 	const handleStep1 = () => {
 		if (!state.name.trim()) return set({ error: 'Website name is required' })
-		if (state.name.trim().length > 100) return set({ error: 'Name must be 100 characters or less' })
+		if (state.name.trim().length > 20) return set({ error: 'Name must be 20 characters or less' })
 		set({ step: 2, error: '' })
 	}
 
@@ -238,7 +238,7 @@ function Step1({
 				type="text"
 				required
 				autoFocus
-				maxLength={100}
+				maxLength={20}
 				disabled={loading}
 				placeholder="My Blog"
 				value={name}

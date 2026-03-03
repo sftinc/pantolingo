@@ -84,8 +84,8 @@ export async function createWebsite(data: {
 
 	// Validate name
 	const trimmedName = name.trim()
-	if (!trimmedName || trimmedName.length > 100) {
-		return { success: false, error: 'Website name must be 1-100 characters' }
+	if (!trimmedName || trimmedName.length > 20) {
+		return { success: false, error: 'Website name must be 1-20 characters' }
 	}
 
 	// Validate source language
