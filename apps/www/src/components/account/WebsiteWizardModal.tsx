@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Modal } from '@/components/ui/Modal'
 import { createWebsite } from '@/actions/onboard'
 import { validateHostname } from '@/actions/website'
+import { deriveTranslationSubdomain } from '@pantolingo/lang'
 
 export interface LanguageOption {
 	code: string
@@ -26,6 +27,7 @@ interface WizardState {
 	targetLangs: LanguageOption[]
 	error: string
 	loading: boolean
+	warnings: string[]
 }
 
 const INITIAL_STATE: WizardState = {
@@ -36,6 +38,7 @@ const INITIAL_STATE: WizardState = {
 	targetLangs: [],
 	error: '',
 	loading: false,
+	warnings: [],
 }
 
 export function WebsiteWizardModal({ isOpen, onClose, languages }: WebsiteWizardModalProps) {
@@ -86,8 +89,17 @@ export function WebsiteWizardModal({ isOpen, onClose, languages }: WebsiteWizard
 			targetLangs: state.targetLangs.map((l) => l.code),
 		})
 		if (result.success) {
-			onClose()
-			router.push(`/account/${result.publicCode}/languages`)
+			if (result.warnings?.length) {
+				set({ loading: false, warnings: result.warnings })
+				// Brief delay to show warnings, then redirect
+				setTimeout(() => {
+					onClose()
+					router.push(`/account/${result.publicCode}/languages`)
+				}, 3000)
+			} else {
+				onClose()
+				router.push(`/account/${result.publicCode}/languages`)
+			}
 		} else {
 			set({ loading: false, error: result.error || 'Failed to create website' })
 		}
@@ -152,6 +164,16 @@ export function WebsiteWizardModal({ isOpen, onClose, languages }: WebsiteWizard
 			{state.error && (
 				<div className="mb-4 p-3 bg-[var(--error)]/10 text-[var(--error)] rounded-md text-sm">
 					{state.error}
+				</div>
+			)}
+
+			{state.warnings.length > 0 && (
+				<div className="mb-4 p-3 bg-[rgba(234,179,8,0.1)] text-[var(--text-body)] rounded-md text-sm space-y-1">
+					<p className="font-medium">Website created with warnings:</p>
+					{state.warnings.map((w, i) => (
+						<p key={i} className="text-[var(--text-muted)]">{w}</p>
+					))}
+					<p className="text-xs text-[var(--text-muted)] mt-1">You can edit hostnames in Settings. Redirecting...</p>
 				</div>
 			)}
 
@@ -502,16 +524,24 @@ function Step5({
 				</div>
 				<div>
 					<span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">Translation languages</span>
-					<div className="flex flex-wrap gap-2 mt-1.5">
-						{targetLangs.map((lang) => (
-							<span
-								key={lang.code}
-								className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--accent)]/10 text-sm font-medium text-[var(--accent)]"
-							>
-								<span>{lang.flag}</span>
-								<span>{lang.name}</span>
-							</span>
-						))}
+					<div className="mt-1.5 space-y-1.5">
+						{targetLangs.map((lang) => {
+							const subdomain = deriveTranslationSubdomain(lang.code)
+							return (
+								<div
+									key={lang.code}
+									className="flex items-center justify-between px-3 py-2 rounded-md bg-[var(--page-bg)]"
+								>
+									<span className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--accent)]">
+										<span>{lang.flag}</span>
+										<span>{lang.name}</span>
+									</span>
+									<span className="text-xs font-mono text-[var(--text-muted)]">
+										{subdomain}.{hostname}
+									</span>
+								</div>
+							)
+						})}
 					</div>
 				</div>
 			</div>
