@@ -107,22 +107,22 @@ describe('saveTranslationSettings', () => {
 	it('trims items in skipPath array', async () => {
 		await saveTranslationSettings(1, {
 			...baseSettings,
-			skipPath: ['  /admin  ', ' /api '],
+			skipPath: ['  startsWith:/admin  ', ' includes:/api '],
 		})
 
 		expect(mockDbUpdateTranslation).toHaveBeenCalledWith(1, expect.objectContaining({
-			skipPath: ['/admin', '/api'],
+			skipPath: ['startsWith:/admin', 'includes:/api'],
 		}))
 	})
 
 	it('filters empty strings from skipPath after trimming', async () => {
 		await saveTranslationSettings(1, {
 			...baseSettings,
-			skipPath: ['/admin', '  ', ''],
+			skipPath: ['startsWith:/admin', '  ', ''],
 		})
 
 		expect(mockDbUpdateTranslation).toHaveBeenCalledWith(1, expect.objectContaining({
-			skipPath: ['/admin'],
+			skipPath: ['startsWith:/admin'],
 		}))
 	})
 
