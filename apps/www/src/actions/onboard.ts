@@ -4,7 +4,7 @@ import dns from 'dns'
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { pool } from '@pantolingo/db/pool'
-import { isHostnameTaken, createWebsiteWithLanguage } from '@pantolingo/db'
+import { isHostnameTaken, createWebsiteWithLanguage, isTranslationHostnameClaimed } from '@pantolingo/db'
 import { SUPPORTED_LANGUAGES, deriveTranslationSubdomain } from '@pantolingo/lang'
 import { validatePassword, hashPassword } from '@/lib/password'
 import { registerTranslationHostnames } from '@/lib/perfprox'
@@ -73,7 +73,7 @@ export async function createWebsite(data: {
 	hostname: string
 	sourceLang: string
 	targetLangs: string[]
-}): Promise<{ success: boolean; error?: string; publicCode?: string }> {
+}): Promise<{ success: boolean; error?: string; publicCode?: string; warnings?: string[] }> {
 	const session = await auth()
 	if (!session?.user?.accountId) {
 		return { success: false, error: 'Unauthorized' }
@@ -139,6 +139,11 @@ export async function createWebsite(data: {
 		translationHostname: deriveTranslationSubdomain(lang) + '.' + apex,
 	}))
 
+	// Check for claimed translation hostnames
+	const claimedHostnames = await isTranslationHostnameClaimed(
+		targetLanguages.map((t) => t.translationHostname)
+	)
+
 	// Create website + translations
 	let publicCode: string
 	try {
@@ -161,5 +166,11 @@ export async function createWebsite(data: {
 	// Register translation hostnames with Perfprox (async, non-blocking)
 	registerTranslationHostnames(targetLanguages.map((t) => t.translationHostname))
 
-	return { success: true, publicCode }
+	return {
+		success: true,
+		publicCode,
+		...(claimedHostnames.length > 0 && {
+			warnings: claimedHostnames.map((h) => `${h} is already claimed by another website`),
+		}),
+	}
 }

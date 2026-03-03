@@ -11,6 +11,7 @@ import {
 	getLanguagesWithDnsStatus,
 	updateDnsStatus,
 	checkAndSetWebsiteVerified,
+	updateWebsiteLanguageHostname,
 } from '@pantolingo/db'
 import { SUPPORTED_LANGUAGES } from '@pantolingo/lang'
 import { VALID_UI_COLORS } from '@/lib/ui-colors'
@@ -229,6 +230,35 @@ export async function checkDnsStatus(
 		}
 
 		return { success: true, dnsStatus: newStatus }
+	} catch {
+		return { success: false, error: 'An error occurred' }
+	}
+}
+
+/**
+ * Update the hostname for an unverified website language.
+ * Used from LanguageCard to resolve hostname conflicts.
+ */
+export async function updateLanguageHostname(
+	websiteId: number,
+	websiteLanguageId: number,
+	newHostname: string
+): Promise<{ success: boolean; error?: string }> {
+	try {
+		const accountId = await requireAccountId()
+
+		if (!(await canAccessWebsite(accountId, websiteId))) {
+			return { success: false, error: 'Access denied' }
+		}
+
+		// Validate hostname format
+		const clean = newHostname.trim().toLowerCase()
+		if (!clean) return { success: false, error: 'Hostname is required' }
+		if (!HOSTNAME_REGEX.test(clean)) {
+			return { success: false, error: 'Enter a valid hostname (e.g., es.example.com)' }
+		}
+
+		return updateWebsiteLanguageHostname(websiteLanguageId, clean)
 	} catch {
 		return { success: false, error: 'An error occurred' }
 	}
