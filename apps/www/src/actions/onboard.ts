@@ -1,6 +1,5 @@
 'use server'
 
-import crypto from 'crypto'
 import dns from 'dns'
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
@@ -134,9 +133,6 @@ export async function createWebsite(data: {
 	const apex = parsed.domain
 	if (!apex) return { success: false, error: 'Could not determine the apex domain' }
 
-	// Generate publicCode
-	const publicCode = crypto.randomBytes(8).toString('hex')
-
 	// Map to target language objects with derived hostnames
 	const targetLanguages = targetLangs.map((lang) => ({
 		targetLang: lang,
@@ -144,14 +140,14 @@ export async function createWebsite(data: {
 	}))
 
 	// Create website + translations
+	let publicCode: string
 	try {
-		await createWebsiteWithLanguage(
+		publicCode = await createWebsiteWithLanguage(
 			session.user.accountId,
 			trimmedName,
 			clean,
 			sourceLang,
 			apex,
-			publicCode,
 			targetLanguages
 		)
 	} catch (error: unknown) {

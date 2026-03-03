@@ -867,9 +867,8 @@ export async function isHostnameTaken(hostname: string, accountId: number): Prom
  * @param hostname - Source hostname (e.g., "example.com")
  * @param sourceLang - Source language code
  * @param apex - Apex domain (e.g., "example.com")
- * @param publicCode - Pre-generated public code
  * @param targetLanguages - Array of target languages with their translation hostnames
- * @returns The public code
+ * @returns The DB-generated public code
  */
 export async function createWebsiteWithLanguage(
 	accountId: number,
@@ -877,18 +876,18 @@ export async function createWebsiteWithLanguage(
 	hostname: string,
 	sourceLang: string,
 	apex: string,
-	publicCode: string,
 	targetLanguages: Array<{ targetLang: string; translationHostname: string }>
 ): Promise<string> {
 	const client = await pool.connect()
 	try {
 		await client.query('BEGIN')
-		const result = await client.query<{ id: number }>(
-			`INSERT INTO website (name, hostname, source_lang, public_code, apex)
-			 VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-			[name, hostname, sourceLang, publicCode, apex]
+		const result = await client.query<{ id: number; public_code: string }>(
+			`INSERT INTO website (name, hostname, source_lang, apex)
+			 VALUES ($1, $2, $3, $4) RETURNING id, public_code`,
+			[name, hostname, sourceLang, apex]
 		)
 		const websiteId = result.rows[0].id
+		const publicCode = result.rows[0].public_code
 		await client.query(
 			`INSERT INTO account_website (account_id, website_id, role)
 			 VALUES ($1, $2, 'owner')`,
