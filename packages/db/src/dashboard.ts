@@ -847,10 +847,11 @@ export async function updateTranslationSettings(
  * - Active (not removed) + verified by any account
  * - Active (not removed) + unverified but owned by the same account
  * Allows: removed websites, unverified websites from other accounts, no records.
+ * Returns: null if available, 'own' if owned by same account, 'other' if verified by another.
  */
-export async function isHostnameTaken(hostname: string, accountId: number): Promise<boolean> {
-	const result = await pool.query(
-		`SELECT 1 FROM website w
+export async function isHostnameTaken(hostname: string, accountId: number): Promise<'own' | 'other' | null> {
+	const result = await pool.query<{ is_own: boolean }>(
+		`SELECT (aw.account_id = $2) AS is_own FROM website w
 		 JOIN account_website aw ON aw.website_id = w.id
 		 WHERE w.hostname = $1
 		 AND w.removed_at IS NULL
@@ -858,7 +859,8 @@ export async function isHostnameTaken(hostname: string, accountId: number): Prom
 		 LIMIT 1`,
 		[hostname, accountId]
 	)
-	return result.rows.length > 0
+	if (result.rows.length === 0) return null
+	return result.rows[0].is_own ? 'own' : 'other'
 }
 
 /**

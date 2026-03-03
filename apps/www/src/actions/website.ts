@@ -176,7 +176,8 @@ export async function validateHostname(hostname: string): Promise<{ valid: boole
 		}
 
 		const taken = await isHostnameTaken(clean, accountId)
-		if (taken) return { valid: false, error: 'This hostname is already registered' }
+		if (taken === 'own') return { valid: false, error: 'You already have a website with this hostname' }
+		if (taken === 'other') return { valid: false, error: 'This hostname is already registered' }
 
 		try {
 			await dns.promises.resolve(clean)

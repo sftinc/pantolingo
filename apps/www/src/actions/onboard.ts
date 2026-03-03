@@ -119,7 +119,8 @@ export async function createWebsite(data: {
 
 	// Check uniqueness
 	const taken = await isHostnameTaken(clean, session.user.accountId)
-	if (taken) return { success: false, error: 'This hostname is already registered' }
+	if (taken === 'own') return { success: false, error: 'You already have a website with this hostname' }
+	if (taken === 'other') return { success: false, error: 'This hostname is already registered' }
 
 	// Check DNS resolution
 	try {
