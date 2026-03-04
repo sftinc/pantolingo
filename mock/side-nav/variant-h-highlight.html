@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en" class="h-full">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Current Nav - Pantolingo</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script>
+			tailwind.config = { darkMode: 'class' }
+		</script>
+		<style>
+			:root {
+				--page-bg: #f8f8f8;
+				--card-bg: #ffffff;
+				--text-heading: #111;
+				--text-muted: #555;
+				--text-subtle: #888;
+				--accent: #2563eb;
+				--accent-hover: #1d4ed8;
+				--border: #d1d5db;
+				--border-hover: #9ca3af;
+				--sidebar-bg: #ffffff;
+				--sidebar-border: #e5e7eb;
+				--content-bg: #f5f5f5;
+				--nav-hover-bg: #f3f4f6;
+			}
+			.dark {
+				--page-bg: #111;
+				--card-bg: #222;
+				--text-heading: #f5f5f5;
+				--text-muted: #b5b5b5;
+				--text-subtle: #777;
+				--accent: #3b82f6;
+				--accent-hover: #60a5fa;
+				--border: #374151;
+				--border-hover: #4b5563;
+				--sidebar-bg: #1a1a1a;
+				--sidebar-border: #374151;
+				--content-bg: #111111;
+				--nav-hover-bg: #2a3040;
+			}
+			body { background-color: var(--content-bg); }
+			/* Thin scrollbar for sidebar nav */
+			.sidebar-scroll::-webkit-scrollbar { width: 4px; }
+			.sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+			.sidebar-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+			.sidebar-scroll::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+			.sidebar-scroll { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+		</style>
+		<script>
+			;(function () {
+				var t = localStorage.getItem('theme') || 'system'
+				if (t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+					document.documentElement.classList.add('dark')
+				}
+			})()
+		</script>
+	</head>
+	<body class="h-full text-gray-900 dark:text-gray-100">
+
+		<!-- ================================================================
+		     MOBILE HEADER (hidden on md+)
+		     ================================================================ -->
+		<header class="md:hidden sticky top-0 z-30 h-14 border-b flex items-center justify-between px-4"
+			style="background: var(--sidebar-bg); border-color: var(--sidebar-border);">
+			<!-- Left: hamburger + website switcher -->
+			<div class="flex items-center gap-3">
+				<button id="mobile-menu-btn" aria-label="Open menu" class="p-1 -ml-1" style="color: var(--text-muted);">
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+					</svg>
+				</button>
+				<!-- Mobile website switcher -->
+				<div class="relative" id="mobile-switcher-wrap">
+					<button id="mobile-switcher-btn" class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors cursor-pointer">
+						<span class="w-5 h-5 rounded bg-blue-700/20 dark:bg-blue-200/20 flex items-center justify-center text-[11px] font-semibold shrink-0">E</span>
+						<span class="font-semibold truncate max-w-[120px] sm:max-w-none">eSnipe</span>
+						<svg class="w-4 h-4 text-blue-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+					</button>
+					<div id="mobile-switcher-dropdown" class="hidden absolute left-0 top-full mt-1 w-64 rounded-lg shadow-lg overflow-hidden z-50" style="background: var(--card-bg); border: 1px solid var(--border);">
+						<button class="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors cursor-pointer" style="color: var(--text-muted);"
+							onmouseenter="this.style.background='var(--nav-hover-bg)'" onmouseleave="this.style.background='transparent'">
+							<svg class="w-5 h-5" style="color: var(--text-subtle);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
+							Add website
+						</button>
+						<div style="border-top: 1px solid var(--border); margin: 4px 0;"></div>
+						<button class="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors cursor-pointer" style="color: var(--text-muted);"
+							onmouseenter="this.style.background='var(--nav-hover-bg)'" onmouseleave="this.style.background='transparent'">
+							<span class="w-6 h-6 rounded flex items-center justify-center text-xs font-semibold bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300">M</span>
+							MyShop
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Right: mobile profile -->
+			<div class="relative" id="mobile-profile-wrap">
+				<button id="mobile-profile-btn" class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer" style="color: var(--text-muted);"
+					onmouseenter="this.style.background='var(--nav-hover-bg)'" onmouseleave="this.style.background='transparent'">
+					<span class="sm:hidden w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style="background: var(--nav-hover-bg); color: var(--text-heading);">W</span>
+					<svg class="w-5 h-5 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" stroke-width="1.5"/><path stroke-width="1.5" d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+					<span class="hidden sm:inline">W. Williams</span>
+					<svg class="w-4 h-4 transition-transform" style="color: var(--text-subtle);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+				</button>
+				<div id="mobile-profile-dropdown" class="hidden absolute right-0 top-full mt-1 w-48 rounded-lg shadow-lg py-1 z-50" style="background: var(--card-bg); border: 1px solid var(--border);"></div>
+			</div>
+		</header>
+
+		<!-- Mobile overlay -->
+		<div id="mobile-overlay" class="md:hidden fixed inset-0 bg-black/40 z-40 hidden" onclick="closeMobileSidebar()"></div>
+
+		<!-- ================================================================
+		     SIDEBAR
+		     ================================================================ -->
+		<aside id="sidebar"
+			class="fixed top-0 left-0 z-50 h-full w-60 flex flex-col transition-transform duration-200 -translate-x-full md:translate-x-0"
+			style="background: var(--sidebar-bg); border-right: 1px solid var(--sidebar-border);">
+
+			<!-- Logo row -->
+			<div class="h-14 flex items-center px-5 shrink-0">
+				<span class="text-base font-bold" style="color: var(--text-heading);">Pantolingo</span>
+			</div>
+
+			<!-- Mobile nav (scrollable, no border/picker) -->
+			<nav class="md:hidden flex-1 min-h-0 overflow-y-auto sidebar-scroll px-2 pt-4 space-y-1">
+				<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-semibold text-blue-700 dark:text-blue-300">
+					<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5h8M7 5V3m2.5 7.5L7 9m0 0L5 12m2-3l2 3m5-3h6m-3 0v8m-2-4h4" />
+						<text x="14" y="9" font-size="7" fill="currentColor" stroke="none" font-weight="600">A</text>
+					</svg>
+					<span>Languages</span>
+				</a>
+				<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors" style="color: var(--text-muted);"
+					onmouseenter="this.style.background='var(--nav-hover-bg)'; this.style.color='var(--text-heading)'" onmouseleave="this.style.background='transparent'; this.style.color='var(--text-muted)'">
+					<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h12M4 14h16M4 18h8" />
+					</svg>
+					<span>Segments</span>
+				</a>
+				<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors" style="color: var(--text-muted);"
+					onmouseenter="this.style.background='var(--nav-hover-bg)'; this.style.color='var(--text-heading)'" onmouseleave="this.style.background='transparent'; this.style.color='var(--text-muted)'">
+					<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+					</svg>
+					<span>Paths</span>
+				</a>
+				<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors" style="color: var(--text-muted);"
+					onmouseenter="this.style.background='var(--nav-hover-bg)'; this.style.color='var(--text-heading)'" onmouseleave="this.style.background='transparent'; this.style.color='var(--text-muted)'">
+					<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3v18h18M7 16v-3m4 3v-6m4 6v-4m4 4V7" />
+					</svg>
+					<span>Stats</span>
+				</a>
+				<div class="pt-4"></div>
+				<a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors" style="color: var(--text-muted);"
+					onmouseenter="this.style.background='var(--nav-hover-bg)'; this.style.color='var(--text-heading)'" onmouseleave="this.style.background='transparent'; this.style.color='var(--text-muted)'">
+					<svg class="w-5 h-5 shrink-0" style="color: var(--text-subtle);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+						<circle cx="12" cy="12" r="3" stroke-width="1.5" />
+					</svg>
+					<span>Settings</span>
+				</a>
+			</nav>
+
+			<!-- Scrollable middle section (desktop) -->
+			<div class="hidden md:flex flex-col min-h-0 flex-1 overflow-y-auto sidebar-scroll">
+
+			<!-- Website picker + nav wrapped in border -->
+			<div class="mx-2 mt-3 rounded-lg border border-blue-100 dark:border-blue-900">
+				<!-- Website picker -->
+				<div class="relative" id="desktop-switcher-wrap">
+					<button id="desktop-switcher-btn" class="w-full flex items-center gap-2 px-3 py-2.5 rounded-t-lg text-sm font-medium bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors cursor-pointer">
+						<span class="w-5 h-5 rounded bg-blue-700/20 dark:bg-blue-200/20 flex items-center justify-center text-[11px] font-semibold shrink-0">E</span>
+						<span class="font-semibold truncate">eSnipe</span>
+						<svg id="desktop-switcher-chevron" class="w-4 h-4 ml-auto text-blue-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+					</button>
+
+					<div id="desktop-switcher-dropdown" class="hidden absolute left-0 top-full mt-1 w-64 rounded-lg shadow-lg overflow-hidden z-50" style="background: var(--card-bg); border: 1px solid var(--border);">
+						<button class="w-full flex items-center gap-3 pl-3 pr-4 py-2.5 text-sm transition-colors cursor-pointer" style="color: var(--text-muted);"
+							onmouseenter="this.style.background='var(--nav-hover-bg)'" onmouseleave="this.style.background='transparent'">
+							<svg class="w-5 h-5" style="color: var(--text-subtle);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
+							Add website
+						</button>
+						<div style="border-top: 1px solid var(--border); margin: 4px 0;"></div>
+						<button class="w-full flex items-center gap-3 pl-3 pr-4 py-2.5 text-sm transition-colors cursor-pointer" style="color: var(--text-muted);"
+							onmouseenter="this.style.background='var(--nav-hover-bg)'" onmouseleave="this.style.background='transparent'">
+							<span class="w-5 h-5 rounded bg-purple-700/20 dark:bg-purple-300/20 flex items-center justify-center text-[11px] font-semibold bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 shrink-0">M</span>
+							MyShop
+						</button>
+					</div>
+				</div>
+
+				<!-- Primary nav -->
+				<nav class="pt-5 pb-1 space-y-0.5">
+					<!-- Languages (active) -->
+					<a href="#" class="flex items-center gap-3 mx-1 px-2 py-2.5 rounded-md text-sm font-semibold text-blue-700 dark:text-blue-300">
+						<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5h8M7 5V3m2.5 7.5L7 9m0 0L5 12m2-3l2 3m5-3h6m-3 0v8m-2-4h4" />
+							<text x="14" y="9" font-size="7" fill="currentColor" stroke="none" font-weight="600">A</text>
+						</svg>
+						<span>Languages</span>
+					</a>
+
+					<!-- Segments -->
+					<a href="#" class="flex items-center gap-3 mx-1 px-2 py-2.5 rounded-md text-sm font-medium transition-colors" style="color: var(--text-muted);"
+						onmouseenter="this.style.background='var(--nav-hover-bg)'; this.style.color='var(--text-heading)'" onmouseleave="this.style.background='transparent'; this.style.color='var(--text-muted)'">
+						<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h12M4 14h16M4 18h8" />
+						</svg>
+						<span>Segments</span>
+					</a>
+
+					<!-- Paths -->
+					<a href="#" class="flex items-center gap-3 mx-1 px-2 py-2.5 rounded-md text-sm font-medium transition-colors" style="color: var(--text-muted);"
+						onmouseenter="this.style.background='var(--nav-hover-bg)'; this.style.color='var(--text-heading)'" onmouseleave="this.style.background='transparent'; this.style.color='var(--text-muted)'">
+						<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+						</svg>
+						<span>Paths</span>
+					</a>
+
+					<!-- Stats -->
+					<a href="#" class="flex items-center gap-3 mx-1 px-2 py-2.5 rounded-md text-sm font-medium transition-colors" style="color: var(--text-muted);"
+						onmouseenter="this.style.background='var(--nav-hover-bg)'; this.style.color='var(--text-heading)'" onmouseleave="this.style.background='transparent'; this.style.color='var(--text-muted)'">
+						<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3v18h18M7 16v-3m4 3v-6m4 6v-4m4 4V7" />
+						</svg>
+						<span>Stats</span>
+					</a>
+
+					<div class="pt-4"></div>
+
+					<!-- Settings -->
+					<a href="#" class="flex items-center gap-3 mx-1 px-2 py-2.5 rounded-md text-sm font-medium transition-colors" style="color: var(--text-muted);"
+						onmouseenter="this.style.background='var(--nav-hover-bg)'; this.style.color='var(--text-heading)'" onmouseleave="this.style.background='transparent'; this.style.color='var(--text-muted)'">
+						<svg class="w-5 h-5 shrink-0" style="color: var(--text-subtle);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+							<circle cx="12" cy="12" r="3" stroke-width="1.5" />
+						</svg>
+						<span>Settings</span>
+					</a>
+				</nav>
+			</div>
+
+			</div><!-- end scrollable middle -->
+
+			<!-- Profile menu (desktop, pinned to bottom) -->
+			<div class="relative hidden md:block" style="border-top: 1px solid var(--sidebar-border);" id="desktop-profile-wrap">
+				<button id="desktop-profile-btn" class="w-full flex items-center gap-3 pl-5 pr-3 py-4 text-sm font-medium transition-colors cursor-pointer" style="color: var(--text-muted);"
+					onmouseenter="this.style.background='var(--nav-hover-bg)'" onmouseleave="this.style.background='transparent'">
+					<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" stroke-width="1.5"/><path stroke-width="1.5" d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+					<span class="truncate">W. Williams</span>
+					<svg id="desktop-profile-chevron" class="w-4 h-4 ml-auto transition-transform" style="color: var(--text-subtle);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+				</button>
+
+				<div id="desktop-profile-dropdown" class="hidden absolute bottom-full mb-1 left-2 right-2 rounded-lg shadow-lg py-1 z-50" style="background: var(--card-bg); border: 1px solid var(--border);">
+					<!-- Profile -->
+					<button class="w-full flex items-center gap-3 pl-3 pr-4 py-2.5 text-sm transition-colors cursor-pointer" style="color: var(--text-muted);"
+						onmouseenter="this.style.background='var(--nav-hover-bg)'" onmouseleave="this.style.background='transparent'">
+						<svg class="w-5 h-5" style="color: var(--text-subtle);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" stroke-width="1.5"/><path stroke-width="1.5" d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+						Profile
+					</button>
+					<!-- Billing -->
+					<a href="#" class="w-full flex items-center gap-3 pl-3 pr-4 py-2.5 text-sm transition-colors cursor-pointer" style="color: var(--text-muted); text-decoration: none;"
+						onmouseenter="this.style.background='var(--nav-hover-bg)'" onmouseleave="this.style.background='transparent'">
+						<svg class="w-5 h-5" style="color: var(--text-subtle);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" stroke-width="1.5"/><path stroke-linecap="round" stroke-width="1.5" d="M2 10h20"/></svg>
+						Billing
+					</a>
+					<div style="border-top: 1px solid var(--border); margin: 4px 0;"></div>
+					<!-- Theme toggle -->
+					<button id="theme-btn" class="w-full flex items-center gap-3 pl-3 pr-4 py-2.5 text-sm transition-colors cursor-pointer" style="color: var(--text-muted);"
+						onmouseenter="this.style.background='var(--nav-hover-bg)'" onmouseleave="this.style.background='transparent'">
+						<svg id="theme-icon-sun" class="w-5 h-5" style="color: var(--text-subtle);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<circle cx="12" cy="12" r="5" stroke-width="1.5" />
+							<path stroke-linecap="round" stroke-width="1.5" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+						</svg>
+						<svg id="theme-icon-moon" class="w-5 h-5 hidden" style="color: var(--text-subtle);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z" />
+						</svg>
+						<svg id="theme-icon-system" class="w-5 h-5 hidden" style="color: var(--text-subtle);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<rect x="2" y="3" width="20" height="14" rx="2" stroke-width="1.5" />
+							<path stroke-linecap="round" stroke-width="1.5" d="M8 21h8m-4-4v4" />
+						</svg>
+						<span id="theme-label">Light mode</span>
+					</button>
+					<!-- Sign out -->
+					<button class="w-full flex items-center gap-3 pl-3 pr-4 py-2.5 text-sm transition-colors cursor-pointer" style="color: var(--text-muted);"
+						onmouseenter="this.style.background='var(--nav-hover-bg)'" onmouseleave="this.style.background='transparent'">
+						<svg class="w-5 h-5" style="color: var(--text-subtle);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+						</svg>
+						Sign out
+					</button>
+				</div>
+			</div>
+		</aside>
+
+		<!-- ================================================================
+		     MAIN CONTENT
+		     ================================================================ -->
+		<main class="md:ml-60 min-h-screen">
+			<div class="mx-auto max-w-6xl px-4 pt-4 pb-8 sm:px-6 lg:px-8">
+				<!-- Page heading -->
+				<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+					<div class="flex items-center gap-3">
+						<h1 class="text-2xl font-semibold" style="color: var(--text-heading);">Languages</h1>
+						<span class="text-sm" style="color: var(--text-muted);">(2)</span>
+					</div>
+				</div>
+
+				<!-- Sample language cards -->
+				<div class="space-y-3">
+					<div class="rounded-lg p-4 flex items-center justify-between" style="background: var(--card-bg); border: 1px solid var(--border);">
+						<div class="flex items-center gap-3">
+							<span class="text-xl">&#x1F1EA;&#x1F1F8;</span>
+							<div>
+								<div class="text-sm font-semibold" style="color: var(--text-heading);">Spanish</div>
+								<div class="text-xs" style="color: var(--text-subtle);">es &middot; 221 segments &middot; 14 unreviewed</div>
+							</div>
+						</div>
+						<div class="flex items-center gap-2">
+							<div class="w-24 h-1.5 rounded-full overflow-hidden" style="background: var(--border);">
+								<div class="h-full rounded-full bg-emerald-500" style="width: 94%;"></div>
+							</div>
+							<span class="text-xs font-medium" style="color: var(--text-subtle);">94%</span>
+						</div>
+					</div>
+					<div class="rounded-lg p-4 flex items-center justify-between" style="background: var(--card-bg); border: 1px solid var(--border);">
+						<div class="flex items-center gap-3">
+							<span class="text-xl">&#x1F1EB;&#x1F1F7;</span>
+							<div>
+								<div class="text-sm font-semibold" style="color: var(--text-heading);">French</div>
+								<div class="text-xs" style="color: var(--text-subtle);">fr &middot; 198 segments &middot; 32 unreviewed</div>
+							</div>
+						</div>
+						<div class="flex items-center gap-2">
+							<div class="w-24 h-1.5 rounded-full overflow-hidden" style="background: var(--border);">
+								<div class="h-full rounded-full bg-emerald-500" style="width: 84%;"></div>
+							</div>
+							<span class="text-xs font-medium" style="color: var(--text-subtle);">84%</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+
+		<!-- ================================================================
+		     JAVASCRIPT
+		     ================================================================ -->
+		<script>
+			// Theme cycling: light → dark → system
+			var themes = ['light', 'dark', 'system']
+			var currentTheme = localStorage.getItem('theme') || 'system'
+
+			function applyTheme(t) {
+				currentTheme = t
+				localStorage.setItem('theme', t)
+				var isDark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+				document.documentElement.classList.toggle('dark', isDark)
+				// Update icons and label
+				document.getElementById('theme-icon-sun').classList.toggle('hidden', t !== 'light')
+				document.getElementById('theme-icon-moon').classList.toggle('hidden', t !== 'dark')
+				document.getElementById('theme-icon-system').classList.toggle('hidden', t !== 'system')
+				document.getElementById('theme-label').textContent =
+					t === 'light' ? 'Light mode' : t === 'dark' ? 'Dark mode' : 'System'
+			}
+			applyTheme(currentTheme)
+
+			document.getElementById('theme-btn').addEventListener('click', function (e) {
+				e.stopPropagation()
+				var idx = (themes.indexOf(currentTheme) + 1) % themes.length
+				applyTheme(themes[idx])
+			})
+
+			// Desktop switcher dropdown
+			document.getElementById('desktop-switcher-btn').addEventListener('click', function () {
+				var dd = document.getElementById('desktop-switcher-dropdown')
+				var open = !dd.classList.contains('hidden')
+				closeAllDropdowns()
+				if (!open) dd.classList.remove('hidden')
+				document.getElementById('desktop-switcher-chevron').style.transform = open ? '' : 'rotate(180deg)'
+			})
+
+			// Desktop profile dropdown
+			document.getElementById('desktop-profile-btn').addEventListener('click', function () {
+				var dd = document.getElementById('desktop-profile-dropdown')
+				var open = !dd.classList.contains('hidden')
+				closeAllDropdowns()
+				if (!open) dd.classList.remove('hidden')
+				document.getElementById('desktop-profile-chevron').style.transform = open ? '' : 'rotate(180deg)'
+			})
+
+			// Mobile switcher dropdown
+			document.getElementById('mobile-switcher-btn').addEventListener('click', function () {
+				var dd = document.getElementById('mobile-switcher-dropdown')
+				var open = !dd.classList.contains('hidden')
+				closeAllDropdowns()
+				if (!open) dd.classList.remove('hidden')
+			})
+
+			// Mobile hamburger
+			document.getElementById('mobile-menu-btn').addEventListener('click', function () {
+				document.getElementById('sidebar').classList.remove('-translate-x-full')
+				document.getElementById('mobile-overlay').classList.remove('hidden')
+			})
+
+			function closeMobileSidebar() {
+				document.getElementById('sidebar').classList.add('-translate-x-full')
+				document.getElementById('mobile-overlay').classList.add('hidden')
+			}
+
+			function closeAllDropdowns() {
+				document.getElementById('desktop-switcher-dropdown').classList.add('hidden')
+				document.getElementById('desktop-profile-dropdown').classList.add('hidden')
+				document.getElementById('mobile-switcher-dropdown').classList.add('hidden')
+				document.getElementById('desktop-switcher-chevron').style.transform = ''
+				document.getElementById('desktop-profile-chevron').style.transform = ''
+			}
+
+			// Click outside to close
+			document.addEventListener('mousedown', function (e) {
+				if (!document.getElementById('desktop-switcher-wrap').contains(e.target) &&
+					!document.getElementById('mobile-switcher-wrap').contains(e.target)) {
+					document.getElementById('desktop-switcher-dropdown').classList.add('hidden')
+					document.getElementById('mobile-switcher-dropdown').classList.add('hidden')
+					document.getElementById('desktop-switcher-chevron').style.transform = ''
+				}
+				if (!document.getElementById('desktop-profile-wrap').contains(e.target)) {
+					document.getElementById('desktop-profile-dropdown').classList.add('hidden')
+					document.getElementById('desktop-profile-chevron').style.transform = ''
+				}
+			})
+		</script>
+	</body>
+</html>

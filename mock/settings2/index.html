@@ -188,6 +188,37 @@
 			</div>
 		</header>
 
+		<!-- Edit Hostname Modal -->
+		<div id="edit-hostname-modal" class="fixed inset-0 z-[60] hidden">
+			<div class="fixed inset-0 bg-black/40" onclick="closeEditModal()"></div>
+			<div class="fixed inset-0 flex items-center justify-center p-4">
+				<div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm p-5">
+					<h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Edit Hostname</h3>
+					<div class="flex items-center gap-2 mb-4">
+						<span id="edit-modal-flag" class="text-lg"></span>
+						<span id="edit-modal-lang" class="text-sm text-gray-700 dark:text-gray-300"></span>
+					</div>
+					<label class="block mb-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">Subdomain</label>
+					<div class="flex items-stretch rounded-md border border-gray-300 dark:border-gray-600">
+						<input
+							type="text"
+							id="edit-subdomain-input"
+							class="w-24 px-2.5 py-2 text-sm font-mono rounded-l-md border-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-0"
+						/>
+						<span id="edit-apex-display" class="px-2.5 py-2 text-sm font-mono rounded-r-md border-l border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400"></span>
+					</div>
+					<div class="flex justify-end gap-2 mt-5">
+						<button onclick="closeEditModal()" class="px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+							Cancel
+						</button>
+						<button onclick="saveEditModal()" class="px-3 py-1.5 text-xs font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer">
+							Save
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<!-- Mobile Sidebar Overlay -->
 		<div id="mobile-overlay" class="md:hidden fixed inset-0 bg-black/40 z-40 hidden"></div>
 
@@ -354,31 +385,47 @@
 						<div class="space-y-3">
 							<!-- Spanish - Active -->
 							<div class="rounded-md border p-4" style="background: rgba(34, 197, 94, 0.05); border-color: rgba(34, 197, 94, 0.2);">
-								<div class="flex items-center justify-between">
-									<div class="flex items-center gap-2">
-										<span class="badge badge-success">Active</span>
-										<span class="text-base">&#127474;&#127485;</span>
-										<span class="text-sm font-medium text-gray-900 dark:text-gray-100">Spanish (Mexico)</span>
-									</div>
-									<button class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer" title="Remove language">
-										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-											<path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-										</svg>
+								<div class="flex items-center flex-wrap gap-2">
+									<span class="badge badge-success">Active</span>
+									<span class="text-base">&#127474;&#127485;</span>
+									<span class="text-sm font-medium text-gray-900 dark:text-gray-100">Spanish (Mexico)</span>
+									<span class="flex-1"></span>
+									<button onclick="toggleActiveInfo(this)" class="px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-card-light dark:bg-card-dark hover:bg-content-light dark:hover:bg-content-dark transition-colors cursor-pointer">
+										View Info
 									</button>
+								</div>
+								<div class="active-dns-info hidden mt-3">
+									<div class="rounded-md bg-card-light dark:bg-card-dark border border-gray-200 dark:border-gray-700 p-3">
+										<p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">CNAME DNS Record</p>
+										<div class="space-y-1.5 font-mono text-sm">
+											<div class="flex items-center gap-1.5">
+												<span class="text-xs font-sans font-medium text-gray-400 dark:text-gray-500 w-12 shrink-0">Name</span>
+												<span class="text-gray-900 dark:text-gray-100 truncate">es.seefusion.tech</span>
+											</div>
+											<div class="flex items-center gap-1.5">
+												<span class="text-xs font-sans font-medium text-gray-400 dark:text-gray-500 w-12 shrink-0">Value</span>
+												<span class="text-gray-900 dark:text-gray-100 truncate">cname.pantolingo.com</span>
+											</div>
+										</div>
+									</div>
 								</div>
 							</div>
 
 							<!-- French - Pending -->
 							<div class="rounded-md border p-4" style="background: rgba(234, 179, 8, 0.05); border-color: rgba(234, 179, 8, 0.2);">
-								<div class="flex items-center justify-between mb-3">
-									<div class="flex items-center gap-2">
-										<span class="badge badge-warning">Pending</span>
-										<span class="text-base">&#127467;&#127479;</span>
-										<span class="text-sm font-medium text-gray-900 dark:text-gray-100">French (France)</span>
-									</div>
+								<div class="flex items-center flex-wrap gap-2 mb-3">
+									<span class="badge badge-warning">Pending</span>
+									<span class="text-base">&#127467;&#127479;</span>
+									<span class="text-sm font-medium text-gray-900 dark:text-gray-100">French (France)</span>
+									<span class="flex-1"></span>
 									<div class="flex items-center gap-2">
 										<button class="px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-card-light dark:bg-card-dark hover:bg-content-light dark:hover:bg-content-dark transition-colors cursor-pointer">
 											Check DNS
+										</button>
+										<button onclick="openEditModal(this)" class="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer" title="Edit hostname">
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" />
+											</svg>
 										</button>
 										<button class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer" title="Remove language">
 											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -389,35 +436,44 @@
 								</div>
 								<div class="rounded-md bg-card-light dark:bg-card-dark border border-gray-200 dark:border-gray-700 p-3">
 									<p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Add CNAME DNS Record</p>
-									<div class="flex items-center gap-2 font-mono text-sm">
-										<span class="text-gray-900 dark:text-gray-100">fr.seefusion.tech</span>
-										<button onclick="copyToClipboard('fr.seefusion.tech', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer" title="Copy name">
-											<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-												<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-											</svg>
-										</button>
-										<span class="text-gray-400">&rarr;</span>
-										<span class="text-gray-900 dark:text-gray-100">cname.pantolingo.com</span>
-										<button onclick="copyToClipboard('cname.pantolingo.com', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer" title="Copy value">
-											<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-												<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-											</svg>
-										</button>
+									<div class="dns-row space-y-1.5 font-mono text-sm">
+										<div class="flex items-center gap-1.5">
+											<span class="text-xs font-sans font-medium text-gray-400 dark:text-gray-500 w-12 shrink-0">Name</span>
+											<span class="hostname-text text-gray-900 dark:text-gray-100 truncate" data-subdomain="fr" data-apex="seefusion.tech" data-flag="&#127467;&#127479;" data-lang="French (France)">fr.seefusion.tech</span>
+											<button onclick="copyToClipboard('fr.seefusion.tech', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer shrink-0" title="Copy">
+												<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+												</svg>
+											</button>
+										</div>
+										<div class="flex items-center gap-1.5">
+											<span class="text-xs font-sans font-medium text-gray-400 dark:text-gray-500 w-12 shrink-0">Value</span>
+											<span class="text-gray-900 dark:text-gray-100 truncate">cname.pantolingo.com</span>
+											<button onclick="copyToClipboard('cname.pantolingo.com', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer shrink-0" title="Copy">
+												<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+												</svg>
+											</button>
+										</div>
 									</div>
 								</div>
 							</div>
 
-							<!-- German - Failed -->
-							<div class="rounded-md border p-4" style="background: rgba(239, 68, 68, 0.05); border-color: rgba(239, 68, 68, 0.2);">
-								<div class="flex items-center justify-between mb-3">
-									<div class="flex items-center gap-2">
-										<span class="badge badge-error">Failed</span>
-										<span class="text-base">&#127465;&#127466;</span>
-										<span class="text-sm font-medium text-gray-900 dark:text-gray-100">German (Germany)</span>
-											</div>
+							<!-- German - Pending -->
+							<div class="rounded-md border p-4" style="background: rgba(234, 179, 8, 0.05); border-color: rgba(234, 179, 8, 0.2);">
+								<div class="flex items-center flex-wrap gap-2 mb-3">
+									<span class="badge badge-warning">Pending</span>
+									<span class="text-base">&#127465;&#127466;</span>
+									<span class="text-sm font-medium text-gray-900 dark:text-gray-100">German (Germany)</span>
+									<span class="flex-1"></span>
 									<div class="flex items-center gap-2">
 										<button class="px-2.5 py-1 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-card-light dark:bg-card-dark hover:bg-content-light dark:hover:bg-content-dark transition-colors cursor-pointer">
 											Check DNS
+										</button>
+										<button onclick="openEditModal(this)" class="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer" title="Edit hostname">
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" />
+											</svg>
 										</button>
 										<button class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer" title="Remove language">
 											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -428,20 +484,25 @@
 								</div>
 								<div class="rounded-md bg-card-light dark:bg-card-dark border border-gray-200 dark:border-gray-700 p-3">
 									<p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Add CNAME DNS Record</p>
-									<div class="flex items-center gap-2 font-mono text-sm">
-										<span class="text-gray-900 dark:text-gray-100">de.seefusion.tech</span>
-										<button onclick="copyToClipboard('de.seefusion.tech', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer" title="Copy name">
-											<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-												<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-											</svg>
-										</button>
-										<span class="text-gray-400">&rarr;</span>
-										<span class="text-gray-900 dark:text-gray-100">cname.pantolingo.com</span>
-										<button onclick="copyToClipboard('cname.pantolingo.com', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer" title="Copy value">
-											<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-												<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-											</svg>
-										</button>
+									<div class="dns-row space-y-1.5 font-mono text-sm">
+										<div class="flex items-center gap-1.5">
+											<span class="text-xs font-sans font-medium text-gray-400 dark:text-gray-500 w-12 shrink-0">Name</span>
+											<span class="hostname-text text-gray-900 dark:text-gray-100 truncate" data-subdomain="de" data-apex="seefusion.tech" data-flag="&#127465;&#127466;" data-lang="German (Germany)">de.seefusion.tech</span>
+											<button onclick="copyToClipboard('de.seefusion.tech', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer shrink-0" title="Copy">
+												<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+												</svg>
+											</button>
+										</div>
+										<div class="flex items-center gap-1.5">
+											<span class="text-xs font-sans font-medium text-gray-400 dark:text-gray-500 w-12 shrink-0">Value</span>
+											<span class="text-gray-900 dark:text-gray-100 truncate">cname.pantolingo.com</span>
+											<button onclick="copyToClipboard('cname.pantolingo.com', this)" class="copy-btn p-1 rounded text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer shrink-0" title="Copy">
+												<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+												</svg>
+											</button>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -798,6 +859,58 @@
 			}
 
 			cacheBtn.addEventListener('click', startCacheTimer)
+
+			// Active language info toggle
+			function toggleActiveInfo(btn) {
+				const info = btn.closest('[style]').querySelector('.active-dns-info')
+				const isHidden = info.classList.contains('hidden')
+				info.classList.toggle('hidden')
+				btn.textContent = isHidden ? 'Hide Info' : 'View Info'
+			}
+
+			// Hostname edit modal
+			let activeHostnameEl = null
+
+			function openEditModal(btn) {
+				const card = btn.closest('[style]')
+				activeHostnameEl = card.querySelector('.hostname-text')
+				const subdomain = activeHostnameEl.dataset.subdomain
+				const apex = activeHostnameEl.dataset.apex
+				document.getElementById('edit-subdomain-input').value = subdomain
+				document.getElementById('edit-apex-display').textContent = '.' + apex
+				document.getElementById('edit-modal-flag').textContent = activeHostnameEl.dataset.flag
+				document.getElementById('edit-modal-lang').textContent = activeHostnameEl.dataset.lang
+				document.getElementById('edit-hostname-modal').classList.remove('hidden')
+				const input = document.getElementById('edit-subdomain-input')
+				input.focus()
+				input.select()
+			}
+
+			function closeEditModal() {
+				document.getElementById('edit-hostname-modal').classList.add('hidden')
+				activeHostnameEl = null
+			}
+
+			function saveEditModal() {
+				if (!activeHostnameEl) return
+				const subdomain = document.getElementById('edit-subdomain-input').value.trim()
+				if (!subdomain) return
+				const apex = activeHostnameEl.dataset.apex
+				const newHostname = subdomain + '.' + apex
+				activeHostnameEl.textContent = newHostname
+				activeHostnameEl.dataset.subdomain = subdomain
+				// Update the copy button next to it
+				const copyBtn = activeHostnameEl.parentElement.querySelector('.copy-btn')
+				if (copyBtn) copyBtn.setAttribute('onclick', "copyToClipboard('" + newHostname + "', this)")
+				closeEditModal()
+			}
+
+			// Close modal on Escape
+			document.addEventListener('keydown', (e) => {
+				if (e.key === 'Escape' && !document.getElementById('edit-hostname-modal').classList.contains('hidden')) {
+					closeEditModal()
+				}
+			})
 
 			// Profile dropdown
 			const profileBtn = document.getElementById('profile-btn')

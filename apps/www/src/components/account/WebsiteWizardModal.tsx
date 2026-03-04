@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { Modal } from '@/components/ui/Modal'
 import { createWebsite } from '@/actions/onboard'
 import { validateHostname } from '@/actions/website'
-import { deriveTranslationSubdomain } from '@pantolingo/lang'
 
 export interface LanguageOption {
 	code: string
@@ -223,7 +222,6 @@ export function WebsiteWizardModal({ isOpen, onClose, languages }: WebsiteWizard
 			{state.step === 5 && (
 				<Step5
 					name={state.name}
-					hostname={state.hostname}
 					sourceLang={state.sourceLang!}
 					targetLangs={state.targetLangs}
 					loading={state.loading}
@@ -492,7 +490,6 @@ function Step4({
 
 function Step5({
 	name,
-	hostname,
 	sourceLang,
 	targetLangs,
 	loading,
@@ -500,7 +497,6 @@ function Step5({
 	onBack,
 }: {
 	name: string
-	hostname: string
 	sourceLang: LanguageOption
 	targetLangs: LanguageOption[]
 	loading: boolean
@@ -515,33 +511,21 @@ function Step5({
 					<p className="text-[15px] font-medium text-[var(--text-heading)] mt-0.5">{name}</p>
 				</div>
 				<div>
-					<span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">Hostname</span>
-					<p className="text-[15px] font-medium text-[var(--text-heading)] mt-0.5">{hostname}</p>
-				</div>
-				<div>
 					<span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">Source language</span>
 					<p className="text-[15px] font-medium text-[var(--text-heading)] mt-0.5">{sourceLang.flag} {sourceLang.name}</p>
 				</div>
 				<div>
 					<span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">Translation languages</span>
-					<div className="mt-1.5 space-y-1.5">
-						{targetLangs.map((lang) => {
-							const subdomain = deriveTranslationSubdomain(lang.code)
-							return (
-								<div
-									key={lang.code}
-									className="flex items-center justify-between px-3 py-2 rounded-md bg-[var(--page-bg)]"
-								>
-									<span className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--accent)]">
-										<span>{lang.flag}</span>
-										<span>{lang.name}</span>
-									</span>
-									<span className="text-xs font-mono text-[var(--text-muted)]">
-										{subdomain}.{hostname}
-									</span>
-								</div>
-							)
-						})}
+					<div className="mt-1.5 flex flex-wrap gap-1.5">
+						{targetLangs.map((lang) => (
+							<span
+								key={lang.code}
+								className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--accent)]/10 text-xs font-medium text-[var(--accent)]"
+							>
+								<span>{lang.flag}</span>
+								<span>{lang.name}</span>
+							</span>
+						))}
 					</div>
 				</div>
 			</div>

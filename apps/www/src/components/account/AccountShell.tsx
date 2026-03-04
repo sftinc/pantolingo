@@ -231,7 +231,7 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 
 			{/* Sidebar */}
 			<aside
-				className={`fixed top-0 left-0 z-50 h-full w-60 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col transition-transform duration-200 ${
+				className={`fixed top-0 left-0 z-50 h-full w-60 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] flex flex-col overflow-hidden transition-transform duration-200 ${
 					mobileOpen ? 'translate-x-0' : '-translate-x-full'
 				} md:translate-x-0`}
 			>
@@ -240,67 +240,8 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 					<span className="text-base font-bold text-[var(--text-heading)]">Pantolingo</span>
 				</div>
 
-				{/* Website picker (desktop only) */}
-				<div ref={switcherRef} className="relative px-2 pt-3 hidden md:block">
-					<button
-						onClick={() => {
-							setSwitcherOpen(!switcherOpen)
-							setProfileOpen(false)
-						}}
-						className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium ${currentColor.btn} ${currentColor.hover} transition-colors cursor-pointer`}
-					>
-						<span className={`w-5 h-5 rounded ${currentColor.avatar} flex items-center justify-center text-[11px] font-semibold shrink-0`}>
-							{currentWebsite.name[0].toUpperCase()}
-						</span>
-						<span className="font-semibold truncate">{currentWebsite.name}</span>
-						<ChevronIcon className={`w-4 h-4 ml-auto ${currentColor.chevron} transition-transform ${switcherOpen ? 'rotate-180' : ''}`} />
-					</button>
-
-					{switcherOpen && (
-						<div className="absolute left-2 top-full mt-1 w-64 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg shadow-lg overflow-hidden z-50">
-							{/* Add website */}
-							<button
-								onClick={() => {
-									setSwitcherOpen(false)
-									setWizardOpen(true)
-								}}
-								className="w-full flex items-center gap-3 pl-3 pr-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
-							>
-								<PlusIcon className="w-5 h-5 text-[var(--text-subtle)]" />
-								Add website
-							</button>
-
-							{otherWebsites.length > 0 && (
-								<>
-									<div className="border-t border-[var(--border)] my-1" />
-									{otherWebsites.map((site) => {
-										const siteColorKey = (site.uiColor as UiColor) || getWebsiteColor(site.name)
-										const siteColor = COLOR_CLASSES[siteColorKey] || COLOR_CLASSES[getWebsiteColor(site.name)]
-										return (
-											<button
-												key={site.publicCode}
-												onClick={() => {
-													setSwitcherOpen(false)
-													const subPath = pathname.replace(`${basePath}/`, '').split('?')[0]
-													router.push(`/account/${site.publicCode}/${subPath}`)
-												}}
-												className="w-full flex items-center gap-3 pl-3 pr-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
-											>
-												<span className={`w-5 h-5 rounded ${siteColor.avatar} flex items-center justify-center text-[11px] font-semibold shrink-0`}>
-													{site.name[0].toUpperCase()}
-												</span>
-												{site.name}
-											</button>
-										)
-									})}
-								</>
-							)}
-						</div>
-					)}
-				</div>
-
-				{/* Primary nav */}
-				<nav className="px-2 pt-4 space-y-1">
+				{/* Mobile nav (scrollable, no border/picker) */}
+				<nav className="md:hidden flex-1 min-h-0 overflow-y-auto sidebar-scroll px-2 pt-4 space-y-1">
 					{NAV_ITEMS.map((item) => {
 						const active = isActive(item.path)
 						return (
@@ -319,29 +260,125 @@ export function AccountShell({ currentWebsite, websites, languages, userName, us
 							</Link>
 						)
 					})}
-
-					{/* Secondary nav */}
-					<div className="pt-6 space-y-1">
-						<Link
-							href={`${basePath}/settings`}
-							onClick={() => setMobileOpen(false)}
-							className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-								pathname.startsWith(`${basePath}/settings`)
-									? `font-semibold ${currentColor.text}`
-									: 'font-medium text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] hover:text-[var(--text-heading)]'
-							}`}
-						>
-							<SettingsIcon className="w-5 h-5 shrink-0 text-[var(--text-subtle)]" />
-							<span>Settings</span>
-						</Link>
-					</div>
+					<div className="pt-5" />
+					<Link
+						href={`${basePath}/settings`}
+						onClick={() => setMobileOpen(false)}
+						className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+							pathname.startsWith(`${basePath}/settings`)
+								? `font-semibold ${currentColor.text}`
+								: 'font-medium text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] hover:text-[var(--text-heading)]'
+						}`}
+					>
+						<SettingsIcon className="w-5 h-5 shrink-0 text-[var(--text-subtle)]" />
+						<span>Settings</span>
+					</Link>
 				</nav>
 
-				{/* Spacer to push profile to bottom */}
-				<div className="flex-grow hidden md:block" />
+				{/* Desktop scrollable middle */}
+				<div className="hidden md:flex flex-col min-h-0 flex-1 overflow-y-auto sidebar-scroll px-2">
+					{/* Website picker + nav wrapped in border */}
+					<div className={`mt-3 rounded-lg border ${currentColor.border}`}>
+						{/* Website picker */}
+						<div ref={switcherRef} className="relative">
+							<button
+								onClick={() => {
+									setSwitcherOpen(!switcherOpen)
+									setProfileOpen(false)
+								}}
+								className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-t-lg text-sm font-medium ${currentColor.btn} ${currentColor.hover} transition-colors cursor-pointer`}
+							>
+								<span className={`w-5 h-5 rounded ${currentColor.avatar} flex items-center justify-center text-[11px] font-semibold shrink-0`}>
+									{currentWebsite.name[0].toUpperCase()}
+								</span>
+								<span className="font-semibold truncate">{currentWebsite.name}</span>
+								<ChevronIcon className={`w-4 h-4 ml-auto ${currentColor.chevron} transition-transform ${switcherOpen ? 'rotate-180' : ''}`} />
+							</button>
 
-				{/* Profile menu (desktop only) */}
-				<div ref={profileRef} className="relative hidden md:block border-t border-[var(--sidebar-border)]">
+							{switcherOpen && (
+								<div className="absolute left-0 top-full mt-1 w-64 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg shadow-lg overflow-hidden z-50">
+									{/* Add website */}
+									<button
+										onClick={() => {
+											setSwitcherOpen(false)
+											setWizardOpen(true)
+										}}
+										className="w-full flex items-center gap-3 pl-3 pr-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
+									>
+										<PlusIcon className="w-5 h-5 text-[var(--text-subtle)]" />
+										Add website
+									</button>
+
+									{otherWebsites.length > 0 && (
+										<>
+											<div className="border-t border-[var(--border)] my-1" />
+											{otherWebsites.map((site) => {
+												const siteColorKey = (site.uiColor as UiColor) || getWebsiteColor(site.name)
+												const siteColor = COLOR_CLASSES[siteColorKey] || COLOR_CLASSES[getWebsiteColor(site.name)]
+												return (
+													<button
+														key={site.publicCode}
+														onClick={() => {
+															setSwitcherOpen(false)
+															const subPath = pathname.replace(`${basePath}/`, '').split('?')[0]
+															router.push(`/account/${site.publicCode}/${subPath}`)
+														}}
+														className="w-full flex items-center gap-3 pl-3 pr-4 py-2.5 text-sm text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] transition-colors cursor-pointer"
+													>
+														<span className={`w-5 h-5 rounded ${siteColor.avatar} flex items-center justify-center text-[11px] font-semibold shrink-0`}>
+															{site.name[0].toUpperCase()}
+														</span>
+														{site.name}
+													</button>
+												)
+											})}
+										</>
+									)}
+								</div>
+							)}
+						</div>
+
+						{/* Nav links inside border */}
+						<nav className="pt-5 pb-1 space-y-0.5">
+							{NAV_ITEMS.map((item) => {
+								const active = isActive(item.path)
+								return (
+									<Link
+										key={item.path}
+										href={`${basePath}/${item.path}`}
+										onClick={() => setMobileOpen(false)}
+										className={`flex items-center gap-3 mx-1 px-2 py-2.5 rounded-md text-sm transition-colors ${
+											active
+												? `font-semibold ${currentColor.text}`
+												: 'font-medium text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] hover:text-[var(--text-heading)]'
+										}`}
+									>
+										<item.icon className="w-5 h-5 shrink-0" />
+										<span>{item.label}</span>
+									</Link>
+								)
+							})}
+
+							<div className="pt-5" />
+
+							<Link
+								href={`${basePath}/settings`}
+								onClick={() => setMobileOpen(false)}
+								className={`flex items-center gap-3 mx-1 px-2 py-2.5 rounded-md text-sm transition-colors ${
+									pathname.startsWith(`${basePath}/settings`)
+										? `font-semibold ${currentColor.text}`
+										: 'font-medium text-[var(--text-muted)] hover:bg-[var(--nav-hover-bg)] hover:text-[var(--text-heading)]'
+								}`}
+							>
+								<SettingsIcon className="w-5 h-5 shrink-0 text-[var(--text-subtle)]" />
+								<span>Settings</span>
+							</Link>
+						</nav>
+					</div>
+				</div>
+
+				{/* Profile menu (desktop, pinned to bottom) */}
+				<div ref={profileRef} className="relative hidden md:block shrink-0 border-t border-[var(--sidebar-border)]">
 					<button
 						onClick={() => {
 							setProfileOpen(!profileOpen)
