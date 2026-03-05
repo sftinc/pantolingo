@@ -5,14 +5,14 @@ import { LanguageCard, CopyButton } from './LanguageCard'
 import { LANGUAGE_DATA } from '@pantolingo/lang'
 import type { LanguageWithDnsStatus } from '@pantolingo/db'
 
-interface SettingsLanguagesTabProps {
+interface SettingsSetupTabProps {
 	websiteId: number
 	initialLanguages: LanguageWithDnsStatus[]
 	hostname: string
 	sourceLang: string
 }
 
-export function SettingsLanguagesTab({ websiteId, initialLanguages, hostname, sourceLang }: SettingsLanguagesTabProps) {
+export function SettingsSetupTab({ websiteId, initialLanguages, hostname, sourceLang }: SettingsSetupTabProps) {
 	const [languages, setLanguages] = useState(initialLanguages)
 
 	const handleDnsCheckComplete = (languageId: number, newStatus: string) => {
@@ -78,6 +78,7 @@ export function SettingsLanguagesTab({ websiteId, initialLanguages, hostname, so
 							<LanguageCard
 								key={lang.id}
 								websiteId={websiteId}
+								websiteHostname={hostname}
 								language={lang}
 								onDnsCheckComplete={handleDnsCheckComplete}
 								onHostnameChange={handleHostnameChange}
@@ -96,7 +97,7 @@ export function SettingsLanguagesTab({ websiteId, initialLanguages, hostname, so
 				<p className="text-xs text-[var(--text-muted)] mb-4">
 					Add this code to the <code className="px-1 py-0.5 rounded bg-[var(--page-bg)] text-[var(--text-heading)] font-mono text-[11px]">&lt;head&gt;</code> of your website
 				</p>
-				<pre className="rounded-md bg-[var(--page-bg)] border border-[var(--border)] p-4 text-xs font-mono text-[var(--text-heading)] overflow-x-auto">
+				<pre className="rounded-md bg-[var(--page-bg)] border border-[var(--border)] p-4 text-xs font-mono text-[var(--text-heading)] whitespace-pre overflow-x-auto">
 					{hreflangLines.map((line, i) => (
 						<div key={i}>{line}</div>
 					))}

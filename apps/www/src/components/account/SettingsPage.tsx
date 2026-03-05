@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { SettingsGeneralTab } from './SettingsGeneralTab'
-import { SettingsLanguagesTab } from './SettingsLanguagesTab'
+import { SettingsSetupTab } from './SettingsSetupTab'
 import { SettingsTranslationTab } from './SettingsTranslationTab'
 import { Modal, ModalFooter, Button } from '@/components/ui/Modal'
 import type { LanguageWithDnsStatus } from '@pantolingo/db'
@@ -109,7 +109,7 @@ export function SettingsPage({ websiteId, publicCode, initialTab, website, langu
 			)}
 
 			{activeTab === 'setup' && (
-				<SettingsLanguagesTab
+				<SettingsSetupTab
 					websiteId={websiteId}
 					initialLanguages={languages}
 					hostname={website.hostname}
