@@ -131,7 +131,8 @@ export function WebsiteWizardModal({ isOpen, onClose, languages }: WebsiteWizard
 			title="Add website"
 			description={STEP_DESCRIPTIONS[state.step]}
 			closeOnBackdropClick={false}
-			className="max-w-lg overflow-visible [&>div]:overflow-visible"
+			size="sm"
+			className="overflow-visible [&>div]:overflow-visible"
 			contentClassName="overflow-visible"
 		>
 			{/* Step indicator */}

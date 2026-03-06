@@ -10,6 +10,7 @@ interface ModalProps {
 	title: string
 	description?: string
 	children: React.ReactNode
+	size?: 'sm' | 'default'
 	className?: string
 	contentClassName?: string
 	badge?: React.ReactNode
@@ -17,7 +18,7 @@ interface ModalProps {
 	hideClose?: boolean
 }
 
-export function Modal({ isOpen, onClose, title, description, children, className, contentClassName, badge, closeOnBackdropClick = true, hideClose = false }: ModalProps) {
+export function Modal({ isOpen, onClose, title, description, children, size = 'default', className, contentClassName, badge, closeOnBackdropClick = true, hideClose = false }: ModalProps) {
 	const dialogRef = useRef<HTMLDialogElement>(null)
 
 	useEffect(() => {
@@ -62,7 +63,8 @@ export function Modal({ isOpen, onClose, title, description, children, className
 		<dialog
 			ref={dialogRef}
 			className={cn(
-				'fixed inset-x-4 top-[20%] mx-auto max-h-[85vh] w-full max-w-[min(calc(100%-2rem),56rem)] rounded-lg bg-[var(--card-bg)] text-[var(--page-fg)] p-0 shadow-[0_4px_24px_var(--shadow-color)] [&::backdrop]:bg-black/50 [&::backdrop]:backdrop-blur-[3px] [&::backdrop]:backdrop-grayscale',
+				'fixed inset-x-4 top-[15%] mx-auto max-h-[85vh] w-full rounded-lg bg-[var(--card-bg)] text-[var(--page-fg)] p-0 shadow-[0_4px_24px_var(--shadow-color)] [&::backdrop]:bg-black/50 [&::backdrop]:backdrop-blur-[3px] [&::backdrop]:backdrop-grayscale',
+				size === 'sm' ? 'max-w-[min(calc(100%-2rem),32rem)]' : 'max-w-[min(calc(100%-2rem),56rem)]',
 				className
 			)}
 			onClick={handleBackdropClick}
@@ -115,7 +117,7 @@ interface ModalFooterProps {
 
 export function ModalFooter({ children, className }: ModalFooterProps) {
 	return (
-		<div className={cn('flex justify-end gap-3 border-t border-[var(--border)] pt-4 mt-4', className)}>
+		<div className={cn('flex justify-end gap-3 pt-4 mt-4', className)}>
 			{children}
 		</div>
 	)

@@ -24,6 +24,7 @@
   --border: #d1d5db;
   --border-hover: #9ca3af;
   --input-bg: #fff;
+  --inset-bg: #f0f0f0;
 
   /* Sidebar colors */
   --sidebar-bg: #ffffff;
@@ -65,7 +66,8 @@
     --error: #ef4444;
     --border: #374151;
     --border-hover: #4b5563;
-    --input-bg: #1a1a1a;
+    --input-bg: #222;
+    --inset-bg: #1a1a1a;
 
     /* Sidebar colors */
     --sidebar-bg: #1a1a1a;
@@ -94,7 +96,8 @@
   --error: #ef4444;
   --border: #374151;
   --border-hover: #4b5563;
-  --input-bg: #1a1a1a;
+  --input-bg: #222;
+  --inset-bg: #1a1a1a;
 
   /* Sidebar colors */
   --sidebar-bg: #1a1a1a;

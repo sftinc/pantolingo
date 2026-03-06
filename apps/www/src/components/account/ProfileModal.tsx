@@ -26,8 +26,7 @@ const tabs = [
 
 type Tab = (typeof tabs)[number]['key']
 
-const inputClass = 'w-full px-3 py-2 text-sm rounded-md bg-[var(--page-bg)] border border-[var(--border)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] disabled:opacity-50'
-const cardClass = 'bg-[var(--card-bg)] rounded-lg border border-[var(--border)]'
+const inputClass = 'w-full px-3 py-2 text-sm rounded-md bg-[var(--input-bg)] border border-[var(--border)] text-[var(--text-heading)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] disabled:opacity-50'
 
 export function ProfileModal({ isOpen, onClose, userProfile }: ProfileModalProps) {
 	const router = useRouter()
@@ -129,7 +128,7 @@ export function ProfileModal({ isOpen, onClose, userProfile }: ProfileModalProps
 	}
 
 	return (
-		<Modal isOpen={isOpen} onClose={handleClose} title="Profile" className="max-w-lg" contentClassName="bg-[var(--page-bg)]">
+		<Modal isOpen={isOpen} onClose={handleClose} title="Profile" size="sm">
 			<div className="space-y-5">
 				{/* Tabs */}
 				<div className="flex gap-1 mb-[-1px] relative z-10">
@@ -138,9 +137,9 @@ export function ProfileModal({ isOpen, onClose, userProfile }: ProfileModalProps
 							key={tab.key}
 							tabIndex={0}
 							onClick={() => handleTabSwitch(tab.key)}
-							className={`px-5 py-2.5 text-sm font-medium rounded-t-lg border transition-colors cursor-pointer ${
+							className={`flex-1 px-5 py-2.5 text-sm font-medium rounded-t-lg border transition-colors cursor-pointer ${
 								activeTab === tab.key
-									? 'bg-[var(--card-bg)] text-[var(--text-heading)] border-[var(--border)] border-b-transparent'
+									? 'bg-[var(--inset-bg)] text-[var(--text-heading)] border-[var(--border)] border-b-transparent'
 									: 'text-[var(--text-muted)] hover:text-[var(--text-heading)] border-transparent'
 							}`}
 						>
@@ -149,7 +148,7 @@ export function ProfileModal({ isOpen, onClose, userProfile }: ProfileModalProps
 					))}
 				</div>
 
-				<div className={`${cardClass} !mt-0 !rounded-tl-none`}>
+				<div className="bg-[var(--inset-bg)] rounded-b-lg border border-[var(--border)]">
 					{/* Tab Content */}
 					<div className="p-6">
 						{/* Personal Info Tab */}
@@ -256,6 +255,7 @@ export function ProfileModal({ isOpen, onClose, userProfile }: ProfileModalProps
 				</div>
 
 				{/* Save Button */}
+
 				<div className="flex justify-end">
 					{activeTab === 'info' ? (
 						<Button variant="primary" onClick={handleSaveProfile} disabled={infoSaving}>

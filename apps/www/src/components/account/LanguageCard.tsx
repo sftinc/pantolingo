@@ -236,7 +236,6 @@ export function LanguageCard({ websiteId, websiteHostname, language, onDnsCheckC
 					<p className="text-xs text-[var(--error)] mt-2">{hostnameError}</p>
 				)}
 				<ModalFooter>
-					<Button variant="secondary" onClick={() => setShowEditModal(false)} disabled={isSaving}>Cancel</Button>
 					<Button variant="primary" onClick={handleSaveHostname} disabled={isSaving || !subdomainValue.trim()}>
 						{isSaving ? 'Saving...' : 'Save'}
 					</Button>
