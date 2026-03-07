@@ -43,6 +43,10 @@ export function SettingsSetupTab({ websiteId, initialLanguages, hostname, source
 		)
 	}
 
+	const handleDeleteLanguage = (languageId: number) => {
+		setLanguages((prev) => prev.filter((lang) => lang.id !== languageId))
+	}
+
 	const handleHostnameChange = (languageId: number, newHostname: string) => {
 		setLanguages((prev) =>
 			prev.map((lang) =>
@@ -138,6 +142,7 @@ export function SettingsSetupTab({ websiteId, initialLanguages, hostname, source
 								language={lang}
 								onDnsCheckComplete={handleDnsCheckComplete}
 								onHostnameChange={handleHostnameChange}
+								onDelete={handleDeleteLanguage}
 							/>
 						))}
 					</div>

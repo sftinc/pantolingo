@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { Badge } from '@/components/ui/Badge'
 import { Modal, ModalFooter, Button } from '@/components/ui/Modal'
 import { LANGUAGE_DATA } from '@pantolingo/lang'
-import { checkDnsStatus, updateLanguageHostname } from '@/actions/website'
+import { checkDnsStatus, updateLanguageHostname, removeLanguage } from '@/actions/website'
 import type { LanguageWithDnsStatus } from '@pantolingo/db'
 
 const STATUS_BADGE: Record<string, 'success' | 'warning' | 'error'> = {
@@ -37,6 +37,7 @@ interface LanguageCardProps {
 	language: LanguageWithDnsStatus
 	onDnsCheckComplete: (languageId: number, newStatus: string) => void
 	onHostnameChange?: (languageId: number, newHostname: string) => void
+	onDelete?: (languageId: number) => void
 }
 
 export function CopyButton({ text }: { text: string }) {
@@ -68,7 +69,7 @@ export function CopyButton({ text }: { text: string }) {
 	)
 }
 
-export function LanguageCard({ websiteId, websiteHostname, language, onDnsCheckComplete, onHostnameChange }: LanguageCardProps) {
+export function LanguageCard({ websiteId, websiteHostname, language, onDnsCheckComplete, onHostnameChange, onDelete }: LanguageCardProps) {
 	const [isPending, startTransition] = useTransition()
 	const langData = LANGUAGE_DATA.find((l) => l.code === language.targetLang)
 	const isActive = language.dnsStatus === 'active'
@@ -78,6 +79,13 @@ export function LanguageCard({ websiteId, websiteHostname, language, onDnsCheckC
 	const [subdomainValue, setSubdomainValue] = useState('')
 	const [hostnameError, setHostnameError] = useState('')
 	const [isSaving, startSaveTransition] = useTransition()
+
+	const [dnsError, setDnsError] = useState('')
+
+	const [showDeleteModal, setShowDeleteModal] = useState(false)
+	const [deleteConfirm, setDeleteConfirm] = useState('')
+	const [deleteError, setDeleteError] = useState('')
+	const [isDeleting, startDeleteTransition] = useTransition()
 
 	const apexSuffix = '.' + websiteHostname
 	const getSubdomain = (h: string) => {
@@ -110,9 +118,32 @@ export function LanguageCard({ websiteId, websiteHostname, language, onDnsCheckC
 
 	const handleCheckDns = () => {
 		startTransition(async () => {
+			setDnsError('')
 			const result = await checkDnsStatus(websiteId, language.id)
-			if (result.success && result.dnsStatus) {
+			if (result.dnsStatus) {
 				onDnsCheckComplete(language.id, result.dnsStatus)
+			}
+			if (!result.success && result.error) {
+				setDnsError(result.error)
+			}
+		})
+	}
+
+	const handleOpenDeleteModal = () => {
+		setDeleteConfirm('')
+		setDeleteError('')
+		setShowDeleteModal(true)
+	}
+
+	const handleDelete = () => {
+		startDeleteTransition(async () => {
+			setDeleteError('')
+			const result = await removeLanguage(websiteId, language.id)
+			if (result.success) {
+				setShowDeleteModal(false)
+				onDelete?.(language.id)
+			} else {
+				setDeleteError(result.error || 'Failed to remove language')
 			}
 		})
 	}
@@ -136,7 +167,7 @@ export function LanguageCard({ websiteId, websiteHostname, language, onDnsCheckC
 					</span>
 					<span className="flex-1" />
 					<div className="flex items-center gap-2">
-						{!language.verifiedAt && (
+						{!language.verifiedAt && language.dnsStatus !== 'failed' && (
 							<button
 								onClick={handleOpenEditModal}
 								className="p-1 rounded text-[var(--text-subtle)] hover:text-[var(--text-muted)] hover:bg-[var(--border)] transition-colors cursor-pointer"
@@ -147,10 +178,10 @@ export function LanguageCard({ websiteId, websiteHostname, language, onDnsCheckC
 								</svg>
 							</button>
 						)}
-						{!isActive && (
+						{!language.verifiedAt && (
 							<button
-								disabled
-								className="p-1 text-[var(--text-subtle)] opacity-50 cursor-not-allowed"
+								onClick={handleOpenDeleteModal}
+								className="p-1 rounded text-[var(--text-subtle)] hover:text-[var(--error)] hover:bg-[var(--border)] transition-colors cursor-pointer"
 								title="Remove language"
 							>
 								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -165,7 +196,7 @@ export function LanguageCard({ websiteId, websiteHostname, language, onDnsCheckC
 							>
 								{showInfo ? 'Hide Info' : 'View Info'}
 							</button>
-						) : (
+						) : language.dnsStatus !== 'failed' ? (
 							<button
 								onClick={handleCheckDns}
 								disabled={isPending}
@@ -173,11 +204,11 @@ export function LanguageCard({ websiteId, websiteHostname, language, onDnsCheckC
 							>
 								{isPending ? 'Checking...' : 'Check DNS'}
 							</button>
-						)}
+						) : null}
 					</div>
 				</div>
 
-				{!isActive && (
+				{!isActive && language.dnsStatus !== 'failed' && (
 					<div className="rounded-md bg-[var(--page-bg)] border border-[var(--border)] p-3">
 						<p className="text-xs font-medium text-[var(--text-subtle)] mb-2">Add CNAME DNS Record</p>
 						<div className="space-y-1.5">
@@ -210,7 +241,43 @@ export function LanguageCard({ websiteId, websiteHostname, language, onDnsCheckC
 						</div>
 					</div>
 				)}
+
+				{dnsError && (
+					<p className="text-xs text-[var(--error)] mt-2">{dnsError}</p>
+				)}
 			</div>
+
+			<Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Remove Language" className="max-w-sm">
+				<p className="text-sm text-[var(--text-body)] mb-4">
+					This will remove the <strong>{langData?.englishName ?? language.targetLang}</strong> language and its DNS configuration. This action cannot be undone.
+				</p>
+				<label className="block text-sm font-medium text-[var(--text-body)] mb-2">
+					Type <strong>DELETE</strong> to confirm
+				</label>
+				<input
+					type="text"
+					value={deleteConfirm}
+					onChange={(e) => setDeleteConfirm(e.target.value)}
+					disabled={isDeleting}
+					className="w-full px-3 py-2 text-sm font-mono bg-[var(--input-bg)] border border-[var(--border)] rounded-md text-[var(--text-heading)] focus:outline-none focus:ring-2 focus:ring-[var(--error)] focus:border-transparent disabled:opacity-50"
+					placeholder="DELETE"
+				/>
+				{deleteError && (
+					<p className="text-xs text-[var(--error)] mt-2">{deleteError}</p>
+				)}
+				<ModalFooter>
+					<Button variant="secondary" onClick={() => setShowDeleteModal(false)} disabled={isDeleting}>
+						Cancel
+					</Button>
+					<button
+						onClick={handleDelete}
+						disabled={isDeleting || deleteConfirm.trim().toLowerCase() !== 'delete'}
+						className="px-4 py-2 text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+					>
+						{isDeleting ? 'Removing...' : 'Remove'}
+					</button>
+				</ModalFooter>
+			</Modal>
 
 			<Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Edit Hostname" className="max-w-sm">
 				<div className="flex items-center gap-2 mb-4">

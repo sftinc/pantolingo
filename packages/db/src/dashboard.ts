@@ -149,7 +149,7 @@ export async function getWebsitesWithStats(accountId: number): Promise<WebsiteWi
 			w.name,
 			w.source_lang,
 			w.ui_color,
-			(SELECT COUNT(DISTINCT target_lang) FROM website_language wl WHERE wl.website_id = w.id) as lang_count,
+			(SELECT COUNT(DISTINCT target_lang) FROM website_language wl WHERE wl.website_id = w.id AND wl.removed_at IS NULL) as lang_count,
 			(SELECT COUNT(*) FROM translation_segment ts JOIN website_segment ws ON ws.id = ts.website_segment_id WHERE ws.website_id = w.id) as segment_count,
 			(SELECT COUNT(*) FROM translation_path tp JOIN website_path wp ON wp.id = tp.website_path_id WHERE wp.website_id = w.id AND EXISTS (SELECT 1 FROM website_path_segment wps WHERE wps.website_path_id = wp.id)) as path_count
 		FROM account_website aw
@@ -284,7 +284,7 @@ export async function getLangsForWebsite(websiteId: number): Promise<LangWithSta
 		FROM website_language wl
 		LEFT JOIN segment_stats ss ON ss.lang = wl.target_lang
 		LEFT JOIN path_stats ps ON ps.lang = wl.target_lang
-		WHERE wl.website_id = $1
+		WHERE wl.website_id = $1 AND wl.removed_at IS NULL
 		ORDER BY wl.target_lang
 	`,
 		[websiteId]
@@ -316,7 +316,7 @@ export async function getLanguagesWithDnsStatus(websiteId: number): Promise<Lang
 	}>(
 		`SELECT id, hostname, target_lang, dns_status, dns_checked_at, verified_at
 		 FROM website_language
-		 WHERE website_id = $1
+		 WHERE website_id = $1 AND removed_at IS NULL
 		 ORDER BY target_lang`,
 		[websiteId]
 	)
@@ -336,7 +336,7 @@ export async function getLanguagesWithDnsStatus(websiteId: number): Promise<Lang
  */
 export async function isValidLangForWebsite(websiteId: number, lang: string): Promise<boolean> {
 	const result = await pool.query<{ exists: boolean }>(
-		'SELECT EXISTS(SELECT 1 FROM website_language WHERE website_id = $1 AND target_lang = $2) as exists',
+		'SELECT EXISTS(SELECT 1 FROM website_language WHERE website_id = $1 AND target_lang = $2 AND removed_at IS NULL) as exists',
 		[websiteId, lang]
 	)
 	return result.rows[0]?.exists ?? false
@@ -941,7 +941,12 @@ export async function updateDnsStatus(
 		return { success: true }
 	} catch (error: unknown) {
 		if (error && typeof error === 'object' && 'code' in error && (error as { code: string }).code === '23505') {
-			return { success: false, error: 'This hostname is already claimed by another website' }
+			await pool.query(
+				`UPDATE website_language SET dns_status = 'failed', dns_checked_at = NOW(), updated_at = NOW()
+				 WHERE id = $1`,
+				[websiteLanguageId]
+			)
+			return { success: false, error: 'This hostname is already active on another account' }
 		}
 		console.error('Failed to update DNS status:', error)
 		return { success: false, error: 'Failed to update DNS status' }
@@ -999,20 +1004,32 @@ export async function updateWebsiteLanguageHostname(
 
 /**
  * Auto-verify a website if it has at least one active language.
- * Idempotent — no-op if already verified.
+ * Idempotent — no-op if already verified (verified_at IS NULL guard means rowCount=0, still success).
+ * Catches PG 23505 (unique violation) when another account already owns that hostname.
  */
-export async function checkAndSetWebsiteVerified(websiteId: number): Promise<void> {
-	await pool.query(
-		`UPDATE website
-		 SET verified_at = NOW()
-		 WHERE id = $1
-		   AND verified_at IS NULL
-		   AND EXISTS (
-		     SELECT 1 FROM website_language
-		     WHERE website_id = $1 AND dns_status = 'active'
-		   )`,
-		[websiteId]
-	)
+export async function checkAndSetWebsiteVerified(
+	websiteId: number
+): Promise<{ success: boolean; error?: string }> {
+	try {
+		await pool.query(
+			`UPDATE website
+			 SET verified_at = NOW()
+			 WHERE id = $1
+			   AND verified_at IS NULL
+			   AND EXISTS (
+			     SELECT 1 FROM website_language
+			     WHERE website_id = $1 AND dns_status = 'active'
+			   )`,
+			[websiteId]
+		)
+		return { success: true }
+	} catch (error: unknown) {
+		if (error && typeof error === 'object' && 'code' in error && (error as { code: string }).code === '23505') {
+			return { success: false, error: 'This website hostname is already active on another account' }
+		}
+		console.error('Failed to verify website:', error)
+		return { success: false, error: 'Failed to verify website' }
+	}
 }
 
 /**
@@ -1066,6 +1083,26 @@ export async function insertWebsiteLanguages(
 		})
 	}
 	return results
+}
+
+/**
+ * Soft-delete an unverified website language by setting removed_at.
+ * Only languages where verified_at IS NULL can be removed.
+ */
+export async function removeWebsiteLanguage(
+	websiteId: number,
+	websiteLanguageId: number
+): Promise<{ success: boolean; error?: string }> {
+	const result = await pool.query(
+		`UPDATE website_language
+		 SET removed_at = NOW()
+		 WHERE id = $1 AND website_id = $2 AND verified_at IS NULL AND removed_at IS NULL`,
+		[websiteLanguageId, websiteId]
+	)
+	if (result.rowCount === 0) {
+		return { success: false, error: 'Language not found or already verified' }
+	}
+	return { success: true }
 }
 
 /**

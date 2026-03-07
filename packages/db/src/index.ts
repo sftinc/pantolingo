@@ -50,6 +50,7 @@ export {
 	updateWebsiteLanguageHostname,
 	getWebsiteApex,
 	insertWebsiteLanguages,
+	removeWebsiteLanguage,
 	enableDevMode,
 	getAccountProfile,
 	updateAccountProfile,

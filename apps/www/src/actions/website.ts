@@ -14,6 +14,7 @@ import {
 	updateWebsiteLanguageHostname,
 	getWebsiteApex,
 	insertWebsiteLanguages,
+	removeWebsiteLanguage,
 } from '@pantolingo/db'
 import type { LanguageWithDnsStatus } from '@pantolingo/db'
 import { SUPPORTED_LANGUAGES } from '@pantolingo/lang'
@@ -222,15 +223,20 @@ export async function checkDnsStatus(
 			return { success: false, error: 'Unable to check DNS status' }
 		}
 
-		// Persist the new status
-		const updateResult = await updateDnsStatus(websiteLanguageId, newStatus)
-		if (!updateResult.success) {
-			return { success: false, error: updateResult.error }
+		// If active, verify website first (before language) to catch hostname conflicts
+		if (newStatus === 'active') {
+			const websiteResult = await checkAndSetWebsiteVerified(websiteId)
+			if (!websiteResult.success) {
+				// Website hostname contested — mark language as failed
+				await updateDnsStatus(websiteLanguageId, 'failed')
+				return { success: false, dnsStatus: 'failed', error: websiteResult.error }
+			}
 		}
 
-		// Auto-verify website if language is now active
-		if (newStatus === 'active') {
-			await checkAndSetWebsiteVerified(websiteId)
+		// Now update the language status
+		const updateResult = await updateDnsStatus(websiteLanguageId, newStatus)
+		if (!updateResult.success) {
+			return { success: false, dnsStatus: 'failed', error: updateResult.error }
 		}
 
 		return { success: true, dnsStatus: newStatus }
@@ -312,6 +318,26 @@ export async function addLanguagesToWebsite(
 		registerTranslationHostnames(languages.map((l) => l.hostname))
 
 		return { success: true, languages: inserted }
+	} catch {
+		return { success: false, error: 'An error occurred' }
+	}
+}
+
+/**
+ * Soft-delete an unverified website language.
+ */
+export async function removeLanguage(
+	websiteId: number,
+	websiteLanguageId: number
+): Promise<{ success: boolean; error?: string }> {
+	try {
+		const accountId = await requireAccountId()
+
+		if (!(await canAccessWebsite(accountId, websiteId))) {
+			return { success: false, error: 'Access denied' }
+		}
+
+		return removeWebsiteLanguage(websiteId, websiteLanguageId)
 	} catch {
 		return { success: false, error: 'An error occurred' }
 	}
