@@ -107,7 +107,7 @@ export async function getWebsiteLanguageConfig(hostname: string): Promise<Websit
 				w.source_lang
 			FROM website_language wl
 			JOIN website w ON w.id = wl.website_id
-			WHERE wl.hostname = $1 AND wl.enabled = TRUE`,
+			WHERE wl.hostname = $1 AND wl.verified_at IS NOT NULL AND wl.removed_at IS NULL`,
 			[hostname]
 		)
 
