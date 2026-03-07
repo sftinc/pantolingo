@@ -24,16 +24,6 @@ export default auth((req) => {
 		return NextResponse.next()
 	}
 
-	// Legacy routes — redirect to new paths
-	if (pathname === '/onboarding' || pathname === '/account/setup') {
-		if (!isLoggedIn) {
-			return NextResponse.redirect(new URL('/login', req.url))
-		}
-		return NextResponse.redirect(
-			new URL(hasName ? '/account/website' : '/account/onboard', req.url)
-		)
-	}
-
 	// Onboard — require session, allow no name
 	if (pathname === '/account/onboard') {
 		if (!isLoggedIn) {
@@ -77,7 +67,6 @@ export const config = {
 		'/account/:path*',
 		'/login',
 		'/signup',
-		'/onboarding',
 		'/auth/:path*',
 	],
 }
