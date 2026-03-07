@@ -68,6 +68,7 @@ export function SettingsLanguagesTab({ websiteId, initialLanguages, hostname, so
 							<LanguageCard
 								key={lang.id}
 								websiteId={websiteId}
+								websiteHostname={hostname}
 								language={lang}
 								onDnsCheckComplete={handleDnsCheckComplete}
 							/>
