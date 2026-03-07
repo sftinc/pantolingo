@@ -1016,6 +1016,59 @@ export async function checkAndSetWebsiteVerified(websiteId: number): Promise<voi
 }
 
 /**
+ * Get the apex domain for a website.
+ *
+ * @param websiteId - Website ID
+ * @returns The apex domain string, or null if not found
+ */
+export async function getWebsiteApex(websiteId: number): Promise<string | null> {
+	const result = await pool.query<{ apex: string | null }>(
+		`SELECT apex FROM website WHERE id = $1`,
+		[websiteId]
+	)
+	return result.rows[0]?.apex ?? null
+}
+
+/**
+ * Insert one or more website_language rows for an existing website.
+ *
+ * @param websiteId - Website ID
+ * @param languages - Array of { targetLang, hostname } to insert
+ * @returns Array of newly created LanguageWithDnsStatus rows
+ */
+export async function insertWebsiteLanguages(
+	websiteId: number,
+	languages: Array<{ targetLang: string; hostname: string }>
+): Promise<LanguageWithDnsStatus[]> {
+	const results: LanguageWithDnsStatus[] = []
+	for (const lang of languages) {
+		const result = await pool.query<{
+			id: number
+			hostname: string
+			target_lang: string
+			dns_status: string
+			dns_checked_at: Date | null
+			verified_at: Date | null
+		}>(
+			`INSERT INTO website_language (website_id, hostname, target_lang)
+			 VALUES ($1, $2, $3)
+			 RETURNING id, hostname, target_lang, dns_status, dns_checked_at, verified_at`,
+			[websiteId, lang.hostname, lang.targetLang]
+		)
+		const row = result.rows[0]
+		results.push({
+			id: row.id,
+			hostname: row.hostname,
+			targetLang: row.target_lang,
+			dnsStatus: row.dns_status,
+			dnsCheckedAt: row.dns_checked_at,
+			verifiedAt: row.verified_at,
+		})
+	}
+	return results
+}
+
+/**
  * Enable dev mode for a website (disables static asset caching for 5 minutes)
  * Sets cache_disabled_until to NOW() + 5 minutes
  * @param websiteId - Website ID

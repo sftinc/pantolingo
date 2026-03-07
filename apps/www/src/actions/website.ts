@@ -12,10 +12,13 @@ import {
 	updateDnsStatus,
 	checkAndSetWebsiteVerified,
 	updateWebsiteLanguageHostname,
+	getWebsiteApex,
+	insertWebsiteLanguages,
 } from '@pantolingo/db'
+import type { LanguageWithDnsStatus } from '@pantolingo/db'
 import { SUPPORTED_LANGUAGES } from '@pantolingo/lang'
 import { VALID_UI_COLORS } from '@/lib/ui-colors'
-import { checkHostnameStatus } from '@/lib/perfprox'
+import { checkHostnameStatus, registerTranslationHostnames } from '@/lib/perfprox'
 
 const HOSTNAME_REGEX = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/
 
@@ -260,6 +263,55 @@ export async function updateLanguageHostname(
 		}
 
 		return updateWebsiteLanguageHostname(websiteLanguageId, clean)
+	} catch {
+		return { success: false, error: 'An error occurred' }
+	}
+}
+
+/**
+ * Add one or more translation languages to an existing website.
+ * Generates hostnames from the language subtag + website apex.
+ * Registers hostnames with Perfprox (async, non-blocking).
+ */
+export async function addLanguagesToWebsite(
+	websiteId: number,
+	targetLangs: string[]
+): Promise<{ success: boolean; languages?: LanguageWithDnsStatus[]; error?: string }> {
+	try {
+		const accountId = await requireAccountId()
+
+		if (!(await canAccessWebsite(accountId, websiteId))) {
+			return { success: false, error: 'Access denied' }
+		}
+
+		if (targetLangs.length === 0) {
+			return { success: false, error: 'No languages selected' }
+		}
+
+		// Validate all language codes
+		const validCodes = new Set(SUPPORTED_LANGUAGES)
+		for (const lang of targetLangs) {
+			if (!validCodes.has(lang)) {
+				return { success: false, error: `Invalid language: ${lang}` }
+			}
+		}
+
+		const apex = await getWebsiteApex(websiteId)
+		if (!apex) {
+			return { success: false, error: 'Website apex domain not found' }
+		}
+
+		const languages = targetLangs.map((lang) => ({
+			targetLang: lang,
+			hostname: lang + '.' + apex,
+		}))
+
+		const inserted = await insertWebsiteLanguages(websiteId, languages)
+
+		// Register hostnames with Perfprox (async, non-blocking)
+		registerTranslationHostnames(languages.map((l) => l.hostname))
+
+		return { success: true, languages: inserted }
 	} catch {
 		return { success: false, error: 'An error occurred' }
 	}

@@ -48,6 +48,8 @@ export {
 	createWebsiteWithLanguage,
 	isTranslationHostnameClaimed,
 	updateWebsiteLanguageHostname,
+	getWebsiteApex,
+	insertWebsiteLanguages,
 	enableDevMode,
 	getAccountProfile,
 	updateAccountProfile,

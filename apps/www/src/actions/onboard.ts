@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { pool } from '@pantolingo/db/pool'
 import { isHostnameTaken, createWebsiteWithLanguage, isTranslationHostnameClaimed } from '@pantolingo/db'
-import { SUPPORTED_LANGUAGES, deriveTranslationSubdomain } from '@pantolingo/lang'
+import { SUPPORTED_LANGUAGES } from '@pantolingo/lang'
 import { validatePassword, hashPassword } from '@/lib/password'
 import { registerTranslationHostnames } from '@/lib/perfprox'
 import { parse } from 'tldts'
@@ -137,7 +137,7 @@ export async function createWebsite(data: {
 	// Map to target language objects with derived hostnames
 	const targetLanguages = targetLangs.map((lang) => ({
 		targetLang: lang,
-		translationHostname: deriveTranslationSubdomain(lang) + '.' + apex,
+		translationHostname: lang + '.' + apex,
 	}))
 
 	// Check for claimed translation hostnames

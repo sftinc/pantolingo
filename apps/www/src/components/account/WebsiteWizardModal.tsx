@@ -418,12 +418,10 @@ function Step4({
 	onContinue: () => void
 	onBack: () => void
 }) {
-	// Filter: exclude source lang and already-selected languages (by subtag prefix)
-	const sourceSubtag = sourceLangCode.split('-')[0]
+	// Filter: exclude source lang and already-selected languages (by exact code)
 	const availableLanguages = languages.filter((l) => {
-		const subtag = l.code.split('-')[0]
-		if (subtag === sourceSubtag) return false
-		if (targetLangs.some((t) => t.code.split('-')[0] === subtag)) return false
+		if (l.code === sourceLangCode) return false
+		if (targetLangs.some((t) => t.code === l.code)) return false
 		return true
 	})
 
