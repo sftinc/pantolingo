@@ -13,7 +13,6 @@ Next.js 16 app with Tailwind CSS v4 and React 19.
 -   `/account` - Smart router (no name → `/account/onboard`, has websites → last website, no websites → `/account/website`)
 -   `/account/onboard` - Profile setup (name + password) for new users missing first/last name
 -   `/account/website` - 4-step wizard for creating a website with DNS verification
--   `/account/setup` - Legacy redirect (no name → `/account/onboard`, else → `/account/website`)
 -   `/account/[publicCode]/languages` - Languages list with pill links
 -   `/account/[publicCode]/segments?lang=es` - Segments editor (language via query param)
 -   `/account/[publicCode]/paths?lang=es` - Paths editor (language via query param)
@@ -62,7 +61,6 @@ src/
 │   │       ├── page.tsx                        # /account - smart router
 │   │       ├── onboard/                        # /account/onboard - profile setup
 │   │       ├── website/                        # /account/website - 4-step wizard
-│   │       ├── setup/                           # /account/setup - legacy redirect
 │   │       └── [publicCode]/
 │   │           ├── layout.tsx                  # Sidebar layout (auth gate + data)
 │   │           ├── languages/page.tsx          # /account/:publicCode/languages

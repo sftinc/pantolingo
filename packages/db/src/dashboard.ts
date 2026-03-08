@@ -1027,7 +1027,7 @@ export async function checkAndSetWebsiteVerified(
 		if (error && typeof error === 'object' && 'code' in error && (error as { code: string }).code === '23505') {
 			await pool.query(
 				`UPDATE website_language SET dns_status = 'failed', dns_checked_at = NOW(), updated_at = NOW()
-				 WHERE website_id = $1 AND removed_at IS NULL`,
+				 WHERE website_id = $1 AND removed_at IS NULL AND verified_at IS NULL`,
 				[websiteId]
 			)
 			return { success: false, error: 'This website hostname is already active on another account' }
@@ -1098,16 +1098,21 @@ export async function removeWebsiteLanguage(
 	websiteId: number,
 	websiteLanguageId: number
 ): Promise<{ success: boolean; error?: string }> {
-	const result = await pool.query(
-		`UPDATE website_language
-		 SET removed_at = NOW()
-		 WHERE id = $1 AND website_id = $2 AND verified_at IS NULL AND removed_at IS NULL`,
-		[websiteLanguageId, websiteId]
-	)
-	if (result.rowCount === 0) {
-		return { success: false, error: 'Language not found or already verified' }
+	try {
+		const result = await pool.query(
+			`UPDATE website_language
+			 SET removed_at = NOW()
+			 WHERE id = $1 AND website_id = $2 AND verified_at IS NULL AND removed_at IS NULL`,
+			[websiteLanguageId, websiteId]
+		)
+		if (result.rowCount === 0) {
+			return { success: false, error: 'Language not found or already verified' }
+		}
+		return { success: true }
+	} catch (error) {
+		console.error('Failed to remove website language:', error)
+		return { success: false, error: 'Failed to remove language' }
 	}
-	return { success: true }
 }
 
 /**
