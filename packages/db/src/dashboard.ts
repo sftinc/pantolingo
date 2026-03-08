@@ -1025,6 +1025,11 @@ export async function checkAndSetWebsiteVerified(
 		return { success: true }
 	} catch (error: unknown) {
 		if (error && typeof error === 'object' && 'code' in error && (error as { code: string }).code === '23505') {
+			await pool.query(
+				`UPDATE website_language SET dns_status = 'failed', dns_checked_at = NOW(), updated_at = NOW()
+				 WHERE website_id = $1 AND removed_at IS NULL`,
+				[websiteId]
+			)
 			return { success: false, error: 'This website hostname is already active on another account' }
 		}
 		console.error('Failed to verify website:', error)
