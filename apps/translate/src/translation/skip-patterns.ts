@@ -8,17 +8,13 @@
  * Current patterns:
  * - [E] for emails (e.g., "user@example.com")
  * - [I] for identifiers - UUIDs (e.g., "550e8400-e29b-41d4-a716-446655440000")
- * - [U] for URLs (e.g., "https://example.com/path", "example.com")
  * - [N] for numbers (e.g., "123.45", "1,000")
  *
- * Processing order by context:
- * - Segments: U → E → I → N (URLs first to capture embedded emails/UUIDs)
- * - Paths: E → I → N (no URL extraction for pathnames)
+ * Processing order: E → I → N (emails first to prevent partial extraction)
  *
  * Each pattern type uses a unique placeholder for regex-based restoration.
  */
 
-import urlRegexSafe from 'url-regex-safe'
 import type { PatternReplacement, PatternizedText } from '../types.js'
 
 // Email pattern: Simple regex catches 99% of real-world emails
@@ -32,27 +28,10 @@ const EMAIL_PLACEHOLDER_PREFIX = '[E'
 const UUID_PATTERN = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi
 const UUID_PLACEHOLDER_PREFIX = '[I'
 
-// URL pattern: non-strict mode matches bare domains (e.g., example.com) without protocol
-// The replacement logic skips matches preceded by @ to avoid capturing email domains
-const URL_PATTERN = urlRegexSafe({
-	strict: false,
-	auth: false,
-	localhost: true,
-	parens: false,
-	apostrophes: false,
-	trailingPeriod: false,
-	ipv4: true,
-	ipv6: true,
-})
-const URL_PLACEHOLDER_PREFIX = '[U'
-
-// Trailing punctuation to strip from URLs (period, comma, etc.)
-const TRAILING_PUNCTUATION = /[.,!?;:]+$/
-
 // Regex for numeric pattern: matches numbers with commas and decimals
 // Requires at least one digit to avoid false matches on pure punctuation like "..."
 // Negative lookbehind (?<!\[\/?[A-Z]+) prevents matching numbers inside placeholders:
-//   - [A-Z]+ matches any uppercase letter sequence (N, E, I, U, HA, HB, etc.)
+//   - [A-Z]+ matches any uppercase letter sequence (N, E, I, HA, HB, etc.)
 //   - \/? optionally matches closing slash for [/HA1] style placeholders
 //   - This ensures "1" in "[N1]" or "[HA12]" isn't extracted as a number
 const NUMERIC_PATTERN = /(?<!\[\/?[A-Z]+)[0-9.,]*\d[0-9.,]*/g
@@ -80,55 +59,16 @@ function applyCaseFormat(text: string, isUpperCase: boolean): string {
 
 /**
  * Apply pattern replacements to text
- * Replaces URLs with [U1], [U2], emails with [E1], [E2], UUIDs with [I1], [I2],
+ * Replaces emails with [E1], [E2], UUIDs with [I1], [I2],
  * and numbers with [N1], [N2], etc.
  *
  * @param text - The text to normalize
- * @param context - Processing context: 'segment' (default) or 'path'
- *   - segment: U → E → I → N (URLs first to capture embedded emails/UUIDs)
- *   - path: E → I → N (skip URL extraction - URLs don't appear in pathnames)
  * @returns PatternizedText with original, normalized text, and replacement data
  */
-export function applyPatterns(
-	text: string,
-	context: 'segment' | 'path' = 'segment'
-): PatternizedText {
+export function applyPatterns(text: string): PatternizedText {
 	const isUpperCase = isAllUpperCase(text)
 	const replacements: PatternReplacement[] = []
 	let normalized = text
-
-	// Process URL pattern first (only for segments)
-	// This captures entire URLs including any embedded emails/UUIDs as part of the URL
-	if (context === 'segment') {
-		const urlValues: string[] = []
-		let urlIndex = 1
-
-		normalized = normalized.replace(URL_PATTERN, (...args) => {
-			const match = args[0] as string
-			// Offset is second-to-last argument (before string and groups)
-			const offset = args[args.length - 2] as number
-
-			// Skip if preceded by @ (this is part of an email address, not a standalone URL)
-			if (offset > 0 && normalized[offset - 1] === '@') {
-				return match
-			}
-
-			// Strip trailing punctuation that's not part of the URL
-			const cleanUrl = match.replace(TRAILING_PUNCTUATION, '')
-			const trailingPunct = match.slice(cleanUrl.length)
-
-			urlValues.push(cleanUrl)
-			return `[U${urlIndex++}]${trailingPunct}`
-		})
-
-		if (urlValues.length > 0) {
-			replacements.push({
-				pattern: 'url',
-				placeholder: URL_PLACEHOLDER_PREFIX,
-				values: urlValues,
-			})
-		}
-	}
 
 	// Process email pattern - Must run BEFORE numeric to prevent user123@example.com → user[N1]@example.com
 	const emailValues: string[] = []
@@ -180,7 +120,7 @@ export function applyPatterns(
 
 /**
  * Restore patterns in translated text
- * Replaces "[N1]", "[N2]", "[E1]", "[I1]", "[U1]" etc. placeholders with actual values
+ * Replaces "[N1]", "[N2]", "[E1]", "[I1]" etc. placeholders with actual values
  * Also applies uppercase formatting if the original text was all uppercase
  *
  * @param text - The translated text with placeholders
@@ -211,7 +151,6 @@ export function restorePatterns(
 			case 'numeric': placeholderLetter = 'N'; break
 			case 'email': placeholderLetter = 'E'; break
 			case 'uuid': placeholderLetter = 'I'; break
-			case 'url': placeholderLetter = 'U'; break
 			default:
 				throw new Error(`Unknown pattern type: ${replacement.pattern}`)
 		}
