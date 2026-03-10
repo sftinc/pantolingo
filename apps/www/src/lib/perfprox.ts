@@ -81,6 +81,22 @@ export async function checkHostnameStatus(hostname: string): Promise<string | nu
 			},
 		})
 
+		if (res.status === 404) {
+			// Hostname not registered yet — create it and retry
+			await createHostname(hostname)
+			const retry = await fetch(`${PERFPROX_BASE_URL}/hostnames/${encodeURIComponent(hostname)}/status`, {
+				method: 'POST',
+				headers: { 'Authorization': `Bearer ${token}` },
+			})
+			if (!retry.ok) {
+				const body = await retry.text()
+				console.error(`[perfprox] Status check failed after registration for "${hostname}" (${retry.status}): ${body}`)
+				return null
+			}
+			const json = await retry.json() as { data: { status: string } }
+			return mapPerfproxStatus(json.data.status)
+		}
+
 		if (!res.ok) {
 			const body = await res.text()
 			console.error(`[perfprox] Status check failed for "${hostname}" (${res.status}): ${body}`)

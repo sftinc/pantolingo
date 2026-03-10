@@ -299,7 +299,11 @@ export async function updateLanguageHostname(
 			return { success: false, error: 'Enter a valid hostname (e.g., es.example.com)' }
 		}
 
-		return updateWebsiteLanguageHostname(websiteLanguageId, clean)
+		const result = await updateWebsiteLanguageHostname(websiteLanguageId, clean)
+		if (result.success) {
+			registerTranslationHostnames([clean])
+		}
+		return result
 	} catch {
 		return { success: false, error: 'An error occurred' }
 	}
