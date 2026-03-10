@@ -120,8 +120,8 @@ export function LanguageCard({ websiteId, websiteHostname, publicCode, language,
 	}
 
 	const handleCheckDns = () => {
+		setDnsError('')
 		startTransition(async () => {
-			setDnsError('')
 			const result = await checkDnsStatus(websiteId, language.id)
 			if (result.dnsStatus) {
 				onDnsCheckComplete(language.id, result.dnsStatus)
