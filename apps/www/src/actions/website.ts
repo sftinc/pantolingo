@@ -21,7 +21,7 @@ import {
 import type { LanguageWithDnsStatus } from '@pantolingo/db'
 import { SUPPORTED_LANGUAGES } from '@pantolingo/lang'
 import { VALID_UI_COLORS } from '@/lib/ui-colors'
-import { checkHostnameStatus, registerTranslationHostnames } from '@/lib/perfprox'
+import { checkHostnameStatus } from '@/lib/perfprox'
 
 const HOSTNAME_REGEX = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/
 
@@ -299,11 +299,7 @@ export async function updateLanguageHostname(
 			return { success: false, error: 'Enter a valid hostname (e.g., es.example.com)' }
 		}
 
-		const result = await updateWebsiteLanguageHostname(websiteLanguageId, clean)
-		if (result.success) {
-			registerTranslationHostnames([clean])
-		}
-		return result
+		return updateWebsiteLanguageHostname(websiteLanguageId, clean)
 	} catch {
 		return { success: false, error: 'An error occurred' }
 	}
@@ -348,9 +344,6 @@ export async function addLanguagesToWebsite(
 		}))
 
 		const inserted = await insertWebsiteLanguages(websiteId, languages)
-
-		// Register hostnames with Perfprox (async, non-blocking)
-		registerTranslationHostnames(languages.map((l) => l.hostname))
 
 		return { success: true, languages: inserted }
 	} catch {
