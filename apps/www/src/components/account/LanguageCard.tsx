@@ -128,6 +128,8 @@ export function LanguageCard({ websiteId, websiteHostname, publicCode, language,
 			}
 			if (!result.success && result.error) {
 				setDnsError(result.error)
+			} else if (result.message) {
+				setDnsError(result.message)
 			}
 		})
 	}
@@ -246,7 +248,7 @@ export function LanguageCard({ websiteId, websiteHostname, publicCode, language,
 				)}
 
 				{dnsError && (
-					<p className="text-xs text-[var(--error)] mt-2">{dnsError}</p>
+					<p className="text-xs text-[var(--error)] mt-2">{dnsError}. This can take a few minutes — check again shortly.</p>
 				)}
 			</div>
 

@@ -204,7 +204,7 @@ export async function validateHostname(hostname: string): Promise<{ valid: boole
 export async function checkDnsStatus(
 	websiteId: number,
 	websiteLanguageId: number
-): Promise<{ success: boolean; dnsStatus?: string; error?: string }> {
+): Promise<{ success: boolean; dnsStatus?: string; error?: string; message?: string }> {
 	try {
 		const accountId = await requireAccountId()
 
@@ -264,6 +264,10 @@ export async function checkDnsStatus(
 		const updateResult = await updateDnsStatus(websiteLanguageId, newStatus)
 		if (!updateResult.success) {
 			return { success: false, dnsStatus: 'failed', error: updateResult.error }
+		}
+
+		if (newStatus === 'pending') {
+			return { success: true, dnsStatus: newStatus, message: 'CNAME verified — waiting for SSL provisioning' }
 		}
 
 		return { success: true, dnsStatus: newStatus }
