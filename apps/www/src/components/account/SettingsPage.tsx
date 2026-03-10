@@ -111,6 +111,7 @@ export function SettingsPage({ websiteId, publicCode, initialTab, website, langu
 			{activeTab === 'setup' && (
 				<SettingsSetupTab
 					websiteId={websiteId}
+					publicCode={publicCode}
 					initialLanguages={languages}
 					hostname={website.hostname}
 					sourceLang={website.sourceLang}

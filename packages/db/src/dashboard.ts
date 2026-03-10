@@ -1204,6 +1204,17 @@ export async function getAccountPasswordHash(accountId: number): Promise<string 
 }
 
 /**
+ * Get a website's public_code by ID.
+ */
+export async function getWebsitePublicCode(websiteId: number): Promise<string | null> {
+	const result = await pool.query<{ public_code: string }>(
+		`SELECT public_code FROM website WHERE id = $1`,
+		[websiteId]
+	)
+	return result.rows[0]?.public_code ?? null
+}
+
+/**
  * Change account password
  */
 export async function changeAccountPassword(accountId: number, newPasswordHash: string): Promise<{ success: boolean; error?: string }> {

@@ -13,6 +13,10 @@
     "./pool": {
       "types": "./dist/pool.d.ts",
       "import": "./dist/pool.js"
+    },
+    "./cname": {
+      "types": "./dist/cname.d.ts",
+      "import": "./dist/cname.js"
     }
   },
   "scripts": {

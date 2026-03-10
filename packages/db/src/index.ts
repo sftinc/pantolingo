@@ -56,6 +56,7 @@ export {
 	updateAccountProfile,
 	getAccountPasswordHash,
 	changeAccountPassword,
+	getWebsitePublicCode,
 	type AccountProfile,
 	type WebsiteWithStats,
 	type LangWithStats,
@@ -70,5 +71,6 @@ export {
 	type ChangelogItem,
 	type ChangelogChange,
 } from './dashboard.js'
+export { getCnameTarget, CNAME_DOMAIN } from './cname.js'
 export { recordLlmUsage } from './usage.js'
 export type { LlmFeature, TokenUsage, LlmUsageRecord } from './types.js'

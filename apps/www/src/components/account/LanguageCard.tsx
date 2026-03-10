@@ -6,6 +6,7 @@ import { Modal, ModalFooter, Button } from '@/components/ui/Modal'
 import { LANGUAGE_DATA } from '@pantolingo/lang'
 import { checkDnsStatus, updateLanguageHostname, removeLanguage } from '@/actions/website'
 import type { LanguageWithDnsStatus } from '@pantolingo/db'
+import { getCnameTarget } from '@pantolingo/db/cname'
 
 const STATUS_BADGE: Record<string, 'success' | 'warning' | 'error'> = {
 	active: 'success',
@@ -34,6 +35,7 @@ const STATUS_BORDER: Record<string, string> = {
 interface LanguageCardProps {
 	websiteId: number
 	websiteHostname: string
+	publicCode: string
 	language: LanguageWithDnsStatus
 	onDnsCheckComplete: (languageId: number, newStatus: string) => void
 	onHostnameChange?: (languageId: number, newHostname: string) => void
@@ -69,7 +71,8 @@ export function CopyButton({ text }: { text: string }) {
 	)
 }
 
-export function LanguageCard({ websiteId, websiteHostname, language, onDnsCheckComplete, onHostnameChange, onDelete }: LanguageCardProps) {
+export function LanguageCard({ websiteId, websiteHostname, publicCode, language, onDnsCheckComplete, onHostnameChange, onDelete }: LanguageCardProps) {
+	const cnameTarget = getCnameTarget(publicCode)
 	const [isPending, startTransition] = useTransition()
 	const langData = LANGUAGE_DATA.find((l) => l.code === language.targetLang)
 	const isActive = language.dnsStatus === 'active'
@@ -219,8 +222,8 @@ export function LanguageCard({ websiteId, websiteHostname, language, onDnsCheckC
 							</div>
 							<div className="flex items-center gap-2 font-mono text-sm">
 								<span className="text-xs font-sans font-medium text-gray-400 w-12 shrink-0">Value</span>
-								<span className="text-[var(--text-heading)] truncate">cname.pantolingo.com</span>
-								<CopyButton text="cname.pantolingo.com" />
+								<span className="text-[var(--text-heading)] truncate">{cnameTarget}</span>
+								<CopyButton text={cnameTarget} />
 							</div>
 						</div>
 					</div>
@@ -236,7 +239,7 @@ export function LanguageCard({ websiteId, websiteHostname, language, onDnsCheckC
 							</div>
 							<div className="flex items-center gap-2 font-mono text-sm">
 								<span className="text-xs font-sans font-medium text-gray-400 w-12 shrink-0">Value</span>
-								<span className="text-[var(--text-heading)] truncate">cname.pantolingo.com</span>
+								<span className="text-[var(--text-heading)] truncate">{cnameTarget}</span>
 							</div>
 						</div>
 					</div>

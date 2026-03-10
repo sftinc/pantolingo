@@ -15,6 +15,8 @@ import {
 	getWebsiteApex,
 	insertWebsiteLanguages,
 	removeWebsiteLanguage,
+	getWebsitePublicCode,
+	getCnameTarget,
 } from '@pantolingo/db'
 import type { LanguageWithDnsStatus } from '@pantolingo/db'
 import { SUPPORTED_LANGUAGES } from '@pantolingo/lang'
@@ -215,6 +217,31 @@ export async function checkDnsStatus(
 		const language = languages.find((l) => l.id === websiteLanguageId)
 		if (!language) {
 			return { success: false, error: 'Language not found' }
+		}
+
+		// Verify CNAME points to this website's unique target
+		const publicCode = await getWebsitePublicCode(websiteId)
+		if (!publicCode) {
+			return { success: false, error: 'Website not found' }
+		}
+		const expectedTarget = getCnameTarget(publicCode)
+
+		try {
+			const targets = await dns.promises.resolveCname(language.hostname)
+			const match = targets.some(
+				(t) => t.replace(/\.$/, '').toLowerCase() === expectedTarget.toLowerCase()
+			)
+			if (!match) {
+				return {
+					success: false,
+					error: `CNAME points to ${targets[0]?.replace(/\.$/, '')}, should point to ${expectedTarget}`,
+				}
+			}
+		} catch {
+			return {
+				success: false,
+				error: `No CNAME record found. Point ${language.hostname} to ${expectedTarget}`,
+			}
 		}
 
 		// Check status via Perfprox

@@ -15,6 +15,7 @@ interface LanguageOption {
 
 interface SettingsSetupTabProps {
 	websiteId: number
+	publicCode: string
 	initialLanguages: LanguageWithDnsStatus[]
 	hostname: string
 	sourceLang: string
@@ -26,7 +27,7 @@ const allLanguages: LanguageOption[] = LANGUAGE_DATA.map((l) => ({
 	flag: l.flag,
 }))
 
-export function SettingsSetupTab({ websiteId, initialLanguages, hostname, sourceLang }: SettingsSetupTabProps) {
+export function SettingsSetupTab({ websiteId, publicCode, initialLanguages, hostname, sourceLang }: SettingsSetupTabProps) {
 	const [languages, setLanguages] = useState(initialLanguages)
 	const [showAddModal, setShowAddModal] = useState(false)
 	const [selectedLangs, setSelectedLangs] = useState<LanguageOption[]>([])
@@ -37,7 +38,7 @@ export function SettingsSetupTab({ websiteId, initialLanguages, hostname, source
 		setLanguages((prev) =>
 			prev.map((lang) =>
 				lang.id === languageId
-					? { ...lang, dnsStatus: newStatus, dnsCheckedAt: new Date() }
+					? { ...lang, dnsStatus: newStatus, dnsCheckedAt: new Date(), ...(newStatus === 'active' ? { verifiedAt: new Date() } : {}) }
 					: lang
 			)
 		)
@@ -139,6 +140,7 @@ export function SettingsSetupTab({ websiteId, initialLanguages, hostname, source
 								key={lang.id}
 								websiteId={websiteId}
 								websiteHostname={hostname}
+								publicCode={publicCode}
 								language={lang}
 								onDnsCheckComplete={handleDnsCheckComplete}
 								onHostnameChange={handleHostnameChange}
