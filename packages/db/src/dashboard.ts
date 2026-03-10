@@ -501,7 +501,7 @@ export async function getPathsForLang(
 		FROM website_path wp
 		LEFT JOIN translation_path tp ON tp.website_path_id = wp.id AND tp.lang = $2
 		${whereClause}
-		ORDER BY wp.path ASC
+		ORDER BY wp.path COLLATE "C" ASC
 		LIMIT $3 OFFSET $4
 	`,
 		[websiteId, lang, limit, offset]
