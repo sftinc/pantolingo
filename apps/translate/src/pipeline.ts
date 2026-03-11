@@ -31,6 +31,8 @@ import {
 } from './translation/translate-pathnames.js'
 import { prepareResponseHeaders } from './http/headers.js'
 import { rewriteRedirectLocation } from './http/redirect.js'
+import { parse as parseTld } from 'tldts'
+import { rewriteSetCookieHeaders, type CookieRewriteConfig } from './http/cookies.js'
 import { proxyStaticAsset, proxyNonHtmlContent, isHtmlContent, isRedirect, type ProxyConfig } from './http/proxy.js'
 import { renderMessagePage } from './utils/message-page.js'
 import { getCacheControl } from './utils/cache-control.js'
@@ -248,6 +250,14 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 		const originHostname = langConfig.websiteHostname
 		const sourceLang = langConfig.sourceLang
 
+		// Compute cookie rewrite config
+		const originApex = langConfig.apex ?? parseTld(langConfig.websiteHostname).domain ?? null
+		const translatedApex = parseTld(host).domain ?? null
+		const cookieRewriteConfig: CookieRewriteConfig | undefined =
+			originApex && translatedApex
+				? { originApex, translatedHost: host, translatedApex }
+				: undefined
+
 		// Resolve pathname (reverse lookup for translated URLs)
 		// Always attempt reverse lookup to support bookmarked/indexed translated URLs
 		// regardless of translatePath setting. If no mapping exists, incoming pathname
@@ -265,6 +275,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 			originBase,
 			targetLang,
 			cacheDisabledUntil: langConfig.cacheDisabledUntil,
+			cookieRewriteConfig,
 		}
 
 		if (await proxyStaticAsset(req, res, url, host, proxyConfig)) {
@@ -339,7 +350,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 					// Build redirect response
 					res.status(originResponse.status).set('Location', redirectUrl)
 
-					// Forward Set-Cookie headers (can be multiple)
+					// Forward Set-Cookie headers with domain rewriting
 					const cookies: string[] = []
 					originResponse.headers.forEach((value, key) => {
 						if (key.toLowerCase() === 'set-cookie') {
@@ -347,7 +358,10 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 						}
 					})
 					if (cookies.length > 0) {
-						res.set('Set-Cookie', cookies)
+						const rewritten = cookieRewriteConfig
+							? rewriteSetCookieHeaders(cookies, cookieRewriteConfig)
+							: cookies
+						res.set('Set-Cookie', rewritten)
 					}
 
 					res.send()
@@ -664,7 +678,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 					})
 
 					// Send response
-					const htmlHeaders = prepareResponseHeaders(fetchResult.headers)
+					const htmlHeaders = prepareResponseHeaders(fetchResult.headers, cookieRewriteConfig)
 					htmlHeaders['Content-Type'] = 'text/html; charset=utf-8'
 					htmlHeaders['Cache-Control'] = getCacheControl({
 						originHeaders: fetchResult.headers,
@@ -997,7 +1011,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 			})
 
 			// Send response with cache control and security headers
-			const htmlHeaders = prepareResponseHeaders(fetchResult.headers)
+			const htmlHeaders = prepareResponseHeaders(fetchResult.headers, cookieRewriteConfig)
 			htmlHeaders['Content-Type'] = 'text/html; charset=utf-8'
 			htmlHeaders['Cache-Control'] = getCacheControl({
 				originHeaders: fetchResult.headers,
