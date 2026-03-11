@@ -5,6 +5,7 @@
 
 import type { Request, Response } from 'express'
 import { prepareResponseHeaders } from './headers.js'
+import type { CookieRewriteConfig } from './cookies.js'
 import { rewriteRedirectLocation } from './redirect.js'
 import { getCacheControl, isDataFileExtension, isDataContentType } from '../utils/cache-control.js'
 import { isStaticAsset } from '../utils.js'
@@ -21,6 +22,7 @@ export interface ProxyConfig {
 	originBase: string
 	targetLang: string
 	cacheDisabledUntil: Date | null
+	cookieRewriteConfig?: CookieRewriteConfig
 }
 
 /**
@@ -96,7 +98,7 @@ export async function proxyStaticAsset(
 
 	// Proxy static asset with filtered headers and security headers
 	// Data files (.json, .xml) respect origin cache; other static assets get 5-min minimum
-	const responseHeaders = prepareResponseHeaders(originResponse.headers)
+	const responseHeaders = prepareResponseHeaders(originResponse.headers, config.cookieRewriteConfig)
 	responseHeaders['Cache-Control'] = getCacheControl({
 		originHeaders: originResponse.headers,
 		cacheDisabledUntil: config.cacheDisabledUntil,
@@ -128,7 +130,7 @@ export function proxyNonHtmlContent(
 
 	// Proxy non-HTML resources with filtered headers and security headers
 	// Data content types (JSON, XML) respect origin cache; other types get 5-min minimum
-	const proxyHeaders = prepareResponseHeaders(originResponse.headers)
+	const proxyHeaders = prepareResponseHeaders(originResponse.headers, config.cookieRewriteConfig)
 	proxyHeaders['Cache-Control'] = getCacheControl({
 		originHeaders: originResponse.headers,
 		cacheDisabledUntil: config.cacheDisabledUntil,
