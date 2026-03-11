@@ -2,6 +2,8 @@
  * Response header filtering and security headers
  */
 
+import { rewriteSetCookieHeaders, type CookieRewriteConfig } from './cookies.js'
+
 /**
  * Headers to remove from origin responses
  * These can cause issues with translated domains or expose origin infrastructure
@@ -41,7 +43,8 @@ const SECURITY_HEADERS: Record<string, string> = {
  * @returns Prepared headers ready for response
  */
 export function prepareResponseHeaders(
-  originHeaders: Headers
+  originHeaders: Headers,
+  cookieRewriteConfig?: CookieRewriteConfig
 ): Record<string, string | string[]> {
   const headers: Record<string, string | string[]> = {}
   const cookies: string[] = []
@@ -60,9 +63,11 @@ export function prepareResponseHeaders(
     }
   })
 
-  // Add accumulated cookies if any
+  // Apply cookie domain rewriting if config provided, then add to headers
   if (cookies.length > 0) {
-    headers['Set-Cookie'] = cookies
+    headers['Set-Cookie'] = cookieRewriteConfig
+      ? rewriteSetCookieHeaders(cookies, cookieRewriteConfig)
+      : cookies
   }
 
   // Add security headers
