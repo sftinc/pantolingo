@@ -136,6 +136,18 @@ describe('rewriteSetCookieDomain', () => {
 		})
 	})
 
+	describe('sub-subdomain cookie', () => {
+		it('rewrites intermediate subdomain cookie to translated host', () => {
+			const result = rewriteSetCookieDomain(
+				'sid=abc; Domain=us.example.com; Path=/',
+				'example.com',
+				'de.example.com',
+				'example.com'
+			)
+			expect(result).toBe('sid=abc; Domain=de.example.com; Path=/')
+		})
+	})
+
 	describe('case insensitivity', () => {
 		it('handles DOMAIN attribute case-insensitively', () => {
 			const result = rewriteSetCookieDomain(
