@@ -45,7 +45,8 @@ export const pool: Pool = new Proxy({} as Pool, {
 			return async (...args: any[]) => {
 				const start = performance.now()
 				const result = await (realPool.query as Function)(...args)
-				console.log(`[DB] ${(performance.now() - start).toFixed(1)}ms | ${queryLabel(args[0])}`)
+				// Uncomment to debug query times and see query info
+			// console.log(`[DB] ${(performance.now() - start).toFixed(1)}ms | ${queryLabel(args[0])}`)
 				return result
 			}
 		}
@@ -57,7 +58,8 @@ export const pool: Pool = new Proxy({} as Pool, {
 				client.query = (async (...args: any[]) => {
 					const start = performance.now()
 					const result = await (origQuery as Function)(...args)
-					console.log(`[DB] ${(performance.now() - start).toFixed(1)}ms | ${queryLabel(args[0])}`)
+					// Uncomment to debug query times and see query info
+			// console.log(`[DB] ${(performance.now() - start).toFixed(1)}ms | ${queryLabel(args[0])}`)
 					return result
 				}) as typeof client.query
 				return client
