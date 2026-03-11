@@ -29,6 +29,7 @@ export interface WebsiteLanguageConfig {
 	skipSelectors: string[] // CSS selectors for elements to skip during translation
 	translatePath: boolean
 	cacheDisabledUntil: Date | null // website.cache_disabled_until - dev override for caching
+	apex: string | null // website.apex — origin domain apex for cookie rewriting
 }
 
 // In-memory cache for hot path (website language config rarely changes)
@@ -93,6 +94,7 @@ export async function getWebsiteLanguageConfig(hostname: string): Promise<Websit
 			cache_disabled_until: Date | null
 			website_hostname: string
 			source_lang: string
+			apex: string | null
 		}>(
 			`SELECT
 				wl.id AS website_language_id,
@@ -104,7 +106,8 @@ export async function getWebsiteLanguageConfig(hostname: string): Promise<Websit
 				w.translate_path,
 				w.cache_disabled_until,
 				w.hostname AS website_hostname,
-				w.source_lang
+				w.source_lang,
+				w.apex
 			FROM website_language wl
 			JOIN website w ON w.id = wl.website_id
 			WHERE wl.hostname = $1 AND wl.verified_at IS NOT NULL AND wl.removed_at IS NULL`,
@@ -129,6 +132,7 @@ export async function getWebsiteLanguageConfig(hostname: string): Promise<Websit
 			skipSelectors: row.skip_selectors || [],
 			translatePath: row.translate_path ?? true,
 			cacheDisabledUntil: row.cache_disabled_until,
+			apex: row.apex,
 		}
 
 		// Cache the result
