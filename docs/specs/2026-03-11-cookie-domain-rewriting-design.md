@@ -89,6 +89,8 @@ Example: `www.example.com` -> `www.example.de`
 - **IP addresses / localhost**: `tldts` returns `null` for `domain` -> skip rewriting entirely.
 - **Origin host is the apex itself** (e.g., `example.com` not `www.example.com`): same logic applies; apex cookies cover, host-specific cookies get rewritten.
 - **RFC 6265**: `Domain=example.com` and `Domain=.example.com` are equivalent in modern browsers. Strip leading dot before comparison.
+- **Multiple Domain attributes**: Per RFC 6265, if a cookie has multiple `Domain` attributes, use the last one. The parser should handle this.
+- **Sub-subdomain cookies**: If the cookie domain is an intermediate subdomain (e.g., `us.example.com` when origin host is `shop.us.example.com`), it doesn't match origin apex, so it rewrites to `translatedHost`. This is acceptable — intermediate subdomain scoping is rare and the translated host is the safest rewrite target.
 
 ## Integration Points
 
@@ -122,30 +124,52 @@ When config is provided, each collected `Set-Cookie` string is passed through `r
 - `translatedHost`: already available as the request hostname
 - `translatedApex`: computed once per request via `parse(translatedHost).domain` from `tldts`
 - Bundle these three and pass to `prepareResponseHeaders()`
-- If `langConfig.apex` is null, skip cookie rewriting (defensive; shouldn't happen in production)
+- If `langConfig.apex` is null, compute apex from `langConfig.websiteHostname` via `tldts` as a fallback rather than skipping cookie rewriting entirely
+
+### Redirect Handler
+
+**File**: `apps/translate/src/pipeline.ts` (lines ~329-355)
+
+The redirect handler collects `Set-Cookie` headers directly without using `prepareResponseHeaders()`. This is a critical path — auth redirects commonly set session cookies. Apply `rewriteSetCookieDomain()` to each cookie in the redirect handler's cookie collection loop before calling `res.set('Set-Cookie', cookies)`. Extract a `rewriteSetCookieHeaders()` helper in `cookies.ts` that takes an array of cookie strings and the rewrite config, and returns rewritten strings. Both `prepareResponseHeaders()` and the redirect handler can call this.
+
+### All Response Paths
+
+Cookie rewriting applies to **all** response paths that forward `Set-Cookie` headers:
+
+| Code Path | Cookie Handling | Integration |
+|---|---|---|
+| HTML responses (sync + deferred) | Via `prepareResponseHeaders()` | Config param |
+| Non-HTML content (`proxyNonHtmlContent`) | Via `prepareResponseHeaders()` | Config param |
+| Static assets (`proxyStaticAsset`) | Via `prepareResponseHeaders()` | Config param |
+| Redirects (3xx) | Direct cookie collection | Call `rewriteSetCookieHeaders()` directly |
+
+All callers of `prepareResponseHeaders()` need the cookie rewrite config threaded through.
 
 ### Dependency
 
-Add `tldts` to `apps/translate/package.json`. Already used in the www app.
+Add `tldts` to `apps/translate/package.json` (new dependency for this workspace; already used in the www app but each workspace manages its own dependencies).
 
 ## Testing
 
 Unit tests in `apps/translate/src/http/cookies.test.ts`:
 
-| Test case | Input Domain | Origin Apex | Translated Host | Expected |
-|---|---|---|---|---|
-| Same apex, wildcard covers | `.example.com` | `example.com` | `de.example.com` | Skip |
-| Same apex, host-specific doesn't cover | `www.example.com` | `example.com` | `de.example.com` | Rewrite to `de.example.com` |
-| No Domain attribute | *(none)* | `example.com` | `de.example.com` | Skip |
-| Different apex, apex cookie | `.example.com` | `example.com` | `www.example.de` | Rewrite to `.example.de` |
-| Different apex, host-specific | `www.example.com` | `example.com` | `www.example.de` | Rewrite to `www.example.de` |
-| IP address translated host | `.example.com` | `example.com` | `127.0.0.1` | Skip |
-| Localhost | `.example.com` | `example.com` | `localhost` | Skip |
-| Origin is apex itself | `example.com` | `example.com` | `de.example.com` | Skip (covers) |
-| Leading dot equivalence | `example.com` vs `.example.com` | — | — | Treated identically |
-| Preserves other attributes | Full cookie with Path, Secure, HttpOnly | — | — | Only Domain changed |
+| Test case | Input Domain | Origin Apex | Translated Host | Translated Apex | Expected |
+|---|---|---|---|---|---|
+| Same apex, wildcard covers | `.example.com` | `example.com` | `de.example.com` | `example.com` | Skip |
+| Same apex, host-specific doesn't cover | `www.example.com` | `example.com` | `de.example.com` | `example.com` | Rewrite to `de.example.com` |
+| No Domain attribute | *(none)* | `example.com` | `de.example.com` | `example.com` | Skip |
+| Different apex, apex cookie | `.example.com` | `example.com` | `www.example.de` | `example.de` | Rewrite to `.example.de` |
+| Different apex, host-specific | `www.example.com` | `example.com` | `www.example.de` | `example.de` | Rewrite to `www.example.de` |
+| IP address translated host | `.example.com` | `example.com` | `127.0.0.1` | *(null)* | Skip |
+| Localhost | `.example.com` | `example.com` | `localhost` | *(null)* | Skip |
+| Origin is apex itself | `example.com` | `example.com` | `de.example.com` | `example.com` | Skip (covers) |
+| Leading dot equivalence | `example.com` vs `.example.com` | — | — | — | Treated identically |
+| Preserves other attributes | Full cookie with Path, Secure, HttpOnly | — | — | — | Only Domain changed |
+| Multiple Domain attributes | Last one wins per RFC 6265 | — | — | — | Uses last Domain value |
 
-Integration test: Verify `prepareResponseHeaders()` rewrites cookies when config is provided and passes through unchanged when it's not.
+Integration tests:
+- Verify `prepareResponseHeaders()` rewrites cookies when config is provided and passes through unchanged when it's not.
+- Verify redirect handler rewrites cookies via `rewriteSetCookieHeaders()`.
 
 ## Out of Scope (Phase 2)
 
