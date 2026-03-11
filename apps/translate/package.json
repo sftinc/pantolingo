@@ -14,7 +14,8 @@
     "@pantolingo/lang": "workspace:*",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "linkedom": "^0.18.12"
+    "linkedom": "^0.18.12",
+    "tldts": "^7.0.23"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",

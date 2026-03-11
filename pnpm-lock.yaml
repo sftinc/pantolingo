@@ -32,6 +32,9 @@ importers:
       linkedom:
         specifier: ^0.18.12
         version: 0.18.12
+      tldts:
+        specifier: ^7.0.23
+        version: 7.0.23
     devDependencies:
       '@types/express':
         specifier: ^5.0.6
