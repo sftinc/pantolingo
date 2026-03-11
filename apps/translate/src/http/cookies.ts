@@ -5,8 +5,6 @@
  * set by the origin work correctly on translated domains.
  */
 
-import { parse } from 'tldts'
-
 /**
  * Configuration for cookie domain rewriting
  */
