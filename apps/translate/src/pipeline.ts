@@ -31,7 +31,8 @@ import {
 } from './translation/translate-pathnames.js'
 import { prepareResponseHeaders } from './http/headers.js'
 import { rewriteRedirectLocation } from './http/redirect.js'
-import { parse as parseTld } from 'tldts'
+import { createRequire } from 'node:module'
+const { parse: parseTld } = createRequire(import.meta.url)('tldts') as typeof import('tldts')
 import { rewriteSetCookieHeaders, type CookieRewriteConfig } from './http/cookies.js'
 import { proxyStaticAsset, proxyNonHtmlContent, isHtmlContent, isRedirect, type ProxyConfig } from './http/proxy.js'
 import { renderMessagePage } from './utils/message-page.js'
