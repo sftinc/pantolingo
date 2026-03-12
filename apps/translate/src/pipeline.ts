@@ -426,6 +426,11 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 			let patternTime = 0
 			let dbLookupTime = 0
 			let hashTime = 0
+			let linkPathTime = 0
+			let restoreTime = 0
+			let applyTime = 0
+			let rewriteTime = 0
+			let spaTime = 0
 
 			if (extractedSegments.length > 0) {
 				// 6. Apply patterns to normalize text for caching (PII redaction, numeric placeholders)
@@ -470,9 +475,11 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 				// 8. Extract link pathnames early (before translation) for parallel processing
 				// Skip path translation for error responses (4xx, 5xx)
 				const isErrorResponse = fetchResult.statusCode >= 400
+				const linkPathStart = Date.now()
 				const linkPathnames = langConfig.translatePath && !isErrorResponse
 					? extractLinkPathnames(document, originHostname)
 					: new Set<string>()
+				linkPathTime = Date.now() - linkPathStart
 
 				// ===== DEFERRED TRANSLATION PATH =====
 				// When enabled and there are cache misses, serve page immediately with skeletons
@@ -915,13 +922,17 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 					}
 
 					// 10. Restore patterns before applying to DOM
+					const restoreStart = Date.now()
 					const restoredTranslations = allTranslations.map((translation, i) => {
 						// Always call restorePatterns to ensure case formatting is applied even if no patterns
 						return restorePatterns(translation, patternData[i]?.replacements ?? [], patternData[i]?.isUpperCase)
 					})
+					restoreTime = Date.now() - restoreStart
 
 					// 11. Apply translations to DOM
+					const applyStart = Date.now()
 					applyTranslations(document, restoredTranslations, extractedSegments, skipSelectors)
+					applyTime = Date.now() - applyStart
 
 					// 12. Collect translations for deferred write
 					if (newSegments.length > 0 && newTranslations.length > 0) {
@@ -945,6 +956,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 					}
 
 					// 14. Rewrite links
+					const rewriteStart = Date.now()
 					rewriteLinks(
 						document,
 						originHostname,
@@ -962,6 +974,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 						console.error('[Lang Metadata] Failed:', langError)
 						// Non-blocking - continue serving response
 					}
+					rewriteTime = Date.now() - rewriteStart
 
 					// 15b. Collect link pathnames for deferred write
 					if (langConfig.translatePath && pathnameSegments.length > 0) {
@@ -974,6 +987,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 
 					// 16. Inject recovery assets for SPA frameworks (Next.js, Nuxt, etc.)
 					// These frameworks may revert server-translated content during hydration
+					const spaStart = Date.now()
 					if (detectSpaFramework(document)) {
 						const dictionary = buildTranslationDictionary(
 							document,
@@ -996,6 +1010,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 							injectRecoveryAssets(document, dictionary)
 						}
 					}
+					spaTime = Date.now() - spaStart
 				} catch (translationError) {
 					// Translation failed - return original HTML with debug header
 					console.error('Translation error, returning original HTML:', translationError)
@@ -1018,7 +1033,7 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 			const urlObj = new URL(fetchUrl)
 			const transInfo = batchCount > 0 ? `trans: ${batchCount} (${translateTime}ms)` : 'trans: 0'
 			console.log(
-				`▶ [${targetLang}] ${urlObj.host}${urlObj.pathname} (${totalTime}ms) | fetch: ${fetchTime}ms | parse: ${parseTime}ms | extract: ${extractTime}ms | pattern: ${patternTime}ms | dbLookup: ${dbLookupTime}ms | hash: ${hashTime}ms | ${transInfo} | seg: ${extractedSegments.length} (+${newTranslations.length}) | paths: ${totalPaths} (+${newPaths}) | serialize: ${serializeTime}ms`
+				`▶ [${targetLang}] ${urlObj.host}${urlObj.pathname} (${totalTime}ms) | fetch: ${fetchTime}ms | parse: ${parseTime}ms | extract: ${extractTime}ms | pattern: ${patternTime}ms | dbLookup: ${dbLookupTime}ms | hash: ${hashTime}ms | linkPath: ${linkPathTime}ms | ${transInfo} | restore: ${restoreTime}ms | apply: ${applyTime}ms | rewrite: ${rewriteTime}ms | spa: ${spaTime}ms | seg: ${extractedSegments.length} (+${newTranslations.length}) | paths: ${totalPaths} (+${newPaths}) | serialize: ${serializeTime}ms`
 			)
 
 			// Execute deferred DB writes after response is sent
