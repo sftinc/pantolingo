@@ -5,10 +5,66 @@
  * Supports deferred mode: marks cache misses (null translations) as pending
  */
 
-import { TRANSLATE_ATTRS } from '../config.js'
+import { TRANSLATE_ATTRS, SKIP_TAGS } from '../config.js'
 import type { Content } from '../types.js'
 import { placeholdersToHtml } from './placeholders.js'
-import { shouldSkipNode, isInsideGroupedElement } from './utils.js'
+
+/**
+ * Check if a single element should be skipped (no ancestor walking)
+ * Used within recursive traversals where ancestors are already handled by recursion.
+ */
+function isSkipElement(node: Node, skipSelectors: string[]): boolean {
+	if (node.nodeType !== 1) return false
+	const elem = node as Element
+	if (SKIP_TAGS.has(elem.tagName.toLowerCase())) return true
+	for (const selector of skipSelectors) {
+		try {
+			if (elem.matches(selector)) return true
+		} catch (e) {
+			// Invalid selector
+		}
+	}
+	return false
+}
+
+/**
+ * Pre-build a Set of all elements that should be skipped (including descendants).
+ * Used by flat iterations (querySelectorAll) that can't rely on recursion for ancestor skipping.
+ */
+function buildSkipSet(document: Document, skipSelectors: string[]): Set<Element> {
+	const skipSet = new Set<Element>()
+
+	const selectors: string[] = Array.from(SKIP_TAGS)
+	for (const sel of skipSelectors) {
+		selectors.push(sel)
+	}
+
+	if (selectors.length === 0) return skipSet
+
+	try {
+		const skipRoots = document.querySelectorAll(selectors.join(','))
+		for (let i = 0; i < skipRoots.length; i++) {
+			const root = skipRoots[i] as Element
+			skipSet.add(root)
+			const descendants = root.querySelectorAll('*')
+			for (let j = 0; j < descendants.length; j++) {
+				skipSet.add(descendants[j] as Element)
+			}
+		}
+	} catch (e) {
+		const skipRoots = document.querySelectorAll(Array.from(SKIP_TAGS).join(','))
+		for (let i = 0; i < skipRoots.length; i++) {
+			const root = skipRoots[i] as Element
+			skipSet.add(root)
+			const descendants = root.querySelectorAll('*')
+			for (let j = 0; j < descendants.length; j++) {
+				skipSet.add(descendants[j] as Element)
+			}
+		}
+	}
+
+	return skipSet
+}
 
 /**
  * Information about a pending segment (cache miss) for client-side polling
@@ -145,12 +201,13 @@ function applyToTextNodes(
 	pending?: PendingSegment[],
 	document?: Document
 ): void {
-	if (shouldSkipNode(node, skipSelectors)) {
+	// Skip elements (recursion handles ancestors, so only check this node)
+	if (isSkipElement(node, skipSelectors)) {
 		return
 	}
 
-	// Skip if inside a grouped element (already applied as HTML segment)
-	if (isInsideGroupedElement(node, groupedElements)) {
+	// Skip if this element was grouped (already applied as HTML segment)
+	if (node.nodeType === 1 && groupedElements.has(node as Element)) {
 		return
 	}
 
@@ -219,7 +276,7 @@ function applyToAttributes(
 	translations: (string | null)[],
 	segments: Content[],
 	indexRef: { index: number },
-	skipSelectors: string[],
+	skipSet: Set<Element>,
 	hashes?: string[],
 	pending?: PendingSegment[]
 ): void {
@@ -228,7 +285,8 @@ function applyToAttributes(
 	for (let i = 0; i < allElements.length; i++) {
 		const elem = allElements[i] as Element
 
-		if (shouldSkipNode(elem, skipSelectors)) {
+		// O(1) skip check using pre-computed set
+		if (skipSet.has(elem)) {
 			continue
 		}
 
@@ -282,13 +340,12 @@ function applyHeadTitle(
 	translations: (string | null)[],
 	segments: Content[],
 	indexRef: { index: number },
-	skipSelectors: string[],
+	skipSet: Set<Element>,
 	hashes?: string[],
 	pending?: PendingSegment[]
 ): void {
 	const titleElement = document.querySelector('title')
-	// Skip if element should be skipped
-	if (!titleElement || shouldSkipNode(titleElement, skipSelectors)) {
+	if (!titleElement || skipSet.has(titleElement)) {
 		return
 	}
 	if (titleElement.textContent && titleElement.textContent.trim().length > 0) {
@@ -335,13 +392,12 @@ function applyHeadDescription(
 	translations: (string | null)[],
 	segments: Content[],
 	indexRef: { index: number },
-	skipSelectors: string[],
+	skipSet: Set<Element>,
 	hashes?: string[],
 	pending?: PendingSegment[]
 ): void {
 	const descElement = document.querySelector('meta[name="description"]')
-	// Skip if element should be skipped
-	if (!descElement || shouldSkipNode(descElement, skipSelectors)) {
+	if (!descElement || skipSet.has(descElement as Element)) {
 		return
 	}
 	const content = descElement.getAttribute('content')
@@ -401,6 +457,9 @@ export function applyTranslations(
 	// Use object to maintain index reference across function calls
 	const indexRef = { index: 0 }
 
+	// Pre-compute skip set once for O(1) lookups
+	const skipSet = buildSkipSet(document, skipSelectors)
+
 	// Track grouped elements to skip during text node application
 	const groupedElements = new Set<Element>()
 
@@ -408,8 +467,8 @@ export function applyTranslations(
 	const pending: PendingSegment[] = hashes ? [] : undefined as unknown as PendingSegment[]
 
 	// Apply to head metadata first (must be identical order as extraction)
-	applyHeadTitle(document, translations, segments, indexRef, skipSelectors, hashes, pending)
-	applyHeadDescription(document, translations, segments, indexRef, skipSelectors, hashes, pending)
+	applyHeadTitle(document, translations, segments, indexRef, skipSet, hashes, pending)
+	applyHeadDescription(document, translations, segments, indexRef, skipSet, hashes, pending)
 
 	// Apply to grouped HTML blocks (must be before text nodes, matching extraction order)
 	applyToGroupedBlocks(translations, segments, indexRef, groupedElements, hashes, pending)
@@ -419,8 +478,8 @@ export function applyTranslations(
 		applyToTextNodes(document.body, translations, segments, indexRef, groupedElements, skipSelectors, hashes, pending, document)
 	}
 
-	// Apply to attributes (must be identical order as extraction)
-	applyToAttributes(document, translations, segments, indexRef, skipSelectors, hashes, pending)
+	// Apply to attributes (uses pre-computed skip set)
+	applyToAttributes(document, translations, segments, indexRef, skipSet, hashes, pending)
 
 	// Return full result in deferred mode, just count for legacy mode
 	if (hashes) {
