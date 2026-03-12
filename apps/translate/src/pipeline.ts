@@ -404,10 +404,13 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 			// Parse HTML with linkedom
 			const parseStart = Date.now()
 			const { document } = parseHTMLDocument(fetchResult.html)
+			const parseTime = Date.now() - parseStart
 
 			// 5. Extract segments
+			const extractStart = Date.now()
 			const skipSelectors = langConfig.skipSelectors
 			const extractedSegments = extractSegments(document, skipSelectors)
+			const extractTime = Date.now() - extractStart
 			const fetchTime = parseStart - fetchStart
 
 			// Store original values for dictionary building (before any modifications)
@@ -420,22 +423,30 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 			let translateTime = 0
 			let totalPaths = 0
 			let newPaths = 0
+			let patternTime = 0
+			let dbLookupTime = 0
+			let hashTime = 0
 
 			if (extractedSegments.length > 0) {
 				// 6. Apply patterns to normalize text for caching (PII redaction, numeric placeholders)
+				const patternStart = Date.now()
 				const patternData = extractedSegments.map((seg) => applyPatterns(seg.value))
 				const normalizedSegments = extractedSegments.map((seg, i) => ({
 					...seg,
 					value: patternData[i].normalized,
 				}))
+				patternTime = Date.now() - patternStart
 
 				// 7. Batch lookup translations from database
+				const dbLookupStart = Date.now()
 				const segmentTexts = normalizedSegments.map((s) => s.value)
 				const cachedTranslations = await batchGetTranslations(
 					langConfig.websiteId,
 					langConfig.targetLang,
 					segmentTexts
 				)
+
+				dbLookupTime = Date.now() - dbLookupStart
 
 				// Match segments with cache
 				const { cached, newSegments, newIndices } = matchSegmentsWithMap(normalizedSegments, cachedTranslations)
@@ -444,12 +455,14 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 				cacheMisses = newSegments.length
 
 				// Collect cached segment hashes for deferred last_used_on update
+				const hashStart = Date.now()
 				if (cachedTranslations.size > 0) {
 					deferredWrites.cachedSegmentHashes = Array.from(cachedTranslations.keys()).map((text) => hashText(text))
 				}
 
 				// Compute hashes for all segments (needed for both deferred and sync modes)
 				const segmentHashes = normalizedSegments.map((s) => hashText(s.value))
+				hashTime = Date.now() - hashStart
 
 				// Feature toggle for deferred translation (always on for now, future: per-site setting)
 				const useDeferredTranslation = true
@@ -996,14 +1009,16 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 			}
 
 			// Serialize final HTML
+			const serializeStart = Date.now()
 			html = document.toString()
+			const serializeTime = Date.now() - serializeStart
 
 			// Calculate total pipeline time and log compact summary
 			const totalTime = Date.now() - fetchStart
 			const urlObj = new URL(fetchUrl)
 			const transInfo = batchCount > 0 ? `trans: ${batchCount} (${translateTime}ms)` : 'trans: 0'
 			console.log(
-				`▶ [${targetLang}] ${urlObj.host}${urlObj.pathname} (${totalTime}ms) | fetch: ${fetchTime}ms | ${transInfo} | seg: ${extractedSegments.length} (+${newTranslations.length}) | paths: ${totalPaths} (+${newPaths})`
+				`▶ [${targetLang}] ${urlObj.host}${urlObj.pathname} (${totalTime}ms) | fetch: ${fetchTime}ms | parse: ${parseTime}ms | extract: ${extractTime}ms | pattern: ${patternTime}ms | dbLookup: ${dbLookupTime}ms | hash: ${hashTime}ms | ${transInfo} | seg: ${extractedSegments.length} (+${newTranslations.length}) | paths: ${totalPaths} (+${newPaths}) | serialize: ${serializeTime}ms`
 			)
 
 			// Execute deferred DB writes after response is sent
