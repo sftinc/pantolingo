@@ -16,6 +16,7 @@ interface SettingsPageProps {
 	website: {
 		name: string
 		hostname: string
+		apex: string
 		sourceLang: string
 		uiColor: string | null
 		skipWords: string[]
@@ -114,6 +115,7 @@ export function SettingsPage({ websiteId, publicCode, initialTab, website, langu
 					publicCode={publicCode}
 					initialLanguages={languages}
 					hostname={website.hostname}
+					apex={website.apex}
 					sourceLang={website.sourceLang}
 				/>
 			)}

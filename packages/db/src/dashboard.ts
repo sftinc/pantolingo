@@ -74,6 +74,7 @@ export interface Website {
 	id: number
 	publicCode: string
 	hostname: string
+	apex: string
 	name: string
 	sourceLang: string
 	uiColor: string | null
@@ -183,6 +184,7 @@ export async function getWebsiteByPublicCode(publicCode: string): Promise<Websit
 		id: number
 		public_code: string
 		hostname: string
+		apex: string
 		name: string
 		source_lang: string
 		ui_color: string | null
@@ -192,7 +194,7 @@ export async function getWebsiteByPublicCode(publicCode: string): Promise<Websit
 		translate_path: boolean | null
 		cache_disabled_remaining: string | null
 	}>(
-		`SELECT id, public_code, hostname, name, source_lang, ui_color, skip_words, skip_path, skip_selectors, translate_path,
+		`SELECT id, public_code, hostname, apex, name, source_lang, ui_color, skip_words, skip_path, skip_selectors, translate_path,
 		        EXTRACT(EPOCH FROM GREATEST(cache_disabled_until - NOW(), INTERVAL '0')) AS cache_disabled_remaining
 		 FROM website WHERE public_code = $1`,
 		[publicCode]
@@ -206,6 +208,7 @@ export async function getWebsiteByPublicCode(publicCode: string): Promise<Websit
 		id: row.id,
 		publicCode: row.public_code,
 		hostname: row.hostname,
+		apex: row.apex,
 		name: row.name,
 		sourceLang: row.source_lang,
 		uiColor: row.ui_color,

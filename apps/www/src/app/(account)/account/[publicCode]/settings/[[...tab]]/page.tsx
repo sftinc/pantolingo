@@ -47,6 +47,7 @@ export default async function Settings({ params }: SettingsPageProps) {
 				website={{
 					name: website.name,
 					hostname: website.hostname,
+					apex: website.apex,
 					sourceLang: website.sourceLang,
 					uiColor: website.uiColor,
 					skipWords: website.skipWords,

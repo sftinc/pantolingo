@@ -18,6 +18,7 @@ interface SettingsSetupTabProps {
 	publicCode: string
 	initialLanguages: LanguageWithDnsStatus[]
 	hostname: string
+	apex: string
 	sourceLang: string
 }
 
@@ -27,7 +28,7 @@ const allLanguages: LanguageOption[] = LANGUAGE_DATA.map((l) => ({
 	flag: l.flag,
 }))
 
-export function SettingsSetupTab({ websiteId, publicCode, initialLanguages, hostname, sourceLang }: SettingsSetupTabProps) {
+export function SettingsSetupTab({ websiteId, publicCode, initialLanguages, hostname, apex, sourceLang }: SettingsSetupTabProps) {
 	const [languages, setLanguages] = useState(initialLanguages)
 	const [showAddModal, setShowAddModal] = useState(false)
 	const [selectedLangs, setSelectedLangs] = useState<LanguageOption[]>([])
@@ -139,7 +140,7 @@ export function SettingsSetupTab({ websiteId, publicCode, initialLanguages, host
 							<LanguageCard
 								key={lang.id}
 								websiteId={websiteId}
-								websiteHostname={hostname}
+								websiteHostname={apex}
 								publicCode={publicCode}
 								language={lang}
 								onDnsCheckComplete={handleDnsCheckComplete}
