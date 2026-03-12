@@ -1,17 +1,20 @@
 /**
  * Framework Detection Module
- * Detects SPA frameworks that cause hydration issues (Next.js, Nuxt, Gatsby, React)
+ * Detects SPA frameworks and widget platforms that cause hydration issues
  * Used to determine if recovery script injection is needed
  */
 
 /**
- * Detect if the document is rendered by an SPA framework that may cause hydration issues
+ * Detect if the document is rendered by an SPA framework or widget platform
+ * that may cause hydration issues (client JS overwriting server-rendered content)
  *
  * Framework markers:
  * - Next.js: #__next container, __NEXT_DATA__ script, /_next/ in script sources
  * - Nuxt/Vue: #__nuxt container, [data-v-*] scoped style attributes
  * - Gatsby: #___gatsby container
  * - React: [data-reactroot] attribute
+ * - Duda: [dmwrapped] attribute, .dmBody class
+ * - Ecwid: .xProductBrowser class, .ec-storefront-v3-ssr class
  *
  * @param document - The parsed HTML document
  * @returns true if an SPA framework is detected, false otherwise
@@ -67,6 +70,16 @@ export function detectSpaFramework(document: Document): boolean {
 
 	// Generic React detection
 	if (document.querySelector('[data-reactroot]')) {
+		return true
+	}
+
+	// Duda website builder detection
+	if (document.querySelector('[dmwrapped]') || document.querySelector('.dmBody')) {
+		return true
+	}
+
+	// Ecwid e-commerce widget detection
+	if (document.querySelector('.xProductBrowser') || document.querySelector('.ec-storefront-v3-ssr')) {
 		return true
 	}
 

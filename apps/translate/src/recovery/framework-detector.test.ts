@@ -108,6 +108,62 @@ describe('detectSpaFramework', () => {
 		})
 	})
 
+	describe('Duda detection', () => {
+		it('detects Duda by dmwrapped attribute', () => {
+			const { document } = parseHTMLDocument(`
+				<!DOCTYPE html>
+				<html>
+					<head><title>Test</title></head>
+					<body>
+						<div dmwrapped="true" id="1063955801">Content</div>
+					</body>
+				</html>
+			`)
+			expect(detectSpaFramework(document)).toBe(true)
+		})
+
+		it('detects Duda by .dmBody class', () => {
+			const { document } = parseHTMLDocument(`
+				<!DOCTYPE html>
+				<html>
+					<head><title>Test</title></head>
+					<body>
+						<div class="dmBody u_dmStyle_template_category">Content</div>
+					</body>
+				</html>
+			`)
+			expect(detectSpaFramework(document)).toBe(true)
+		})
+	})
+
+	describe('Ecwid detection', () => {
+		it('detects Ecwid by .xProductBrowser class', () => {
+			const { document } = parseHTMLDocument(`
+				<!DOCTYPE html>
+				<html>
+					<head><title>Test</title></head>
+					<body>
+						<div class="xProductBrowser" data-store-version="2">Content</div>
+					</body>
+				</html>
+			`)
+			expect(detectSpaFramework(document)).toBe(true)
+		})
+
+		it('detects Ecwid by .ec-storefront-v3-ssr class', () => {
+			const { document } = parseHTMLDocument(`
+				<!DOCTYPE html>
+				<html>
+					<head><title>Test</title></head>
+					<body>
+						<div class="ec-storefront-v3-ssr">Content</div>
+					</body>
+				</html>
+			`)
+			expect(detectSpaFramework(document)).toBe(true)
+		})
+	})
+
 	describe('Non-SPA pages', () => {
 		it('returns false for static HTML', () => {
 			const { document } = parseHTMLDocument(`
