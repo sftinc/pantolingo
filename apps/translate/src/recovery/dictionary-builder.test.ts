@@ -5,7 +5,6 @@
 import { describe, it, expect } from 'vitest'
 import { parseHTMLDocument } from '../dom/parser.js'
 import { extractSegments } from '../dom/extractor.js'
-import { applyTranslations } from '../dom/applicator.js'
 import { buildTranslationDictionary } from './dictionary-builder.js'
 
 describe('buildTranslationDictionary', () => {
@@ -23,12 +22,9 @@ describe('buildTranslationDictionary', () => {
 
 			const segments = extractSegments(document, [])
 			const originalValues = segments.map((s) => s.value)
-
-			// Simulate translations
 			const translations = ['Hola', 'Mundo']
-			applyTranslations(document, translations, segments, [])
 
-			const dictionary = buildTranslationDictionary(document, segments, originalValues, [], 'es')
+			const dictionary = buildTranslationDictionary(segments, originalValues, translations, 'es')
 
 			expect(dictionary.targetLang).toBe('es')
 			expect(dictionary.text['Hello']).toBe('Hola')
@@ -48,13 +44,11 @@ describe('buildTranslationDictionary', () => {
 
 			const segments = extractSegments(document, [])
 			const originalValues = segments.map((s) => s.value)
+			// Translations same as originals
+			const translations = ['Hello', 'World']
 
-			// Don't translate - use original values
-			applyTranslations(document, ['Hello', 'World'], segments, [])
+			const dictionary = buildTranslationDictionary(segments, originalValues, translations, 'es')
 
-			const dictionary = buildTranslationDictionary(document, segments, originalValues, [], 'es')
-
-			// Should be empty since nothing changed
 			expect(Object.keys(dictionary.text).length).toBe(0)
 		})
 	})
@@ -73,18 +67,16 @@ describe('buildTranslationDictionary', () => {
 
 			const segments = extractSegments(document, [])
 			const originalValues = segments.map((s) => s.value)
+			// segments[0] = title "Test", segments[1] = html "Hello [HB1]world[/HB1]"
+			const translations = ['Prueba', 'Hola [HB1]mundo[/HB1]']
 
-			// Simulate translation (the value contains placeholders after extraction)
-			// For HTML segments, we get the text with placeholders like "Hello [HB1]world[/HB1]"
-			const translations = ['Test', 'Hola [HB1]mundo[/HB1]']
-			applyTranslations(document, translations, segments, [])
+			const dictionary = buildTranslationDictionary(segments, originalValues, translations, 'es')
 
-			const dictionary = buildTranslationDictionary(document, segments, originalValues, [], 'es')
-
-			// HTML segment should have innerHTML value
 			expect(dictionary.targetLang).toBe('es')
-			// The html dict uses textContent as key
-			expect(Object.keys(dictionary.html).length).toBeGreaterThanOrEqual(0)
+			// HTML dict key is original placeholder text, value is restored innerHTML
+			const htmlKey = originalValues[1] // "Hello [HB1]world[/HB1]"
+			expect(dictionary.html[htmlKey]).toContain('mundo')
+			expect(dictionary.html[htmlKey]).toContain('<strong>')
 		})
 	})
 
@@ -104,55 +96,43 @@ describe('buildTranslationDictionary', () => {
 			const segments = extractSegments(document, [])
 			const originalValues = segments.map((s) => s.value)
 
-			// Find attribute segment indices
-			const attrSegments = segments.filter((s) => s.kind === 'attr')
-			expect(attrSegments.length).toBe(2) // alt and title
-
-			// Create translations (title, button text, alt, title attr)
-			const translations = segments.map((s, i) => {
+			const translations = segments.map((s) => {
 				if (s.value === 'A cat') return 'Un gato'
 				if (s.value === 'Click me') return 'Haz clic'
 				if (s.value === 'Button') return 'Boton'
 				return s.value
 			})
 
-			applyTranslations(document, translations, segments, [])
-
-			const dictionary = buildTranslationDictionary(document, segments, originalValues, [], 'es')
+			const dictionary = buildTranslationDictionary(segments, originalValues, translations, 'es')
 
 			expect(dictionary.attrs['A cat']).toBe('Un gato')
 			expect(dictionary.attrs['Click me']).toBe('Haz clic')
 		})
 	})
 
-	describe('skip selectors', () => {
-		it('handles skip selectors correctly', () => {
+	describe('deferred mode (null translations)', () => {
+		it('skips null translations (cache misses)', () => {
 			const { document } = parseHTMLDocument(`
 				<!DOCTYPE html>
 				<html>
-					<head><title>Test</title></head>
+					<head><title>Hello</title></head>
 					<body>
-						<p class="translate">Hello</p>
-						<p class="skip">World</p>
+						<div>World</div>
+						<div>Foo</div>
 					</body>
 				</html>
 			`)
 
-			const skipSelectors = ['.skip']
-			const segments = extractSegments(document, skipSelectors)
+			const segments = extractSegments(document, [])
 			const originalValues = segments.map((s) => s.value)
+			// Second segment is a cache miss
+			const translations: (string | null)[] = ['Hola', null, 'Bar']
 
-			// Only "Test" and "Hello" should be extracted
-			expect(segments.length).toBe(2)
+			const dictionary = buildTranslationDictionary(segments, originalValues, translations, 'es')
 
-			const translations = ['Prueba', 'Hola']
-			applyTranslations(document, translations, segments, skipSelectors)
-
-			const dictionary = buildTranslationDictionary(document, segments, originalValues, skipSelectors, 'es')
-
-			expect(dictionary.text['Test']).toBe('Prueba')
-			// HTML segments with simple content
-			expect(Object.keys(dictionary.html).length + Object.keys(dictionary.text).length).toBeGreaterThan(0)
+			expect(dictionary.text['Hello']).toBe('Hola')
+			expect(dictionary.text['World']).toBeUndefined()
+			expect(dictionary.text['Foo']).toBe('Bar')
 		})
 	})
 
@@ -168,9 +148,8 @@ describe('buildTranslationDictionary', () => {
 
 			const segments = extractSegments(document, [])
 			const originalValues = segments.map((s) => s.value)
-			applyTranslations(document, originalValues, segments, [])
 
-			const dictionary = buildTranslationDictionary(document, segments, originalValues, [], 'es')
+			const dictionary = buildTranslationDictionary(segments, originalValues, originalValues, 'es')
 			expect(dictionary.paths).toEqual({})
 		})
 
@@ -185,9 +164,8 @@ describe('buildTranslationDictionary', () => {
 
 			const segments = extractSegments(document, [])
 			const originalValues = segments.map((s) => s.value)
-			applyTranslations(document, originalValues, segments, [])
 
-			const dictionary = buildTranslationDictionary(document, segments, originalValues, [], 'es', new Map())
+			const dictionary = buildTranslationDictionary(segments, originalValues, originalValues, 'es', new Map())
 			expect(dictionary.paths).toEqual({})
 		})
 
@@ -202,13 +180,12 @@ describe('buildTranslationDictionary', () => {
 
 			const segments = extractSegments(document, [])
 			const originalValues = segments.map((s) => s.value)
-			applyTranslations(document, originalValues, segments, [])
 
 			const pathnameMap = new Map([
 				['/about', '/acerca-de'],
 				['/contact', '/contacto'],
 			])
-			const dictionary = buildTranslationDictionary(document, segments, originalValues, [], 'es', pathnameMap)
+			const dictionary = buildTranslationDictionary(segments, originalValues, originalValues, 'es', pathnameMap)
 			expect(dictionary.paths).toEqual({
 				'/about': '/acerca-de',
 				'/contact': '/contacto',
@@ -226,13 +203,12 @@ describe('buildTranslationDictionary', () => {
 
 			const segments = extractSegments(document, [])
 			const originalValues = segments.map((s) => s.value)
-			applyTranslations(document, originalValues, segments, [])
 
 			const pathnameMap = new Map([
 				['/about', '/acerca-de'],
-				['/api/v1', '/api/v1'],  // unchanged - should be excluded
+				['/api/v1', '/api/v1'],
 			])
-			const dictionary = buildTranslationDictionary(document, segments, originalValues, [], 'es', pathnameMap)
+			const dictionary = buildTranslationDictionary(segments, originalValues, originalValues, 'es', pathnameMap)
 			expect(dictionary.paths).toEqual({ '/about': '/acerca-de' })
 		})
 	})
@@ -249,9 +225,9 @@ describe('buildTranslationDictionary', () => {
 
 			const segments = extractSegments(document, [])
 			const originalValues = ['wrong', 'length', 'array']
+			const translations = ['a', 'b', 'c']
 
-			// Should return empty dictionary on mismatch
-			const dictionary = buildTranslationDictionary(document, segments, originalValues, [], 'es')
+			const dictionary = buildTranslationDictionary(segments, originalValues, translations, 'es')
 
 			expect(Object.keys(dictionary.text).length).toBe(0)
 			expect(Object.keys(dictionary.html).length).toBe(0)
@@ -269,8 +245,9 @@ describe('buildTranslationDictionary', () => {
 
 			const segments = extractSegments(document, [])
 			const originalValues: string[] = []
+			const translations: string[] = []
 
-			const dictionary = buildTranslationDictionary(document, segments, originalValues, [], 'es')
+			const dictionary = buildTranslationDictionary(segments, originalValues, translations, 'es')
 
 			expect(dictionary.targetLang).toBe('es')
 			expect(Object.keys(dictionary.text).length).toBe(0)
