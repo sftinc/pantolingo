@@ -645,7 +645,8 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 					}
 
 					// Inject SPA recovery assets if needed (with cached translations only)
-					if (detectSpaFramework(document) && appliedCount > 0) {
+					// Skip dictionary building for very large pages (O(n²) cost)
+					if (detectSpaFramework(document) && appliedCount > 0 && extractedSegments.length <= 200) {
 						const dictionary = buildTranslationDictionary(
 							document,
 							extractedSegments,
@@ -964,7 +965,8 @@ export async function handleRequest(req: Request, res: Response): Promise<void> 
 
 					// 16. Inject recovery assets for SPA frameworks (Next.js, Nuxt, etc.)
 					// These frameworks may revert server-translated content during hydration
-					if (detectSpaFramework(document)) {
+					// Skip dictionary building for very large pages (O(n²) cost)
+					if (detectSpaFramework(document) && extractedSegments.length <= 200) {
 						const dictionary = buildTranslationDictionary(
 							document,
 							extractedSegments,
