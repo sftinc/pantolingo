@@ -4,10 +4,69 @@
  * Supports grouped HTML extraction for inline elements
  */
 
-import { TRANSLATE_ATTRS, BLOCK_TAGS } from '../config.js'
+import { TRANSLATE_ATTRS, BLOCK_TAGS, SKIP_TAGS } from '../config.js'
 import type { Content } from '../types.js'
 import { isGroupableElement, htmlToPlaceholders, containsText } from './placeholders.js'
-import { shouldSkipNode, isInsideGroupedElement } from './utils.js'
+
+/**
+ * Check if a single element should be skipped (no ancestor walking)
+ * Used within recursive traversals where ancestors are already handled by recursion.
+ */
+function isSkipElement(node: Node, skipSelectors: string[]): boolean {
+	if (node.nodeType !== 1) return false
+	const elem = node as Element
+	if (SKIP_TAGS.has(elem.tagName.toLowerCase())) return true
+	for (const selector of skipSelectors) {
+		try {
+			if (elem.matches(selector)) return true
+		} catch (e) {
+			// Invalid selector
+		}
+	}
+	return false
+}
+
+/**
+ * Pre-build a Set of all elements that should be skipped (including descendants).
+ * Used by flat iterations (querySelectorAll) that can't rely on recursion for ancestor skipping.
+ */
+function buildSkipSet(document: Document, skipSelectors: string[]): Set<Element> {
+	const skipSet = new Set<Element>()
+
+	// Build a combined selector for skip tags + custom selectors
+	const selectors: string[] = Array.from(SKIP_TAGS)
+	for (const sel of skipSelectors) {
+		selectors.push(sel)
+	}
+
+	if (selectors.length === 0) return skipSet
+
+	try {
+		const skipRoots = document.querySelectorAll(selectors.join(','))
+		for (let i = 0; i < skipRoots.length; i++) {
+			const root = skipRoots[i] as Element
+			skipSet.add(root)
+			// Also add all descendants
+			const descendants = root.querySelectorAll('*')
+			for (let j = 0; j < descendants.length; j++) {
+				skipSet.add(descendants[j] as Element)
+			}
+		}
+	} catch (e) {
+		// Fallback: just use SKIP_TAGS if combined selector fails
+		const skipRoots = document.querySelectorAll(Array.from(SKIP_TAGS).join(','))
+		for (let i = 0; i < skipRoots.length; i++) {
+			const root = skipRoots[i] as Element
+			skipSet.add(root)
+			const descendants = root.querySelectorAll('*')
+			for (let j = 0; j < descendants.length; j++) {
+				skipSet.add(descendants[j] as Element)
+			}
+		}
+	}
+
+	return skipSet
+}
 
 /**
  * Extract grouped block elements as single segments with HTML placeholders
@@ -17,7 +76,7 @@ import { shouldSkipNode, isInsideGroupedElement } from './utils.js'
  * @param skipSelectors - CSS selectors for elements to skip
  */
 function extractGroupedBlocks(node: Node, segments: Content[], groupedElements: Set<Element>, skipSelectors: string[]): void {
-	if (shouldSkipNode(node, skipSelectors)) {
+	if (isSkipElement(node, skipSelectors)) {
 		return
 	}
 
@@ -75,13 +134,13 @@ function extractGroupedBlocks(node: Node, segments: Content[], groupedElements: 
  * @param skipSelectors - CSS selectors for elements to skip
  */
 function extractTextNodes(node: Node, segments: Content[], groupedElements: Set<Element>, skipSelectors: string[]): void {
-	// Skip if node or ancestor should be skipped
-	if (shouldSkipNode(node, skipSelectors)) {
+	// Skip elements (recursion handles ancestors, so only check this node)
+	if (isSkipElement(node, skipSelectors)) {
 		return
 	}
 
-	// Skip if inside a grouped element (already extracted as HTML segment)
-	if (isInsideGroupedElement(node, groupedElements)) {
+	// Skip if this element was grouped (already extracted as HTML segment)
+	if (node.nodeType === 1 && groupedElements.has(node as Element)) {
 		return
 	}
 
@@ -115,16 +174,16 @@ function extractTextNodes(node: Node, segments: Content[], groupedElements: Set<
  * Uses querySelectorAll which returns elements in document order
  * @param document - linkedom Document object
  * @param segments - Accumulator array for segments
- * @param skipSelectors - CSS selectors for elements to skip
+ * @param skipSet - Pre-computed set of elements to skip
  */
-function extractAttributes(document: Document, segments: Content[], skipSelectors: string[]): void {
+function extractAttributes(document: Document, segments: Content[], skipSet: Set<Element>): void {
 	const allElements = document.querySelectorAll('*')
 
 	for (let i = 0; i < allElements.length; i++) {
 		const elem = allElements[i] as Element
 
-		// Skip if element should be skipped
-		if (shouldSkipNode(elem, skipSelectors)) {
+		// O(1) skip check using pre-computed set
+		if (skipSet.has(elem)) {
 			continue
 		}
 
@@ -151,12 +210,11 @@ function extractAttributes(document: Document, segments: Content[], skipSelector
  * Extract title text from <title> element
  * @param document - linkedom Document object
  * @param segments - Accumulator array for segments
- * @param skipSelectors - CSS selectors for elements to skip
+ * @param skipSet - Pre-computed set of elements to skip
  */
-function extractHeadTitle(document: Document, segments: Content[], skipSelectors: string[]): void {
+function extractHeadTitle(document: Document, segments: Content[], skipSet: Set<Element>): void {
 	const titleElement = document.querySelector('title')
-	// Skip if element should be skipped
-	if (!titleElement || shouldSkipNode(titleElement, skipSelectors)) {
+	if (!titleElement || skipSet.has(titleElement)) {
 		return
 	}
 	if (titleElement.textContent && titleElement.textContent.trim().length > 0) {
@@ -177,12 +235,11 @@ function extractHeadTitle(document: Document, segments: Content[], skipSelectors
  * Extract description from <meta name="description"> element
  * @param document - linkedom Document object
  * @param segments - Accumulator array for segments
- * @param skipSelectors - CSS selectors for elements to skip
+ * @param skipSet - Pre-computed set of elements to skip
  */
-function extractHeadDescription(document: Document, segments: Content[], skipSelectors: string[]): void {
+function extractHeadDescription(document: Document, segments: Content[], skipSet: Set<Element>): void {
 	const descElement = document.querySelector('meta[name="description"]')
-	// Skip if element should be skipped
-	if (!descElement || shouldSkipNode(descElement, skipSelectors)) {
+	if (!descElement || skipSet.has(descElement as Element)) {
 		return
 	}
 	const content = descElement.getAttribute('content')
@@ -216,12 +273,15 @@ export function extractSegments(document: Document, skipSelectors: string[]): Co
 		return segments
 	}
 
+	// Pre-compute skip set once for O(1) lookups
+	const skipSet = buildSkipSet(document, skipSelectors)
+
 	// Track elements that were grouped (to skip during text node extraction)
 	const groupedElements = new Set<Element>()
 
 	// Extract head metadata first (title and description)
-	extractHeadTitle(document, segments, skipSelectors)
-	extractHeadDescription(document, segments, skipSelectors)
+	extractHeadTitle(document, segments, skipSet)
+	extractHeadDescription(document, segments, skipSet)
 
 	// Extract grouped blocks first (p, h1-h6, li, etc. with inline content)
 	// This produces 'html' kind segments with placeholders
@@ -235,8 +295,8 @@ export function extractSegments(document: Document, skipSelectors: string[]): Co
 		extractTextNodes(document.body, segments, groupedElements, skipSelectors)
 	}
 
-	// Extract attributes from all elements
-	extractAttributes(document, segments, skipSelectors)
+	// Extract attributes from all elements (uses pre-computed skip set)
+	extractAttributes(document, segments, skipSet)
 
 	return segments
 }
